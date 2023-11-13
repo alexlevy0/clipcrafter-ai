@@ -25,7 +25,7 @@ const theme: Theme = {
   },
 };
 
-const processFile = ({ file, key }) => {
+const processFile = ({ file, key }: { key: string, file: Blob }) => {
   const fileParts = key.split('.');
   const ext = fileParts.pop();
   return {
@@ -59,7 +59,7 @@ export default function Home() {
           acceptedFileTypes={['video/*']}
           maxFileSize={10000} // TODO
           maxFileCount={5}
-          processFile={processFile}
+          // processFile={processFile}
           onFileRemove={({ key }) => {
             setFiles((prevFiles) => {
               return {
@@ -82,7 +82,7 @@ export default function Home() {
             setFiles((prevFiles) => {
               return {
                 ...prevFiles,
-                [key]: {
+                [key as string]: {
                   status: 'success',
                 },
               };
@@ -92,7 +92,7 @@ export default function Home() {
             setFiles((prevFiles) => {
               return {
                 ...prevFiles,
-                [key]: {
+                [key as string]: {
                   status: 'uploading',
                 },
               };
@@ -108,13 +108,13 @@ export default function Home() {
             },
           }}
         />
-        {Object.keys(files).map((key) => {
+        {/* {Object.keys(files).map((key) => {
           return files[key] ? (
             <div style={{ color: 'white' }}>
               {key}: {files[key].status}
             </div>
           ) : null;
-        })}
+        })} */}
         <main className="flex min-h-screen flex-col items-center justify-between p-24">
           {hasWindow && <ReactPlayer
             url='https://giistyxelor.s3.amazonaws.com/giists/video/video0cP3w019TiZYYcUy22WY.mp4'
