@@ -1,0 +1,29 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-qlipapp-dev-101614-authRole",
+      "UnauthRoleArn": "arn:aws:iam::327852390890:role/amplify-qlipapp-dev-101614-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::327852390890:role/amplify-qlipapp-dev-101614-authRole",
+      "Region": "eu-west-3",
+      "DeploymentBucketName": "amplify-qlipapp-dev-101614-deployment",
+      "UnauthRoleName": "amplify-qlipapp-dev-101614-unauthRole",
+      "StackName": "amplify-qlipapp-dev-101614",
+      "StackId": "arn:aws:cloudformation:eu-west-3:327852390890:stack/amplify-qlipapp-dev-101614/4c650400-8205-11ee-b554-06608fbe8ef2",
+      "AmplifyAppId": "d2tr6yy2p3clvc"
+    },
+    "categories": {
+      "auth": {
+        "qlipappaada6b47": {}
+      },
+      "function": {
+        "S3Trigger52a3ac74": {
+          "deploymentBucketName": "amplify-qlipapp-dev-101614-deployment",
+          "s3Key": "amplify-builds/S3Trigger52a3ac74-43786164445147783531-build.zip"
+        }
+      },
+      "storage": {
+        "qliplabel": {}
+      }
+    }
+  }
+}
