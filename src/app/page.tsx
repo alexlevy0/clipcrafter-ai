@@ -11,7 +11,8 @@ import dynamic from 'next/dynamic';
 const ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false });
 
 
-Amplify.configure(awsconfig);
+// Amplify.configure(awsconfig);
+Amplify.configure({ ...awsconfig, ssr: true });
 
 const theme: Theme = {
   name: 'my-theme',
@@ -57,7 +58,7 @@ export default function Home() {
           isResumable
           accessLevel='public'
           acceptedFileTypes={['video/*']}
-          maxFileSize={10000} // TODO
+          // maxFileSize={10000} // TODO
           maxFileCount={5}
           // processFile={processFile}
           onFileRemove={({ key }) => {
