@@ -1,13 +1,14 @@
 "use client";
-import Image from 'next/image'
 import '@aws-amplify/ui-react/styles.css';
 import { Amplify } from 'aws-amplify';
 import awsconfig from '../aws-exports';
-// import type { AppProps } from 'next/app'
 import { StorageManager } from '@aws-amplify/ui-react-storage'
 import { Button, ColorMode, defaultDarkModeOverride } from '@aws-amplify/ui-react'
 import { ThemeProvider, Theme } from '@aws-amplify/ui-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+// import ReactPlayer from 'react-player';
+import dynamic from 'next/dynamic';
+const ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false });
 
 
 Amplify.configure(awsconfig);
@@ -43,10 +44,15 @@ export default function Home() {
   };
   const [files, setFiles] = React.useState({});
 
+  const [hasWindow, setHasWindow] = useState(false);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setHasWindow(true);
+    }
+  }, []);
   return (
     <ThemeProvider theme={theme} colorMode={colorMode}>
       <>
-
         <StorageManager
           isResumable
           accessLevel='public'
@@ -109,6 +115,13 @@ export default function Home() {
             </div>
           ) : null;
         })}
+        <main className="flex min-h-screen flex-col items-center justify-between p-24">
+          {hasWindow && <ReactPlayer
+            url='https://giistyxelor.s3.amazonaws.com/giists/video/video0cP3w019TiZYYcUy22WY.mp4'
+            controls
+            playing={true}
+          />}
+        </main>
       </>
     </ThemeProvider>
 
