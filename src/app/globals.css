@@ -1,3 +1,6 @@
+@import url('https://rsms.me/inter/inter.css');
+@import url('https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -27,12 +30,9 @@ body {
 }
 
 
-@import url('https://rsms.me/inter/inter.css');
-@import url('https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css');
-
 * {
   box-sizing: border-box;
-  cursor: none !important;
+  /* cursor: none !important; */
 }
 
 *::-webkit-scrollbar {
@@ -79,4 +79,22 @@ body {
 canvas {
   position: absolute;
   z-index: 1;
+}
+
+#root {
+  text-align: center;
+  margin: 1.2rem;
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.auth-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
 }

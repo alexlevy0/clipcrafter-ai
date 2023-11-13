@@ -4,16 +4,16 @@ import '@aws-amplify/ui-react/styles.css';
 import { Amplify } from 'aws-amplify';
 import awsconfig from '../aws-exports';
 import { StorageManager } from '@aws-amplify/ui-react-storage'
-import { Button, ColorMode, defaultDarkModeOverride } from '@aws-amplify/ui-react'
-import { ThemeProvider, Theme } from '@aws-amplify/ui-react';
+import { Flex, Divider, Button, ColorMode, defaultDarkModeOverride } from '@aws-amplify/ui-react'
+import { ThemeProvider, withAuthenticator } from '@aws-amplify/ui-react';
 import React, { useEffect, useState, useLayoutEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import * as THREE from 'three'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Html, Mask, useMask, OrthographicCamera, Clone, Float as FloatImpl } from '@react-three/drei'
-import useSpline from '@splinetool/r3f-spline'
 
 const ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false });
+const useSpline = dynamic(() => import('@splinetool/r3f-spline'), { ssr: false });
 
 Amplify.configure({ ...awsconfig, ssr: true });
 
@@ -26,9 +26,12 @@ const processFile = ({ file, key }: { key: string, file: Blob }) => {
   };
 }
 
-export default function App() {
+function App(props) {
+  console.log(props?.user)
+  console.log({ props })
   const container = useRef()
   const domContent = useRef()
+  // return null
   return (
     <div ref={container} className="content-container">
       <div
@@ -47,13 +50,15 @@ export default function App() {
         </directionalLight>
         <OrthographicCamera makeDefault={true} far={100000} near={-100000} position={[0, 0, 1000]} />
         <hemisphereLight intensity={0.5} color="#eaeaea" position={[0, 1, 0]} />
-        <Scene portal={domContent} position={[0, -50, 0]} />
+        <Scene /* signOut={props?.signOut} */ portal={domContent} position={[0, -50, 0]} />
       </Canvas>
     </div>
   )
 }
 
-export function Home() {
+export default withAuthenticator(App);
+
+function Main({ signOut }) {
   const [colorMode] = React.useState<ColorMode>('system');
   const theme = {
     name: 'my-theme',
@@ -66,6 +71,10 @@ export function Home() {
       setHasWindow(true);
     }
   }, []);
+  const onLogout = () => {
+    signOut()
+    console.log('fire onLogout')
+  }
   return (
     <ThemeProvider theme={theme} colorMode={colorMode}>
       <div >
@@ -116,26 +125,37 @@ export function Home() {
           components={{
             FilePicker({ onClick }) {
               return (
-                <Button
-                  size="large"
-                  variation="primary"
-                  isFullWidth={true}
-                  onClick={onClick}
-                >
-                  Browse Files
-                </Button>
+                <Flex direction="column" justifyContent="space-around">
+                  <Button
+                    size="large"
+                    variation="primary"
+                    isFullWidth={true}
+                    onClick={onClick}
+                  >
+                    Browse Files
+                  </Button>
+                  {/* <Divider orientation="vertical" /> */}
+                  <Button
+                    size="large"
+                    isFullWidth={true}
+                    onClick={onLogout}
+                  >
+                    Logout
+                  </Button>
+                </Flex>
               );
             },
           }}
         />
+        {/* 
         {Object.keys(files).map((key) => {
           return files[key] ? (
             <div style={{ color: 'white' }}>
               {key}: {files[key].status}
             </div>
           ) : null;
-        })}
-        <main className="flex min-h-screen flex-col items-center justify-between p-24">
+        })} */}
+        <main className="flex min-h-screen flex-col items-center justify-between p-0">
           {hasWindow && <ReactPlayer
             width={"100%"}
             url='https://giistyxelor.s3.amazonaws.com/giists/video/video0cP3w019TiZYYcUy22WY.mp4'
@@ -149,7 +169,7 @@ export function Home() {
 }
 
 
-function Scene({ portal, ...props }) {
+function Scene({ signOut, portal, ...props }) {
   let timeout = null
   const v = new THREE.Vector3()
   const wheel = useRef(0)
@@ -169,7 +189,7 @@ function Scene({ portal, ...props }) {
         node.name !== 'Cube 24' &&
         Object.assign(node.material, stencil),
     )
-  }, [stencil, nodes]) // TODO Back check
+  })
   useFrame((state) => {
     v.copy({ x: state.pointer.x, y: state.pointer.y, z: 0 })
     v.unproject(state.camera)
@@ -192,10 +212,12 @@ function Scene({ portal, ...props }) {
       <Float object={nodes['Icon-star']} />
       <Float object={nodes['Icon-play']} />
       <Float object={nodes['Icon-text-1']} />
+
       <group ref={hand}>
         <Clone object={nodes['hand-r']} rotation-y={0.35} />
       </group>
       <Clone object={nodes['Bubble-BG']} scale={1.25} />
+
       <FloatImpl floatIntensity={100} rotationIntensity={0.5} speed={1}>
         <Float intensity={100} rotation={0.5} object={nodes['Bubble-LOGO']} position={[0, -0, 0]} scale={1.5} />
         <group position={[0, -50, 0]} rotation={[-0.15, 0, 0]}>
@@ -204,7 +226,7 @@ function Scene({ portal, ...props }) {
             <Clone object={[nodes['Rectangle 4'], nodes['Rectangle 3'], nodes['Boolean 2']]} />
             <Mask id={1} colorWrite={false} depthWrite={false} geometry={nodes.screen.geometry} castShadow receiveShadow position={[0, 0, 9.89]}>
               <Html className="content-embed" portal={portal} scale={40} transform zIndexRange={[-1, 0]}>
-                <Home />
+                <Main signOut={signOut} />
               </Html>
             </Mask>
             <mesh
