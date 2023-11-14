@@ -19,6 +19,7 @@
     "@splinetool/react-spline": "^2.2.6",
     "@splinetool/runtime": "^0.9.496",
     "aws-amplify": "^5.3.12",
+    "aws-lambda": "^1.0.7",
     "aws-sdk": "^2.1495.0",
     "jsdom": "^22.1.0",
     "next": "14.0.2",
