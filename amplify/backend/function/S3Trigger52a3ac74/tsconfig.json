@@ -1,9 +1,10 @@
 {
-  "exclude": [
-    "./lib"
-  ],
   "include": [
+    "**/*.ts",
     "./src/*"
+  ],
+  "exclude": [
+    "node_modules"
   ],
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
