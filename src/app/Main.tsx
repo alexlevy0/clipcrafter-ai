@@ -33,7 +33,7 @@ export function Main({ signOut }) {
   }, []);
   return (
     <ThemeProvider theme={theme} colorMode={colorMode}>
-      <div >
+      <div>
         <StorageManager
           isResumable
           accessLevel='public'

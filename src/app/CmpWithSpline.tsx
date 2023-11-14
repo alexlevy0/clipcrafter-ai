@@ -33,18 +33,26 @@ const MyComponentWithSpline = (props) => {
     v.copy({ x: state.pointer.x, y: state.pointer.y, z: 0 })
     v.unproject(state.camera)
 
-    if (hand?.current?.rotation?.x)
+    if (hand?.current?.rotation?.x) {
       hand.current.rotation.x = THREE.MathUtils.lerp(
         hand.current.rotation.x,
         clicked ? -0.7 : -0.5, 0.2
       )
+    }
 
-    if (hand?.current?.position?.lerp)
+
+    if (hand?.current?.position?.lerp) {
       hand.current.position.lerp(
-        { x: v.x - 100, y: wheel.current + v.y, z: v.z },
-        0.0
-        // 0.4
+        {
+          x: v.x - 100,
+          y: wheel.current + v.y,
+          y: v.y,
+          z: v.z
+        },
+        0.3
       )
+
+    }
 
     state.camera.zoom = THREE.MathUtils.lerp(state.camera.zoom, clicked ? 0.9 : 0.7, clicked ? 0.025 : 0.15)
     state.camera.position.lerp({ x: -state.pointer.x * 400, y: -state.pointer.y * 200, z: 1000 }, 0.1)

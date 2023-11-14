@@ -1,4 +1,10 @@
 if (typeof window === "undefined") {
+  window = {
+    location: {
+      protocol: {},
+    },
+  };
+
   window = class {
     constructor() {}
     location = {
@@ -28,9 +34,11 @@ if (typeof window === "undefined") {
     };
   };
 }
-// if (typeof document === "undefined") {
-//   global.document = {};
-// }
+if (typeof document === "undefined") {
+  global.document = class {
+    constructor() {}
+  };
+}
 
 if (typeof Image === "undefined") {
   global.Image = class {

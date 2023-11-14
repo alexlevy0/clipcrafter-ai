@@ -29,11 +29,11 @@
     }
   },
   "include": [
+    "src/app/polyfill.js",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "src/app/polyfill.js"
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
