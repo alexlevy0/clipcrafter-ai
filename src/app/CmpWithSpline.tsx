@@ -34,10 +34,17 @@ const MyComponentWithSpline = (props) => {
     v.unproject(state.camera)
 
     if (hand?.current?.rotation?.x)
-      hand.current.rotation.x = THREE.MathUtils.lerp(hand.current.rotation.x, clicked ? -0.7 : -0.5, 0.2)
+      hand.current.rotation.x = THREE.MathUtils.lerp(
+        hand.current.rotation.x,
+        clicked ? -0.7 : -0.5, 0.2
+      )
 
     if (hand?.current?.position?.lerp)
-      hand.current.position.lerp({ x: v.x - 100, y: wheel.current + v.y, z: v.z }, 0.4)
+      hand.current.position.lerp(
+        { x: v.x - 100, y: wheel.current + v.y, z: v.z },
+        0.0
+        // 0.4
+      )
 
     state.camera.zoom = THREE.MathUtils.lerp(state.camera.zoom, clicked ? 0.9 : 0.7, clicked ? 0.025 : 0.15)
     state.camera.position.lerp({ x: -state.pointer.x * 400, y: -state.pointer.y * 200, z: 1000 }, 0.1)
@@ -88,7 +95,8 @@ const MyComponentWithSpline = (props) => {
               }}
               receiveShadow
               geometry={nodes.screen.geometry}>
-              <meshStandardMaterial transparent opacity={0.1} />
+              <meshStandardMaterial transparent opacity={0.0} />
+              {/* <meshStandardMaterial transparent opacity={1} /> */}
             </mesh>
           </group>
         </group>
