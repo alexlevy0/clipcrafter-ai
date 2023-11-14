@@ -1,0 +1,27 @@
+{
+  "exclude": [
+    "./lib"
+  ],
+  "include": [
+    "./src/*"
+  ],
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "outDir": "./lib",
+    "baseUrl": "./",
+    "rootDir": "./src",
+    "paths": {
+      "src": [
+        "./src"
+      ]
+    }
+  }
+}

@@ -18,7 +18,7 @@
       "function": {
         "S3Trigger52a3ac74": {
           "deploymentBucketName": "amplify-qlipapp-dev-101614-deployment",
-          "s3Key": "amplify-builds/S3Trigger52a3ac74-43786164445147783531-build.zip"
+          "s3Key": "amplify-builds/S3Trigger52a3ac74-6c364f626c4b4d546438-build.zip"
         }
       },
       "storage": {

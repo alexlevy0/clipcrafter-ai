@@ -26,6 +26,7 @@
   "function": {
     "S3Trigger52a3ac74": {
       "build": true,
+      "dependsOn": [],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     }
