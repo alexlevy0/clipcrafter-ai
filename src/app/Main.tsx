@@ -14,6 +14,7 @@ const processFile = ({ file, key }: { key: string, file: Blob }) => {
   const ext = fileParts.pop();
   return {
     file,
+    // key: `${Date.now()}${fileParts.join('.')}.${ext}`,
     key: `${Date.now()}${fileParts.join('.')}.${ext}`,
   };
 }
@@ -39,7 +40,7 @@ export function Main({ signOut }) {
           accessLevel='public'
           acceptedFileTypes={['video/*']}
           maxFileCount={5}
-          processFile={processFile}
+          // processFile={processFile}
           onFileRemove={({ key }) => {
             setFiles((prevFiles) => {
               return {
