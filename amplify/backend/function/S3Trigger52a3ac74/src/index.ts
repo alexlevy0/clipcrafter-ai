@@ -7,10 +7,9 @@ import { Handler } from "aws-lambda";
 
 const execPromise = promisify(exec);
 
-// Configuration modulable pour AWS
 const awsConfig = {
-  region: "eu-west-3", // Cette valeur peut être modifiée selon les besoins
-  functionName: "MyLambdaFunction", // Remplacez par le nom de votre fonction Lambda
+  region: "eu-west-3",
+  functionName: "LambdaFunction",
 };
 
 interface EventInput {
