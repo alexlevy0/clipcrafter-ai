@@ -1,5 +1,12 @@
-if (typeof window === "undefined") {
+if (
+  typeof Image === "undefined" ||
+  typeof window === "undefined" ||
+  typeof document === "undefined"
+) {
   window = {
+    document: {
+      querySelector: function () {},
+    },
     location: {
       protocol: {},
     },
@@ -33,14 +40,6 @@ if (typeof window === "undefined") {
       search: {},
     };
   };
-}
-if (typeof document === "undefined") {
-  global.document = class {
-    constructor() {}
-  };
-}
-
-if (typeof Image === "undefined") {
   global.Image = class {
     constructor() {}
   };
