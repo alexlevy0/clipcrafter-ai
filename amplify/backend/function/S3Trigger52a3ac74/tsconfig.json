@@ -5,6 +5,7 @@
       "dom",
       "esnext"
     ],
+    "importHelpers": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "skipLibCheck": true,
@@ -18,5 +19,7 @@
       ]
     }
   },
-  "include": ["lib"]
+  "include": [
+    "lib"
+  ]
 }
