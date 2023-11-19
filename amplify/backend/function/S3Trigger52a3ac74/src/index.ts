@@ -28,13 +28,17 @@ async function downloadObject(
 ): Promise<void> {
   const startTime = Date.now();
   try {
+    console.log("->fs", fs);
+    console.log("->fs.writeFile", fs.writeFile);
+
     console.log(`Downloading '${objectKey}' from bucket '${bucketName}'`);
+
     const objectData = await s3
       .getObject({ Bucket: bucketName, Key: objectKey })
       .promise();
-    console.log("->fs", fs);
-    console.log("->fs.writeFile", fs.writeFile);
+
     await fs.writeFile(filePath, objectData.Body as Buffer);
+
     const fileSize = objectData.ContentLength;
     const duration = Date.now() - startTime;
 
