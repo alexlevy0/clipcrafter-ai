@@ -200,7 +200,7 @@ export var handler = function (event, context) { return __awaiter(void 0, void 0
                 _a = validateInput(inputBucketKey), bucketName = _a.bucketName, objectKey = _a.objectKey;
                 console.log({ bucketName: bucketName, objectKey: objectKey });
                 fileName = objectKey.split("/").pop();
-                console.log({ fileName: fileName });
+                console.log('fileName =>', { fileName: fileName });
                 if (!fileName)
                     throw new Error("Failed to extract file name from objectKey");
                 tmpFilePath = "/tmp/".concat(fileName);
