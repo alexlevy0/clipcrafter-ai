@@ -2,15 +2,18 @@ import * as AWS from "aws-sdk";
 import { exec } from "child_process";
 import { promisify } from "util";
 import fs from "fs/promises";
+import fsSync from "fs";
 import path from "path";
 import { Handler } from "aws-lambda";
+import { S3 } from "@aws-sdk/client-s3";
+import { Readable } from "stream";
 
 const execPromise = promisify(exec);
 
-// Configuration modulable pour AWS
 const awsConfig = {
-  region: "eu-west-3", // Cette valeur peut être modifiée selon les besoins
-  functionName: "MyLambdaFunction", // Remplacez par le nom de votre fonction Lambda
+  region: "eu-west-3",
+  functionName: "MyLambdaFunction",
+  namespace: "qlip-space",
 };
 
 interface EventInput {
@@ -18,8 +21,9 @@ interface EventInput {
   bucketName: string;
 }
 
-const s3 = new AWS.S3(awsConfig);
-const cloudwatch = new AWS.CloudWatch(awsConfig);
+const s3 = new S3(awsConfig);
+
+// const cloudwatch = new AWS.CloudWatch(awsConfig);
 
 async function downloadObject(
   bucketName: string,
@@ -27,65 +31,94 @@ async function downloadObject(
   filePath: string
 ): Promise<void> {
   const startTime = Date.now();
+
   try {
-    console.log("-- ->fs", fs);
-    console.log("->fs.writeFile", fs.writeFile);
+    await publishMetric(
+      `Downloading '${objectKey}' from bucket '${bucketName}'`,
+      1
+    );
 
-    console.log(`Downloading '${objectKey}' from bucket '${bucketName}'`);
+    const { Body, ContentLength } = await s3.getObject({
+      Bucket: bucketName,
+      Key: objectKey,
+    });
 
-    const objectData = await s3
-      .getObject({ Bucket: bucketName, Key: objectKey })
-      .promise();
+    if (Body instanceof Readable) {
+      await new Promise((resolve, reject) => {
+        const writeStream = fsSync.createWriteStream(filePath);
+        Body.pipe(writeStream);
+        Body.on("error", reject);
+        writeStream.on("finish", resolve);
+      });
+    } else {
+      throw new Error("Received data is not a stream");
+    }
 
-    await fs.writeFile(filePath, objectData.Body as Buffer);
-
-    const fileSize = objectData.ContentLength;
     const duration = Date.now() - startTime;
 
-    if (fileSize !== undefined) {
-      await publishMetric("FileSize", fileSize);
+    if (ContentLength !== undefined) {
+      await publishMetric("FileSize", ContentLength);
     }
 
     await publishMetric("DownloadDuration", duration);
   } catch (error: unknown) {
     if (error instanceof Error) {
-      console.error(`Error downloading object: ${error.message}`);
-      await publishMetric("DownloadError", 1);
+      await publishMetric(
+        `DownloadError : Error downloading object: ${error.message}`,
+        1,
+        true
+      );
     }
     throw error;
   }
 }
 
 async function getFrameRate(filePath: string): Promise<string> {
-  if (!isValidPath(filePath)) {
-    throw new Error("Invalid file path");
-  }
-
   try {
-    console.log(`Extracting frame rate for '${filePath}'`);
+    await isValidPath(filePath);
+
+    await publishMetric(`Extracting frame rate for '${filePath}'`, 1);
+
     const ffprobeCommand = `ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 "${filePath}"`;
+
     const { stdout } = await execPromise(ffprobeCommand);
+
     return stdout.trim();
   } catch (error: unknown) {
     if (error instanceof Error) {
-      console.error(`Error extracting frame rate: ${error.message}`);
-      await publishMetric("FrameRateExtractionError", 1);
+      await publishMetric(
+        `FrameRateExtractionError : Error extracting frame rate: ${error.message}`,
+        1,
+        true
+      );
     }
     throw error;
   }
 }
 
-function isValidPath(filePath: string): boolean {
-  // @ts-ignore
-  return path.isAbsolute(filePath) && fs.existsSync(filePath);
+async function isValidPath(filePath: string): Promise<boolean> {
+  if (!path.isAbsolute(filePath)) {
+    throw new Error("File path isnt absolute");
+  }
+
+  try {
+    await fs.readFile(filePath);
+    return true;
+  } catch (error) {
+    throw new Error(`Invalid file path ${error.message}`);
+  }
 }
 
-async function publishMetric(name: string, value: number): Promise<void> {
+async function publishMetric(
+  metricName: string,
+  value: number,
+  isError: boolean = false
+): Promise<void> {
   try {
     const params = {
       MetricData: [
         {
-          MetricName: name,
+          MetricName: metricName,
           Dimensions: [
             {
               Name: "FunctionName",
@@ -97,9 +130,13 @@ async function publishMetric(name: string, value: number): Promise<void> {
           Value: value,
         },
       ],
-      Namespace: "MyApplication",
+      Namespace: awsConfig.namespace,
     };
-    await cloudwatch.putMetricData(params).promise();
+    const log = JSON.stringify(params, null, 2);
+    if (isError) {
+      console.error(log);
+    } else console.log(log);
+    // await cloudwatch.putMetricData(params).promise();
   } catch (error: any) {
     console.error(`Error publishing metric: ${error.message}`);
   }
@@ -113,10 +150,29 @@ function validateInput(input: EventInput): EventInput {
   return { bucketName: bN, objectKey: oK };
 }
 
+function calculateFrameRate(frameRateString: string): number {
+  const parts = frameRateString.split("/");
+  if (parts.length !== 2) {
+    throw new Error("Invalid frame rate format");
+  }
+
+  const numerator = parseInt(parts[0], 10);
+  const denominator = parseInt(parts[1], 10);
+
+  if (isNaN(numerator) || isNaN(denominator) || denominator === 0) {
+    throw new Error("Invalid frame rate numbers");
+  }
+
+  return numerator / denominator;
+}
+
 export const handler: Handler = async (event, context) => {
   if (!event || !event.Records) {
-    console.error("Missing Records in event");
-    await publishMetric("InputValidationError", 1);
+    await publishMetric(
+      "InputValidationError : Missing Records in event",
+      1,
+      true
+    );
     return {
       statusCode: 400,
       body: JSON.stringify({ error: "Records is required in event" }),
@@ -133,34 +189,49 @@ export const handler: Handler = async (event, context) => {
 
   try {
     const { bucketName, objectKey } = validateInput(inputBucketKey);
-    console.log({ bucketName, objectKey });
+
     const fileName = objectKey.split("/").pop();
-    console.log('fileName =>', { fileName });
+
     if (!fileName)
       throw new Error("Failed to extract file name from objectKey");
 
     tmpFilePath = `/tmp/${fileName}`;
 
     await downloadObject(bucketName, objectKey, tmpFilePath);
+
     await fs.access(tmpFilePath, fs.constants.R_OK | fs.constants.W_OK);
 
     const frameRate = await getFrameRate(tmpFilePath);
-    console.log(`Frame rate: ${frameRate}`);
-    await publishMetric("FrameRateExtracted", 1);
 
-    return { statusCode: 200, body: JSON.stringify({ frameRate }) };
+    const calculatedFrameRate = calculateFrameRate(frameRate);
+
+    await publishMetric(
+      `FrameRateExtracted : Frame rate: ${calculatedFrameRate}`,
+      1
+    );
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ frameRate: calculatedFrameRate }),
+    };
   } catch (error: any) {
-    console.error(`Error in handler: ${error.message}`);
-    await publishMetric("HandlerError", 1);
+    await publishMetric(
+      `HandlerError : Error in handler: ${error.message}`,
+      1,
+      true
+    );
     return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
   } finally {
     if (tmpFilePath) {
-      console.log(`Cleaning up temporary files`);
+      await publishMetric(`Cleaning up temporary files`, 1);
       try {
         await fs.unlink(tmpFilePath);
       } catch (err: any) {
-        console.error(`Error deleting tmp file: ${err.message}`);
-        await publishMetric("FileCleanupError", 1);
+        await publishMetric(
+          `FileCleanupError : Error deleting tmp file: ${err.message}`,
+          1,
+          true
+        );
       }
     }
   }

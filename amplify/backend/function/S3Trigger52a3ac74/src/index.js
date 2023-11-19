@@ -34,61 +34,71 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import * as AWS from "aws-sdk";
 import { exec } from "child_process";
 import { promisify } from "util";
 import fs from "fs/promises";
+import fsSync from "fs";
 import path from "path";
+import { S3 } from "@aws-sdk/client-s3";
+import { Readable } from "stream";
 var execPromise = promisify(exec);
-// Configuration modulable pour AWS
 var awsConfig = {
     region: "eu-west-3",
-    functionName: "MyLambdaFunction", // Remplacez par le nom de votre fonction Lambda
+    functionName: "MyLambdaFunction",
+    namespace: "qlip-space",
 };
-var s3 = new AWS.S3(awsConfig);
-var cloudwatch = new AWS.CloudWatch(awsConfig);
+var s3 = new S3(awsConfig);
+// const cloudwatch = new AWS.CloudWatch(awsConfig);
 function downloadObject(bucketName, objectKey, filePath) {
     return __awaiter(this, void 0, void 0, function () {
-        var startTime, objectData, fileSize, duration, error_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var startTime, _a, Body_1, ContentLength, duration, error_1;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
                     startTime = Date.now();
-                    _a.label = 1;
+                    _b.label = 1;
                 case 1:
-                    _a.trys.push([1, 7, , 10]);
-                    console.log("-- ->fs", fs);
-                    console.log("->fs.writeFile", fs.writeFile);
-                    console.log("Downloading '".concat(objectKey, "' from bucket '").concat(bucketName, "'"));
-                    return [4 /*yield*/, s3
-                            .getObject({ Bucket: bucketName, Key: objectKey })
-                            .promise()];
+                    _b.trys.push([1, 10, , 13]);
+                    return [4 /*yield*/, publishMetric("Downloading '".concat(objectKey, "' from bucket '").concat(bucketName, "'"), 1)];
                 case 2:
-                    objectData = _a.sent();
-                    return [4 /*yield*/, fs.writeFile(filePath, objectData.Body)];
+                    _b.sent();
+                    return [4 /*yield*/, s3.getObject({
+                            Bucket: bucketName,
+                            Key: objectKey,
+                        })];
                 case 3:
-                    _a.sent();
-                    fileSize = objectData.ContentLength;
-                    duration = Date.now() - startTime;
-                    if (!(fileSize !== undefined)) return [3 /*break*/, 5];
-                    return [4 /*yield*/, publishMetric("FileSize", fileSize)];
+                    _a = _b.sent(), Body_1 = _a.Body, ContentLength = _a.ContentLength;
+                    if (!(Body_1 instanceof Readable)) return [3 /*break*/, 5];
+                    return [4 /*yield*/, new Promise(function (resolve, reject) {
+                            var writeStream = fsSync.createWriteStream(filePath);
+                            Body_1.pipe(writeStream);
+                            Body_1.on("error", reject);
+                            writeStream.on("finish", resolve);
+                        })];
                 case 4:
-                    _a.sent();
-                    _a.label = 5;
-                case 5: return [4 /*yield*/, publishMetric("DownloadDuration", duration)];
+                    _b.sent();
+                    return [3 /*break*/, 6];
+                case 5: throw new Error("Received data is not a stream");
                 case 6:
-                    _a.sent();
-                    return [3 /*break*/, 10];
+                    duration = Date.now() - startTime;
+                    if (!(ContentLength !== undefined)) return [3 /*break*/, 8];
+                    return [4 /*yield*/, publishMetric("FileSize", ContentLength)];
                 case 7:
-                    error_1 = _a.sent();
-                    if (!(error_1 instanceof Error)) return [3 /*break*/, 9];
-                    console.error("Error downloading object: ".concat(error_1.message));
-                    return [4 /*yield*/, publishMetric("DownloadError", 1)];
-                case 8:
-                    _a.sent();
-                    _a.label = 9;
-                case 9: throw error_1;
-                case 10: return [2 /*return*/];
+                    _b.sent();
+                    _b.label = 8;
+                case 8: return [4 /*yield*/, publishMetric("DownloadDuration", duration)];
+                case 9:
+                    _b.sent();
+                    return [3 /*break*/, 13];
+                case 10:
+                    error_1 = _b.sent();
+                    if (!(error_1 instanceof Error)) return [3 /*break*/, 12];
+                    return [4 /*yield*/, publishMetric("DownloadError : Error downloading object: ".concat(error_1.message), 1, true)];
+                case 11:
+                    _b.sent();
+                    _b.label = 12;
+                case 12: throw error_1;
+                case 13: return [2 /*return*/];
             }
         });
     });
@@ -99,70 +109,90 @@ function getFrameRate(filePath) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (!isValidPath(filePath)) {
-                        throw new Error("Invalid file path");
-                    }
-                    _a.label = 1;
+                    _a.trys.push([0, 4, , 7]);
+                    return [4 /*yield*/, isValidPath(filePath)];
                 case 1:
-                    _a.trys.push([1, 3, , 6]);
-                    console.log("Extracting frame rate for '".concat(filePath, "'"));
+                    _a.sent();
+                    return [4 /*yield*/, publishMetric("Extracting frame rate for '".concat(filePath, "'"), 1)];
+                case 2:
+                    _a.sent();
                     ffprobeCommand = "ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 \"".concat(filePath, "\"");
                     return [4 /*yield*/, execPromise(ffprobeCommand)];
-                case 2:
+                case 3:
                     stdout = (_a.sent()).stdout;
                     return [2 /*return*/, stdout.trim()];
-                case 3:
-                    error_2 = _a.sent();
-                    if (!(error_2 instanceof Error)) return [3 /*break*/, 5];
-                    console.error("Error extracting frame rate: ".concat(error_2.message));
-                    return [4 /*yield*/, publishMetric("FrameRateExtractionError", 1)];
                 case 4:
+                    error_2 = _a.sent();
+                    if (!(error_2 instanceof Error)) return [3 /*break*/, 6];
+                    return [4 /*yield*/, publishMetric("FrameRateExtractionError : Error extracting frame rate: ".concat(error_2.message), 1, true)];
+                case 5:
                     _a.sent();
-                    _a.label = 5;
-                case 5: throw error_2;
-                case 6: return [2 /*return*/];
+                    _a.label = 6;
+                case 6: throw error_2;
+                case 7: return [2 /*return*/];
             }
         });
     });
 }
 function isValidPath(filePath) {
-    // @ts-ignore
-    return path.isAbsolute(filePath) && fs.existsSync(filePath);
-}
-function publishMetric(name, value) {
     return __awaiter(this, void 0, void 0, function () {
-        var params, error_3;
+        var error_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    params = {
-                        MetricData: [
-                            {
-                                MetricName: name,
-                                Dimensions: [
-                                    {
-                                        Name: "FunctionName",
-                                        Value: awsConfig.functionName,
-                                    },
-                                ],
-                                Timestamp: new Date(),
-                                Unit: "Count",
-                                Value: value,
-                            },
-                        ],
-                        Namespace: "MyApplication",
-                    };
-                    return [4 /*yield*/, cloudwatch.putMetricData(params).promise()];
+                    if (!path.isAbsolute(filePath)) {
+                        throw new Error("File path isnt absolute");
+                    }
+                    _a.label = 1;
                 case 1:
-                    _a.sent();
-                    return [3 /*break*/, 3];
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, fs.readFile(filePath)];
                 case 2:
+                    _a.sent();
+                    return [2 /*return*/, true];
+                case 3:
                     error_3 = _a.sent();
-                    console.error("Error publishing metric: ".concat(error_3.message));
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+                    throw new Error("Invalid file path ".concat(error_3.message));
+                case 4: return [2 /*return*/];
             }
+        });
+    });
+}
+function publishMetric(metricName, value, isError) {
+    if (isError === void 0) { isError = false; }
+    return __awaiter(this, void 0, void 0, function () {
+        var params, log;
+        return __generator(this, function (_a) {
+            try {
+                params = {
+                    MetricData: [
+                        {
+                            MetricName: metricName,
+                            Dimensions: [
+                                {
+                                    Name: "FunctionName",
+                                    Value: awsConfig.functionName,
+                                },
+                            ],
+                            Timestamp: new Date(),
+                            Unit: "Count",
+                            Value: value,
+                        },
+                    ],
+                    Namespace: awsConfig.namespace,
+                };
+                log = JSON.stringify(params, null, 2);
+                if (isError) {
+                    console.error(log);
+                }
+                else
+                    console.log(log);
+                // await cloudwatch.putMetricData(params).promise();
+            }
+            catch (error) {
+                console.error("Error publishing metric: ".concat(error.message));
+            }
+            return [2 /*return*/];
         });
     });
 }
@@ -173,14 +203,25 @@ function validateInput(input) {
     }
     return { bucketName: bN, objectKey: oK };
 }
+function calculateFrameRate(frameRateString) {
+    var parts = frameRateString.split("/");
+    if (parts.length !== 2) {
+        throw new Error("Invalid frame rate format");
+    }
+    var numerator = parseInt(parts[0], 10);
+    var denominator = parseInt(parts[1], 10);
+    if (isNaN(numerator) || isNaN(denominator) || denominator === 0) {
+        throw new Error("Invalid frame rate numbers");
+    }
+    return numerator / denominator;
+}
 export var handler = function (event, context) { return __awaiter(void 0, void 0, void 0, function () {
-    var bucket, key, inputBucketKey, tmpFilePath, _a, bucketName, objectKey, fileName, frameRate, error_4, err_1;
+    var bucket, key, inputBucketKey, tmpFilePath, _a, bucketName, objectKey, fileName, frameRate, calculatedFrameRate, error_4, err_1;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 if (!(!event || !event.Records)) return [3 /*break*/, 2];
-                console.error("Missing Records in event");
-                return [4 /*yield*/, publishMetric("InputValidationError", 1)];
+                return [4 /*yield*/, publishMetric("InputValidationError : Missing Records in event", 1, true)];
             case 1:
                 _b.sent();
                 return [2 /*return*/, {
@@ -196,11 +237,9 @@ export var handler = function (event, context) { return __awaiter(void 0, void 0
                 };
                 _b.label = 3;
             case 3:
-                _b.trys.push([3, 8, 10, 16]);
+                _b.trys.push([3, 8, 10, 17]);
                 _a = validateInput(inputBucketKey), bucketName = _a.bucketName, objectKey = _a.objectKey;
-                console.log({ bucketName: bucketName, objectKey: objectKey });
                 fileName = objectKey.split("/").pop();
-                console.log('fileName =>', { fileName: fileName });
                 if (!fileName)
                     throw new Error("Failed to extract file name from objectKey");
                 tmpFilePath = "/tmp/".concat(fileName);
@@ -213,37 +252,37 @@ export var handler = function (event, context) { return __awaiter(void 0, void 0
                 return [4 /*yield*/, getFrameRate(tmpFilePath)];
             case 6:
                 frameRate = _b.sent();
-                console.log("Frame rate: ".concat(frameRate));
-                return [4 /*yield*/, publishMetric("FrameRateExtracted", 1)];
+                calculatedFrameRate = calculateFrameRate(frameRate);
+                return [4 /*yield*/, publishMetric("FrameRateExtracted : Frame rate: ".concat(calculatedFrameRate), 1)];
             case 7:
                 _b.sent();
-                return [2 /*return*/, { statusCode: 200, body: JSON.stringify({ frameRate: frameRate }) }];
+                return [2 /*return*/, { statusCode: 200, body: JSON.stringify({ calculatedFrameRate: calculatedFrameRate }) }];
             case 8:
                 error_4 = _b.sent();
-                console.error("Error in handler: ".concat(error_4.message));
-                return [4 /*yield*/, publishMetric("HandlerError", 1)];
+                return [4 /*yield*/, publishMetric("HandlerError : Error in handler: ".concat(error_4.message), 1, true)];
             case 9:
                 _b.sent();
                 return [2 /*return*/, { statusCode: 500, body: JSON.stringify({ error: error_4.message }) }];
             case 10:
-                if (!tmpFilePath) return [3 /*break*/, 15];
-                console.log("Cleaning up temporary files");
-                _b.label = 11;
+                if (!tmpFilePath) return [3 /*break*/, 16];
+                return [4 /*yield*/, publishMetric("Cleaning up temporary files", 1)];
             case 11:
-                _b.trys.push([11, 13, , 15]);
-                return [4 /*yield*/, fs.unlink(tmpFilePath)];
+                _b.sent();
+                _b.label = 12;
             case 12:
-                _b.sent();
-                return [3 /*break*/, 15];
+                _b.trys.push([12, 14, , 16]);
+                return [4 /*yield*/, fs.unlink(tmpFilePath)];
             case 13:
-                err_1 = _b.sent();
-                console.error("Error deleting tmp file: ".concat(err_1.message));
-                return [4 /*yield*/, publishMetric("FileCleanupError", 1)];
-            case 14:
                 _b.sent();
-                return [3 /*break*/, 15];
-            case 15: return [7 /*endfinally*/];
-            case 16: return [2 /*return*/];
+                return [3 /*break*/, 16];
+            case 14:
+                err_1 = _b.sent();
+                return [4 /*yield*/, publishMetric("FileCleanupError : Error deleting tmp file: ".concat(err_1.message), 1, true)];
+            case 15:
+                _b.sent();
+                return [3 /*break*/, 16];
+            case 16: return [7 /*endfinally*/];
+            case 17: return [2 /*return*/];
         }
     });
 }); };
