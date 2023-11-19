@@ -135,7 +135,7 @@ export const handler: Handler = async (event, context) => {
     const { bucketName, objectKey } = validateInput(inputBucketKey);
     console.log({ bucketName, objectKey });
     const fileName = objectKey.split("/").pop();
-    console.log({ fileName });
+    console.log('fileName =>', { fileName });
     if (!fileName)
       throw new Error("Failed to extract file name from objectKey");
 
