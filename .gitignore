@@ -58,3 +58,4 @@ amplifytools.xcconfig
 #amplify-do-not-edit-end
 
 amplify/backend/function/**/src/**/*.js
+amplify/backend/function/**/src/**/*.json
