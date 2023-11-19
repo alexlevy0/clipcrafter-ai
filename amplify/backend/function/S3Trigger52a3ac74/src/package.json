@@ -19,7 +19,6 @@
     "@aws-sdk/util-waiter": "^3.374.0",
     "archiver": "^6.0.1",
     "aws-lambda": "^1.0.7",
-    "aws-sdk": "^2.1495.0",
-    "typescript": "^5.2.2"
+    "aws-sdk": "^2.1495.0"
   }
 }
