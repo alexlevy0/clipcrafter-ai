@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "amplify:S3Trigger52a3ac74": "cd amplify/backend/function/S3Trigger52a3ac74 && tsc -p ./tsconfig.json && cd -"
+    "amplify:S3Trigger52a3ac74": "cd amplify/backend/function/S3Trigger52a3ac74 && npx tsc -p ./tsconfig.json && cd -"
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^5.3.2",

@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -35,14 +34,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.handler = void 0;
-var AWS = require("aws-sdk");
-var child_process_1 = require("child_process");
-var util_1 = require("util");
-var promises_1 = require("fs/promises");
-var path_1 = require("path");
-var execPromise = (0, util_1.promisify)(child_process_1.exec);
+import * as AWS from "aws-sdk";
+import { exec } from "child_process";
+import { promisify } from "util";
+import fs from "fs/promises";
+import path from "path";
+var execPromise = promisify(exec);
 // Configuration modulable pour AWS
 var awsConfig = {
     region: "eu-west-3",
@@ -60,13 +57,15 @@ function downloadObject(bucketName, objectKey, filePath) {
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 7, , 10]);
+                    console.log("->fs", fs);
+                    console.log("->fs.writeFile", fs.writeFile);
                     console.log("Downloading '".concat(objectKey, "' from bucket '").concat(bucketName, "'"));
                     return [4 /*yield*/, s3
                             .getObject({ Bucket: bucketName, Key: objectKey })
                             .promise()];
                 case 2:
                     objectData = _a.sent();
-                    return [4 /*yield*/, promises_1.default.writeFile(filePath, objectData.Body)];
+                    return [4 /*yield*/, fs.writeFile(filePath, objectData.Body)];
                 case 3:
                     _a.sent();
                     fileSize = objectData.ContentLength;
@@ -128,7 +127,7 @@ function getFrameRate(filePath) {
 }
 function isValidPath(filePath) {
     // @ts-ignore
-    return path_1.default.isAbsolute(filePath) && promises_1.default.existsSync(filePath);
+    return path.isAbsolute(filePath) && fs.existsSync(filePath);
 }
 function publishMetric(name, value) {
     return __awaiter(this, void 0, void 0, function () {
@@ -174,7 +173,7 @@ function validateInput(input) {
     }
     return { bucketName: bN, objectKey: oK };
 }
-var handler = function (event, context) { return __awaiter(void 0, void 0, void 0, function () {
+export var handler = function (event, context) { return __awaiter(void 0, void 0, void 0, function () {
     var bucket, key, inputBucketKey, tmpFilePath, _a, bucketName, objectKey, fileName, frameRate, error_4, err_1;
     return __generator(this, function (_b) {
         switch (_b.label) {
@@ -208,7 +207,7 @@ var handler = function (event, context) { return __awaiter(void 0, void 0, void 
                 return [4 /*yield*/, downloadObject(bucketName, objectKey, tmpFilePath)];
             case 4:
                 _b.sent();
-                return [4 /*yield*/, promises_1.default.access(tmpFilePath, promises_1.default.constants.R_OK | promises_1.default.constants.W_OK)];
+                return [4 /*yield*/, fs.access(tmpFilePath, fs.constants.R_OK | fs.constants.W_OK)];
             case 5:
                 _b.sent();
                 return [4 /*yield*/, getFrameRate(tmpFilePath)];
@@ -232,7 +231,7 @@ var handler = function (event, context) { return __awaiter(void 0, void 0, void 
                 _b.label = 11;
             case 11:
                 _b.trys.push([11, 13, , 15]);
-                return [4 /*yield*/, promises_1.default.unlink(tmpFilePath)];
+                return [4 /*yield*/, fs.unlink(tmpFilePath)];
             case 12:
                 _b.sent();
                 return [3 /*break*/, 15];
@@ -248,4 +247,3 @@ var handler = function (event, context) { return __awaiter(void 0, void 0, void 
         }
     });
 }); };
-exports.handler = handler;
