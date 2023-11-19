@@ -5,7 +5,7 @@
       "dom",
       "esnext"
     ],
-    "module": "commonjs",
+    "module": "esnext",
     "moduleResolution": "node",
     "skipLibCheck": true,
     "resolveJsonModule": true,
