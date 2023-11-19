@@ -256,7 +256,10 @@ export var handler = function (event, context) { return __awaiter(void 0, void 0
                 return [4 /*yield*/, publishMetric("FrameRateExtracted : Frame rate: ".concat(calculatedFrameRate), 1)];
             case 7:
                 _b.sent();
-                return [2 /*return*/, { statusCode: 200, body: JSON.stringify({ calculatedFrameRate: calculatedFrameRate }) }];
+                return [2 /*return*/, {
+                        statusCode: 200,
+                        body: JSON.stringify({ frameRate: calculatedFrameRate }),
+                    }];
             case 8:
                 error_4 = _b.sent();
                 return [4 /*yield*/, publishMetric("HandlerError : Error in handler: ".concat(error_4.message), 1, true)];
