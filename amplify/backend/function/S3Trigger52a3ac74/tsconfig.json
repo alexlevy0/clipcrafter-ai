@@ -9,12 +9,12 @@
     "moduleResolution": "node",
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "outDir": "./lib",
+    "outDir": "./src",
     "baseUrl": "./",
-    "rootDir": "./src",
+    "rootDir": "./lib",
     "paths": {
       "src": [
-        "./src"
+        "./lib"
       ]
     }
   }

@@ -1,0 +1,14 @@
+{
+  "Records": [
+    {
+      "s3": {
+        "bucket": {
+          "name": "qlip-bucket104807-main"
+        },
+        "object": {
+          "key": "public/alice_1.mov"
+        }
+      }
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import cropData from "./qlip-crop-model-out.json" assert { type: "json" };
+import cropData from "../lib/qlip-crop-model-out.json" assert { type: "json" };
 
 interface SourceModel {
   ts_start: number;
