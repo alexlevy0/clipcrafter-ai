@@ -28,7 +28,7 @@ async function downloadObject(
 ): Promise<void> {
   const startTime = Date.now();
   try {
-    console.log("->fs", fs);
+    console.log("-- ->fs", fs);
     console.log("->fs.writeFile", fs.writeFile);
 
     console.log(`Downloading '${objectKey}' from bucket '${bucketName}'`);
