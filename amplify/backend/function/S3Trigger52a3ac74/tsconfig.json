@@ -1,19 +1,11 @@
 {
-  "exclude": [
-    "./lib",
-    "node_modules"
-  ],
-  "include": [
-    "**/*.ts",
-    "./src/*"
-  ],
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "lib": [
       "dom",
       "esnext"
     ],
-    "module": "ESNext",
+    "module": "commonjs",
     "moduleResolution": "node",
     "skipLibCheck": true,
     "resolveJsonModule": true,
