@@ -1,11 +1,14 @@
-import { config } from "./config";
-export var getMediaConverterParam = function (clippingArray) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getMediaConverterParam = void 0;
+var config_1 = require("./config");
+var getMediaConverterParam = function (clippingArray) {
     return {
-        Queue: config.jobQueueArn,
+        Queue: config_1.config.jobQueueArn,
         UserMetadata: {
             Customer: "Amazon",
         },
-        Role: config.iamRoleArn,
+        Role: config_1.config.iamRoleArn,
         Settings: {
             OutputGroups: [
                 {
@@ -13,7 +16,7 @@ export var getMediaConverterParam = function (clippingArray) {
                     OutputGroupSettings: {
                         Type: "FILE_GROUP_SETTINGS",
                         FileGroupSettings: {
-                            Destination: config.outputBucketName,
+                            Destination: config_1.config.outputBucketName,
                         },
                     },
                     Outputs: [
@@ -118,7 +121,7 @@ export var getMediaConverterParam = function (clippingArray) {
                     DeblockFilter: "DISABLED",
                     DenoiseFilter: "DISABLED",
                     TimecodeSource: "ZEROBASED",
-                    FileInput: config.inputBucketAndFilename,
+                    FileInput: config_1.config.inputBucketAndFilename,
                 },
             ],
             TimecodeConfig: {
@@ -127,3 +130,4 @@ export var getMediaConverterParam = function (clippingArray) {
         },
     };
 };
+exports.getMediaConverterParam = getMediaConverterParam;

@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,21 +35,23 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.handler = void 0;
 // import * as AWS from "aws-sdk";
-import { exec } from "child_process";
-import { promisify } from "util";
-import fs from "fs/promises";
-import fsSync from "fs";
-import path from "path";
-import { S3 } from "@aws-sdk/client-s3";
-import { Readable } from "stream";
-var execPromise = promisify(exec);
+var child_process_1 = require("child_process");
+var util_1 = require("util");
+var promises_1 = require("fs/promises");
+var fs_1 = require("fs");
+var path_1 = require("path");
+var client_s3_1 = require("@aws-sdk/client-s3");
+var stream_1 = require("stream");
+var execPromise = (0, util_1.promisify)(child_process_1.exec);
 var awsConfig = {
     region: "eu-west-3",
     functionName: "MyLambdaFunction",
     namespace: "qlip-space",
 };
-var s3 = new S3(awsConfig);
+var s3 = new client_s3_1.S3(awsConfig);
 // const cloudwatch = new AWS.CloudWatch(awsConfig);
 function downloadObject(bucketName, objectKey, filePath) {
     return __awaiter(this, void 0, void 0, function () {
@@ -69,9 +72,9 @@ function downloadObject(bucketName, objectKey, filePath) {
                         })];
                 case 3:
                     _a = _b.sent(), Body_1 = _a.Body, ContentLength = _a.ContentLength;
-                    if (!(Body_1 instanceof Readable)) return [3 /*break*/, 5];
+                    if (!(Body_1 instanceof stream_1.Readable)) return [3 /*break*/, 5];
                     return [4 /*yield*/, new Promise(function (resolve, reject) {
-                            var writeStream = fsSync.createWriteStream(filePath);
+                            var writeStream = fs_1.default.createWriteStream(filePath);
                             Body_1.pipe(writeStream);
                             Body_1.on("error", reject);
                             writeStream.on("finish", resolve);
@@ -141,13 +144,13 @@ function isValidPath(filePath) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (!path.isAbsolute(filePath)) {
+                    if (!path_1.default.isAbsolute(filePath)) {
                         throw new Error("File path isnt absolute");
                     }
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, fs.readFile(filePath)];
+                    return [4 /*yield*/, promises_1.default.readFile(filePath)];
                 case 2:
                     _a.sent();
                     return [2 /*return*/, true];
@@ -216,7 +219,7 @@ function calculateFrameRate(frameRateString) {
     }
     return numerator / denominator;
 }
-export var handler = function (event, context) { return __awaiter(void 0, void 0, void 0, function () {
+var handler = function (event, context) { return __awaiter(void 0, void 0, void 0, function () {
     var bucket, key, inputBucketKey, tmpFilePath, _a, bucketName, objectKey, fileName, frameRate, calculatedFrameRate, error_4, err_1;
     return __generator(this, function (_b) {
         switch (_b.label) {
@@ -247,7 +250,7 @@ export var handler = function (event, context) { return __awaiter(void 0, void 0
                 return [4 /*yield*/, downloadObject(bucketName, objectKey, tmpFilePath)];
             case 4:
                 _b.sent();
-                return [4 /*yield*/, fs.access(tmpFilePath, fs.constants.R_OK | fs.constants.W_OK)];
+                return [4 /*yield*/, promises_1.default.access(tmpFilePath, promises_1.default.constants.R_OK | promises_1.default.constants.W_OK)];
             case 5:
                 _b.sent();
                 return [4 /*yield*/, getFrameRate(tmpFilePath)];
@@ -275,7 +278,7 @@ export var handler = function (event, context) { return __awaiter(void 0, void 0
                 _b.label = 12;
             case 12:
                 _b.trys.push([12, 14, , 16]);
-                return [4 /*yield*/, fs.unlink(tmpFilePath)];
+                return [4 /*yield*/, promises_1.default.unlink(tmpFilePath)];
             case 13:
                 _b.sent();
                 return [3 /*break*/, 16];
@@ -290,3 +293,4 @@ export var handler = function (event, context) { return __awaiter(void 0, void 0
         }
     });
 }); };
+exports.handler = handler;
