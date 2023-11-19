@@ -5,8 +5,7 @@ import fs from "fs/promises";
 import fsSync from "fs";
 import path from "path";
 import { Handler } from "aws-lambda";
-// import { S3 } from "@aws-sdk/client-s3";
-import * as ClientS3 from "@aws-sdk/client-s3";
+import { S3 } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
 
 const execPromise = promisify(exec);
@@ -22,7 +21,7 @@ interface EventInput {
   bucketName: string;
 }
 
-const s3 = new ClientS3.S3(awsConfig);
+const s3 = new S3(awsConfig);
 
 // const cloudwatch = new AWS.CloudWatch(awsConfig);
 

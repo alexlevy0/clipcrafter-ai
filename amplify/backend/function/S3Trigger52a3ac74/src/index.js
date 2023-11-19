@@ -40,8 +40,7 @@ import { promisify } from "util";
 import fs from "fs/promises";
 import fsSync from "fs";
 import path from "path";
-// import { S3 } from "@aws-sdk/client-s3";
-import * as ClientS3 from "@aws-sdk/client-s3";
+import { S3 } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
 var execPromise = promisify(exec);
 var awsConfig = {
@@ -49,7 +48,7 @@ var awsConfig = {
     functionName: "MyLambdaFunction",
     namespace: "qlip-space",
 };
-var s3 = new ClientS3.S3(awsConfig);
+var s3 = new S3(awsConfig);
 // const cloudwatch = new AWS.CloudWatch(awsConfig);
 function downloadObject(bucketName, objectKey, filePath) {
     return __awaiter(this, void 0, void 0, function () {
