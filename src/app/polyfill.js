@@ -3,7 +3,7 @@ if (
   typeof window === "undefined" ||
   typeof document === "undefined"
 ) {
-  console.log("yoooooooooo--------");
+  console.log("In");
   global.Image = class {
     constructor() {}
   };
@@ -45,7 +45,7 @@ if (
     querySelectorAll: () => [],
     querySelector: () => [],
   };
-  console.log('weshhhh', document)
+  // console.log('weshhhh', document)
   window.location = { protocol: "", hostname: "", port: "" };
   // document = {
   //   querySelectorAll: function () {},
@@ -56,5 +56,5 @@ if (
   //   querySelector: function () {},
   // };
 } else {
-  console.log("waaaaaaazzaaaaaa");
+  console.log("OK");
 }

@@ -54,7 +54,7 @@ const MyComponentWithSpline = dynamic(
 );
 
 function Scene({ signOut, portal, ...props }) {
-  const { nodes } = useSpline('/scroll.splinecode')
+  const { nodes } = useSpline('scroll.splinecode')
   return nodes && (
     <MyComponentWithSpline
       signOut={signOut}
