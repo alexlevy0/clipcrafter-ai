@@ -1,12 +1,11 @@
 import { S3 } from "@aws-sdk/client-s3";
 import { exec } from "child_process";
 import { promisify } from "util";
-import fs from "fs/promises";
-import fsSync from "fs";
-import path from "path";
+import * as fsSync from "fs";
+import * as fs from "fs/promises";
+import * as path from "path";
 import { Handler } from "aws-lambda";
 import { Readable } from "stream";
-// import * as AWS from "aws-sdk";
 
 const execPromise = promisify(exec);
 
