@@ -180,6 +180,7 @@ function calculateFrameRate(frameRateString: string): number {
 }
 
 export const handler: Handler = async (event) => {
+  await publishMetric(`${conf.functionName} start with event : ${event}`, 1);
   if (!event || !event.Records) {
     await publishMetric(
       "InputValidationError : Missing Records in event",
@@ -207,6 +208,12 @@ export const handler: Handler = async (event) => {
 
     if (!fileName)
       throw new Error("Failed to extract file name from objectKey");
+
+    if (fileName.includes(conf.nameModifier)) {
+      const preventDoubleProcessing = `Canceling ${conf.functionName} : prevent double processing`;
+      await publishMetric(preventDoubleProcessing, 1);
+      throw new Error(preventDoubleProcessing);
+    }
 
     tmpFilePath = `/tmp/${fileName}`;
     await downloadObject(bucketName, objectKey, tmpFilePath);
@@ -253,6 +260,8 @@ export const handler: Handler = async (event) => {
     const [name] = fileName.split(".");
     const host = `https://${bucketName}.s3.${conf.region}.amazonaws.com/`;
     const url = `${host}${folderName}/${name}${conf.nameModifier}.${conf.videoOutputFormat}`;
+
+    await publishMetric(`Job created, url : ${url}`, 1);
 
     return {
       statusCode: 200,
