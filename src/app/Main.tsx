@@ -5,7 +5,7 @@ import { Flex, Button, ColorMode, defaultDarkModeOverride } from '@aws-amplify/u
 import { ThemeProvider } from '@aws-amplify/ui-react';
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-// import { getProperties } from '@aws-amplify/storage';
+import { Storage } from 'aws-amplify';
 
 
 // @ts-ignore:next-line
@@ -22,12 +22,12 @@ const processFile = ({ file, key }: { key: string, file: Blob }) => {
   };
 }
 
-const theme = {
-  name: 'my-theme',
-  overrides: [defaultDarkModeOverride],
-};
 
 export function Main({ signOut }: { signOut: any }) {
+  const theme = {
+    name: 'my-theme',
+    overrides: [defaultDarkModeOverride],
+  };
   const [colorMode] = useState<ColorMode>('system');
   const [files, setFiles] = useState({});
   const [hasWindow, setHasWindow] = useState(false);
@@ -40,22 +40,13 @@ export function Main({ signOut }: { signOut: any }) {
       setHasWindow(true);
     }
     const fetchData = async () => {
-      try {
-        const result = await getProperties({
-          key: 'public/mejorar_tu_espanol_edited.mp4',
-          options: {
-            accessLevel: 'guest', // 'private' | 'protected' | 'guest'
-            // targetIdentityId: 'xxxxxxx' // ID of another user, if `accessLevel: protected`
-          }
-        });
-        console.log('File Properties ', result);
-      } catch (error) {
-        console.log('Error ', error);
-      }
+      const result = await Storage.getProperties('public/mejorar_tu_espanol_edited.mp4');
+      console.log('File Properties ', result);
+
     }
     try {
       console.log('1------');
-      // fetchData()
+      fetchData()
     } catch (error) {
       console.error(error)
     }
