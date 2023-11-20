@@ -5,62 +5,94 @@ import { Flex, Button, ColorMode, defaultDarkModeOverride } from '@aws-amplify/u
 import { ThemeProvider } from '@aws-amplify/ui-react';
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Storage } from 'aws-amplify';
-
+import { Storage, Hub } from 'aws-amplify';
 
 // @ts-ignore:next-line
 const ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false });
 
+const theme = {
+  name: 'my-theme',
+  overrides: [defaultDarkModeOverride],
+};
 
-const processFile = ({ file, key }: { key: string, file: Blob }) => {
-  const fileParts = key.split('.');
-  const ext = fileParts.pop();
-  return {
-    file,
-    // key: `${Date.now()}${fileParts.join('.')}.${ext}`,
-    key: `${Date.now()}${fileParts.join('.')}.${ext}`,
-  };
-}
+interface IfilesNames {
+  [key: string]: { status: string, error?: string };
+};
 
+interface IStorageGet {
+  level?: 'private' | 'protected' | 'public';
+  identityId?: string;
+  download?: boolean;
+  expires?: number;
+  contentType?: string;
+  validateObjectExistence?: boolean;
+  cacheControl?: string;
+  track?: boolean;
+};
 
 export function Main({ signOut }: { signOut: any }) {
-  const theme = {
-    name: 'my-theme',
-    overrides: [defaultDarkModeOverride],
-  };
   const [colorMode] = useState<ColorMode>('system');
-  const [files, setFiles] = useState({});
+  const [filesNames, setFilesNames] = useState<IfilesNames>({});
   const [hasWindow, setHasWindow] = useState(false);
-  const [videoUrl, setVideoUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState<string>("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       setHasWindow(true);
     }
+
     const fetchData = async () => {
-      const result = await Storage.get('mejorar_tu_espanol_edited.mp4');
-      setVideoUrl(result)
-      console.log('File url ', result);
+      const fileKey = Object.keys(filesNames).find((key: string) =>
+        filesNames[key].status === "success" && !filesNames[key].error)
+
+      const S3Key = fileKey?.[0]
+      if (S3Key?.length) {
+        const storageGetConfig: IStorageGet = {
+          level: 'public', // TODO Change to private
+          // identityId: 'xxxxxxx', // the identityId of that user
+          download: false,
+          track: true,
+        }
+        const signedURL = await Storage.get(S3Key, storageGetConfig)
+        if (signedURL) {
+          setVideoUrl(signedURL)
+        }
+      }
     }
+
     try {
       fetchData()
     } catch (error) {
       console.error(error)
     }
+  }, [filesNames]);
+
+  useEffect(() => {
+    let _listener: () => void
+
+    const startListener = () => {
+      _listener = Hub.listen('storage', ({ payload: { event, data } }) => {
+        console.log('Hub.listen : ', { event }, { data });
+      });
+    }
+
+    startListener()
+
+    return () => _listener()
   }, []);
 
-
-
-  const onUploadSuccess = ({ key }: { key: string }) => {
-    console.log('onUploadSuccess', { key });
-    // setFiles((prevFiles) => {
-    //   return {
-    //     ...prevFiles,
-    //     [key as string]: {
-    //       status: 'success',
-    //     },
-    //   };
-    // });
+  const onFileEvent = (key: string, { status, error }: { status: string, error?: any }) => {
+    console.log('onFileEvent : ', { key }, { status }, { error });
+    setFilesNames((prevFiles) => {
+      return {
+        ...prevFiles,
+        [key as string]: {
+          status,
+          ...(error ? error : {}),
+        },
+      };
+    });
+    console.log({ filesNames });
   }
 
 
@@ -69,40 +101,15 @@ export function Main({ signOut }: { signOut: any }) {
       <div>
         <StorageManager
           isResumable
+          // Size is in bytes
+          // maxFileSize={10000} // TODO
           accessLevel='public'
           acceptedFileTypes={['video/*']}
           maxFileCount={1}
-          // processFile={processFile}
-          onFileRemove={({ key }) => {
-            setFiles((prevFiles) => {
-              return {
-                ...prevFiles,
-                [key]: undefined,
-              };
-            });
-          }}
-          onUploadError={(error, { key }) => {
-            setFiles((prevFiles) => {
-              return {
-                ...prevFiles,
-                [key]: {
-                  status: 'error',
-                },
-              };
-            });
-          }}
-          // @ts-ignore:next-line
-          onUploadSuccess={onUploadSuccess}
-          onUploadStart={({ key }) => {
-            setFiles((prevFiles) => {
-              return {
-                ...prevFiles,
-                [key as string]: {
-                  status: 'uploading',
-                },
-              };
-            });
-          }}
+          onUploadSuccess={({ key = 'N/A' }) => onFileEvent(key, { 'status': 'success' })}
+          onFileRemove={({ key }) => onFileEvent(key, { 'status': 'remove' })}
+          onUploadError={(error, { key }) => onFileEvent(key, { 'status': 'error', error })}
+          onUploadStart={({ key = 'N/A' }) => onFileEvent(key, { 'status': 'uploading' })}
           components={{
             FilePicker({ onClick }) {
               return (
@@ -115,7 +122,6 @@ export function Main({ signOut }: { signOut: any }) {
                   >
                     Browse Files
                   </Button>
-                  {/* <Divider orientation="vertical" /> */}
                   <Button
                     size="large"
                     isFullWidth={true}
@@ -128,14 +134,6 @@ export function Main({ signOut }: { signOut: any }) {
             },
           }}
         />
-        {/* 
-        {Object.keys(files).map((key) => {
-          return files[key] ? (
-            <div style={{ color: 'white' }}>
-              {key}: {files[key].status}
-            </div>
-          ) : null;
-        })} */}
         <main className="flex min-h-screen flex-col items-center justify-between p-0">
           {hasWindow && (
             <ReactPlayer

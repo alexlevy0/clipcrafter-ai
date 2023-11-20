@@ -21,11 +21,16 @@ const cropData = JSON.parse(
   fs.readFileSync("qlip-crop-model-out.json", "utf-8")
 );
 
-const repairedCropData: MainSourceModel = cropData as MainSourceModel;
+const typedCropData: MainSourceModel = cropData as MainSourceModel;
+
+const testTypedCropData = {
+  ...typedCropData,
+  shots: typedCropData.shots.slice(0, 2),
+};
 
 export function convertInputClippings(frameRate): OutputModel[] {
   const output: OutputModel[] = [];
-  for (const clip of repairedCropData.shots) {
+  for (const clip of testTypedCropData.shots) {
     const start = secondsToTimestamp(clip.ts_start, frameRate);
     const end = secondsToTimestamp(clip.ts_end, frameRate);
     output.push({ StartTimecode: start, EndTimecode: end });
