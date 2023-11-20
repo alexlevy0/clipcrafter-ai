@@ -40,9 +40,10 @@ export function Main({ signOut }: { signOut: any }) {
       setHasWindow(true);
     }
     const fetchData = async () => {
-      const result = await Storage.getProperties('public/mejorar_tu_espanol_edited.mp4');
+      const result = await Storage.getProperties('mejorar_tu_espanol_edited.mp4');
       console.log('File Properties ', result);
-
+      // https://qlip-bucket104807-main.s3.eu-west-3.amazonaws.com/public/public/mejorar_tu_espanol_edited.mp4
+      // https://qlip-bucket104807-main.s3.eu-west-3.amazonaws.com/public/mejorar_tu_espanol_edited.mp4
     }
     try {
 
