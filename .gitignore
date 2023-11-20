@@ -35,6 +35,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+
+amplify/backend/function/**/src/**/*.js
+amplify/backend/function/**/src/**/*.json
+
 #amplify-do-not-edit-begin
 amplify/\#current-cloud-backend
 amplify/.config/local-*
@@ -56,6 +60,3 @@ amplifytools.xcconfig
 .secret-*
 **.sample
 #amplify-do-not-edit-end
-
-amplify/backend/function/**/src/**/*.js
-amplify/backend/function/**/src/**/*.json
