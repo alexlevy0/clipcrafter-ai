@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 import '@aws-amplify/ui-react/styles.css';
 import { StorageManager } from '@aws-amplify/ui-react-storage'
@@ -6,8 +5,12 @@ import { Flex, Button, ColorMode, defaultDarkModeOverride } from '@aws-amplify/u
 import { ThemeProvider } from '@aws-amplify/ui-react';
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
+// import { getProperties } from '@aws-amplify/storage';
 
+
+// @ts-ignore:next-line
 const ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false });
+
 
 const processFile = ({ file, key }: { key: string, file: Blob }) => {
   const fileParts = key.split('.');
@@ -24,17 +27,54 @@ const theme = {
   overrides: [defaultDarkModeOverride],
 };
 
-export function Main({ signOut }) {
+export function Main({ signOut }: { signOut: any }) {
   const [colorMode] = useState<ColorMode>('system');
   const [files, setFiles] = useState({});
   const [hasWindow, setHasWindow] = useState(false);
+
+  console.log('≠≠≠≠≠');
+
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       setHasWindow(true);
     }
+    const fetchData = async () => {
+      try {
+        const result = await getProperties({
+          key: 'public/mejorar_tu_espanol_edited.mp4',
+          options: {
+            accessLevel: 'guest', // 'private' | 'protected' | 'guest'
+            // targetIdentityId: 'xxxxxxx' // ID of another user, if `accessLevel: protected`
+          }
+        });
+        console.log('File Properties ', result);
+      } catch (error) {
+        console.log('Error ', error);
+      }
+    }
+    try {
+      console.log('1------');
+      // fetchData()
+    } catch (error) {
+      console.error(error)
+    }
   }, []);
 
-  const [videoUrl, setVideoUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState(""); // https://giistyxelor.s3.amazonaws.com/giists/video/video0cP3w019TiZYYcUy22WY.mp4
+
+
+  const onUploadSuccess = ({ key }: { key: any }) => {
+    console.log('yooo');
+    // setFiles((prevFiles) => {
+    //   return {
+    //     ...prevFiles,
+    //     [key as string]: {
+    //       status: 'success',
+    //     },
+    //   };
+    // });
+  }
 
 
   return (
@@ -64,16 +104,8 @@ export function Main({ signOut }) {
               };
             });
           }}
-          onUploadSuccess={({ key }) => {
-            setFiles((prevFiles) => {
-              return {
-                ...prevFiles,
-                [key as string]: {
-                  status: 'success',
-                },
-              };
-            });
-          }}
+          // @ts-ignore:next-line
+          onUploadSuccess={onUploadSuccess}
           onUploadStart={({ key }) => {
             setFiles((prevFiles) => {
               return {
@@ -120,8 +152,8 @@ export function Main({ signOut }) {
         <main className="flex min-h-screen flex-col items-center justify-between p-0">
           {hasWindow && (
             <ReactPlayer
+              // @ts-ignore:next-line
               width={"100%"}
-              // url='https://giistyxelor.s3.amazonaws.com/giists/video/video0cP3w019TiZYYcUy22WY.mp4'
               url={videoUrl}
               controls
               playing={false}
