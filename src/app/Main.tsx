@@ -45,6 +45,7 @@ export function Main({ signOut }: { signOut: any }) {
 
     }
     try {
+
       console.log('1------');
       fetchData()
     } catch (error) {
