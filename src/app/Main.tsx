@@ -3,7 +3,7 @@ import '@aws-amplify/ui-react/styles.css';
 import { StorageManager } from '@aws-amplify/ui-react-storage'
 import { Flex, Button, ColorMode, defaultDarkModeOverride } from '@aws-amplify/ui-react'
 import { ThemeProvider } from '@aws-amplify/ui-react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Storage, Hub } from 'aws-amplify';
 
@@ -16,7 +16,7 @@ const theme = {
 };
 
 interface IfilesNames {
-  [key: string]: { status: string, error?: string };
+  [key: string]: { status: Status, error?: string };
 };
 
 interface IStorageGet {
@@ -30,11 +30,37 @@ interface IStorageGet {
   track?: boolean;
 };
 
+enum Status {
+  uploading,
+  remove,
+  success,
+  error,
+}
+
 export function Main({ signOut }: { signOut: any }) {
   const [colorMode] = useState<ColorMode>('system');
   const [filesNames, setFilesNames] = useState<IfilesNames>({});
   const [hasWindow, setHasWindow] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string>("");
+
+  const displayVideo = useCallback(async () => {
+    const fileKey = Object.keys(filesNames).find((key: string) =>
+      filesNames[key].status === Status.success && !filesNames[key].error)
+
+    const S3Key = fileKey?.[0]
+    if (S3Key?.length) {
+      const storageGetConfig: IStorageGet = {
+        level: 'public', // TODO Change to private
+        // identityId: 'xxxxxxx', // the identityId of that user
+        download: false,
+        track: true,
+      }
+      const signedURL = await Storage.get(S3Key, storageGetConfig)
+      if (signedURL) {
+        setVideoUrl(signedURL)
+      }
+    }
+  }, [filesNames]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -42,37 +68,20 @@ export function Main({ signOut }: { signOut: any }) {
     }
 
     const fetchData = async () => {
-      const fileKey = Object.keys(filesNames).find((key: string) =>
-        filesNames[key].status === "success" && !filesNames[key].error)
-
-      const S3Key = fileKey?.[0]
-      if (S3Key?.length) {
-        const storageGetConfig: IStorageGet = {
-          level: 'public', // TODO Change to private
-          // identityId: 'xxxxxxx', // the identityId of that user
-          download: false,
-          track: true,
-        }
-        const signedURL = await Storage.get(S3Key, storageGetConfig)
-        if (signedURL) {
-          setVideoUrl(signedURL)
-        }
+      try {
+        await displayVideo()
+      } catch (error) {
+        throw new Error(`DisplayVideo Error : ${error}`);
       }
     }
-
-    try {
-      fetchData()
-    } catch (error) {
-      console.error(error)
-    }
-  }, [filesNames]);
+    fetchData().catch(console.error)
+  }, [filesNames, displayVideo]);
 
   useEffect(() => {
     let _listener: () => void
 
     const startListener = () => {
-      const allChanelRegex = /.*/
-      _listener = Hub.listen(allChanelRegex, ({
+      _listener = Hub.listen(/.*/, ({
         patternInfo,
         source,
         channel,
@@ -81,15 +90,21 @@ export function Main({ signOut }: { signOut: any }) {
         console.log(`Event on : ${channel}`,
           { patternInfo }, { source }, { event }, { data }
         );
+        if (event === "getSignedUrl") {
+          displayVideo()
+        }
       });
     }
 
     startListener()
 
-    return () => _listener()
-  }, []);
+    return () => {
+      _listener()
+      console.log('listener removed');
+    }
+  });
 
-  const onFileEvent = (key: string, { status, error }: { status: string, error?: any }) => {
+  const onFileEvent = (key: string, { status, error }: { status: Status, error?: any }) => {
     console.log('onFileEvent : ', { key }, { status }, { error });
     setFilesNames((prevFiles) => {
       return {
@@ -114,10 +129,10 @@ export function Main({ signOut }: { signOut: any }) {
           accessLevel='public'
           acceptedFileTypes={['video/*']}
           maxFileCount={1}
-          onUploadSuccess={({ key = 'N/A' }) => onFileEvent(key, { 'status': 'success' })}
-          onFileRemove={({ key }) => onFileEvent(key, { 'status': 'remove' })}
-          onUploadError={(error, { key }) => onFileEvent(key, { 'status': 'error', error })}
-          onUploadStart={({ key = 'N/A' }) => onFileEvent(key, { 'status': 'uploading' })}
+          onUploadSuccess={({ key = 'N/A' }) => onFileEvent(key, { 'status': Status.success })}
+          onFileRemove={({ key }) => onFileEvent(key, { 'status': Status.remove })}
+          onUploadError={(error, { key }) => onFileEvent(key, { 'status': Status.error, error })}
+          onUploadStart={({ key = 'N/A' }) => onFileEvent(key, { 'status': Status.uploading })}
           components={{
             FilePicker({ onClick }) {
               return (
