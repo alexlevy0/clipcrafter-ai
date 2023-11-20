@@ -31,34 +31,28 @@ export function Main({ signOut }: { signOut: any }) {
   const [colorMode] = useState<ColorMode>('system');
   const [files, setFiles] = useState({});
   const [hasWindow, setHasWindow] = useState(false);
-
-  console.log('≠≠≠≠≠');
-
+  const [videoUrl, setVideoUrl] = useState("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       setHasWindow(true);
     }
     const fetchData = async () => {
-      const result = await Storage.getProperties('mejorar_tu_espanol_edited.mp4');
-      console.log('File Properties ', result);
-      // https://qlip-bucket104807-main.s3.eu-west-3.amazonaws.com/public/public/mejorar_tu_espanol_edited.mp4
-      // https://qlip-bucket104807-main.s3.eu-west-3.amazonaws.com/public/mejorar_tu_espanol_edited.mp4
+      const result = await Storage.get('mejorar_tu_espanol_edited.mp4');
+      setVideoUrl(result)
+      console.log('File url ', result);
     }
     try {
-
-      console.log('1------');
       fetchData()
     } catch (error) {
       console.error(error)
     }
   }, []);
 
-  const [videoUrl, setVideoUrl] = useState(""); // https://giistyxelor.s3.amazonaws.com/giists/video/video0cP3w019TiZYYcUy22WY.mp4
 
 
-  const onUploadSuccess = ({ key }: { key: any }) => {
-    console.log('yooo');
+  const onUploadSuccess = ({ key }: { key: string }) => {
+    console.log('onUploadSuccess', { key });
     // setFiles((prevFiles) => {
     //   return {
     //     ...prevFiles,

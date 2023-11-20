@@ -21,6 +21,10 @@ if (
 
   global.window = class window {
     constructor() {}
+    document = {
+      querySelectorAll: () => [],
+      querySelector: () => [],
+    };
     location = {
       hash: {},
       host: {},
@@ -33,6 +37,15 @@ if (
       search: {},
     };
   };
+  window.document = {
+    querySelectorAll: () => [],
+    querySelector: () => [],
+  };
+  document = {
+    querySelectorAll: () => [],
+    querySelector: () => [],
+  };
+  console.log('weshhhh', document)
   window.location = { protocol: "", hostname: "", port: "" };
   // document = {
   //   querySelectorAll: function () {},
