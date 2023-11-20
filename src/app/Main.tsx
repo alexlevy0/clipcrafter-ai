@@ -19,19 +19,24 @@ const processFile = ({ file, key }: { key: string, file: Blob }) => {
   };
 }
 
+const theme = {
+  name: 'my-theme',
+  overrides: [defaultDarkModeOverride],
+};
+
 export function Main({ signOut }) {
-  const [colorMode] = React.useState<ColorMode>('system');
-  const theme = {
-    name: 'my-theme',
-    overrides: [defaultDarkModeOverride],
-  };
-  const [files, setFiles] = React.useState({});
+  const [colorMode] = useState<ColorMode>('system');
+  const [files, setFiles] = useState({});
   const [hasWindow, setHasWindow] = useState(false);
   useEffect(() => {
     if (typeof window !== "undefined") {
       setHasWindow(true);
     }
   }, []);
+
+  const [videoUrl, setVideoUrl] = useState("");
+
+
   return (
     <ThemeProvider theme={theme} colorMode={colorMode}>
       <div>
@@ -113,12 +118,14 @@ export function Main({ signOut }) {
           ) : null;
         })} */}
         <main className="flex min-h-screen flex-col items-center justify-between p-0">
-          {hasWindow && <ReactPlayer
-            width={"100%"}
-            url='https://giistyxelor.s3.amazonaws.com/giists/video/video0cP3w019TiZYYcUy22WY.mp4'
-            controls
-            playing={false}
-          />}
+          {hasWindow && (
+            <ReactPlayer
+              width={"100%"}
+              // url='https://giistyxelor.s3.amazonaws.com/giists/video/video0cP3w019TiZYYcUy22WY.mp4'
+              url={videoUrl}
+              controls
+              playing={false}
+            />)}
         </main>
       </div>
     </ThemeProvider>

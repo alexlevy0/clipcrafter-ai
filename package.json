@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "amplify:S3Trigger52a3ac74": "cd amplify/backend/function/S3Trigger52a3ac74 && tsc -p ./tsconfig.json && cd -",
+    "amplify:S3Trigger52a3ac74": "cd amplify/backend/function/S3Trigger52a3ac74 && npm i @aws-sdk/client-mediaconvert && tsc -p ./tsconfig.json && cd -",
     "debug:local:S3Trigger": "cd amplify/backend/function/S3Trigger52a3ac74 && sam local invoke 'LambdaFunction' -e lib/event.json -t S3Trigger52a3ac74-cloudformation-template.json && cd -"
   },
   "dependencies-comments": {
