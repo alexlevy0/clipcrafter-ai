@@ -71,8 +71,16 @@ export function Main({ signOut }: { signOut: any }) {
     let _listener: () => void
 
     const startListener = () => {
-      _listener = Hub.listen('storage', ({ payload: { event, data } }) => {
-        console.log('Hub.listen : ', { event }, { data });
+      const allChanelRegex = /.*/
+      _listener = Hub.listen(allChanelRegex, ({
+        patternInfo,
+        source,
+        channel,
+        payload: { event, data }
+      }) => {
+        console.log(`Event on : ${channel}`,
+          { patternInfo }, { source }, { event }, { data }
+        );
       });
     }
 
