@@ -1,5 +1,10 @@
 {
+  "include": [
+    "lib",
+    "lib/qlip-crop-model-out.json"
+  ],
   "compilerOptions": {
+    "target": "esnext",
     "allowSyntheticDefaultImports": true,
     "lib": [
       "dom",

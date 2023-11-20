@@ -1,12 +1,27 @@
-import { config } from "./config";
+interface GetMediaConverterParam {
+  fileInput: string;
+  outputBucketName: string;
+  jobQueueArn: string;
+  iamRoleArn: string;
+  nameModifier?: string;
+}
 
-export const getMediaConverterParam = (clippingArray) => {
+export const getMediaConverterParam = (
+  clippingArray,
+  {
+    fileInput,
+    outputBucketName,
+    jobQueueArn,
+    iamRoleArn,
+    nameModifier = "_edited",
+  }: GetMediaConverterParam
+) => {
   return {
-    Queue: config.jobQueueArn,
+    Queue: jobQueueArn,
     UserMetadata: {
       Customer: "Amazon",
     },
-    Role: config.iamRoleArn,
+    Role: iamRoleArn,
     Settings: {
       OutputGroups: [
         {
@@ -14,7 +29,7 @@ export const getMediaConverterParam = (clippingArray) => {
           OutputGroupSettings: {
             Type: "FILE_GROUP_SETTINGS",
             FileGroupSettings: {
-              Destination: config.outputBucketName,
+              Destination: outputBucketName,
             },
           },
           Outputs: [
@@ -96,7 +111,7 @@ export const getMediaConverterParam = (clippingArray) => {
                   MoovPlacement: "PROGRESSIVE_DOWNLOAD",
                 },
               },
-              NameModifier: "_1",
+              NameModifier: nameModifier,
             },
           ],
         },
@@ -119,7 +134,8 @@ export const getMediaConverterParam = (clippingArray) => {
           DeblockFilter: "DISABLED",
           DenoiseFilter: "DISABLED",
           TimecodeSource: "ZEROBASED", //
-          FileInput: config.inputBucketAndFilename,
+          // FileInput: config.inputBucketAndFilename,
+          FileInput: fileInput,
         },
       ],
       TimecodeConfig: {

@@ -6,7 +6,9 @@
           "name": "qlip-bucket104807-main"
         },
         "object": {
-          "key": "public/alice_1.mov"
+          "keyCommented1": "public/alice_1.mov",
+          "keyCommented2": "public/mejorar_tu_espanol.mp4",
+          "key": "public/mejorar_tu_espanol.mov"
         }
       }
     }

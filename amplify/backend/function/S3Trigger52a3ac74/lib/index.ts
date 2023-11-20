@@ -6,23 +6,36 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import { Handler } from "aws-lambda";
 import { Readable } from "stream";
+import {
+  MediaConvertClient,
+  CreateJobCommand,
+} from "@aws-sdk/client-mediaconvert";
+import { convertInputClippings } from "./convertInputClippings";
+import { getMediaConverterParam } from "./getMediaConverterParam";
 
 const execPromise = promisify(exec);
 
-const awsConfig = {
+const conf = {
   region: "eu-west-3",
-  functionName: "MyLambdaFunction",
-  namespace: "qlip-space",
+  functionName: "UploadTriggeredLambda",
+  namespace: "QlipNameSpace",
+  nameModifier: "_edited",
+  videoOutputFormat: "mp4",
+  endpointUniqueString: "xpxxifqxa",
+  jobQueueArn: `arn:aws:mediaconvert:eu-west-3:327852390890:queues/Default`,
+  iamRoleArn: `arn:aws:iam::327852390890:role/service-role/MediaConvert_Default_Role`,
 };
+
+const mediaConvEndpoint = `https://${conf.endpointUniqueString}.mediaconvert.${conf.region}.amazonaws.com`;
 
 interface EventInput {
   objectKey: string;
   bucketName: string;
 }
 
-const s3 = new S3(awsConfig);
+const s3 = new S3(conf);
 
-// const cloudwatch = new AWS.CloudWatch(awsConfig);
+// const cloudwatch = new AWS.CloudWatch(conf);
 
 async function downloadObject(
   bucketName: string,
@@ -121,7 +134,7 @@ async function publishMetric(
           Dimensions: [
             {
               Name: "FunctionName",
-              Value: awsConfig.functionName,
+              Value: conf.functionName,
             },
           ],
           Timestamp: new Date(),
@@ -129,13 +142,14 @@ async function publishMetric(
           Value: value,
         },
       ],
-      Namespace: awsConfig.namespace,
+      Namespace: conf.namespace,
     };
-    const log = JSON.stringify(params, null, 2);
     if (isError) {
-      console.error(log);
-    } else console.log(log);
-    // await cloudwatch.putMetricData(params).promise();
+      console.error(params);
+    } else {
+      console.log(params.MetricData[0].MetricName);
+      // await cloudwatch.putMetricData(params).promise();
+    }
   } catch (error: any) {
     console.error(`Error publishing metric: ${error.message}`);
   }
@@ -165,7 +179,7 @@ function calculateFrameRate(frameRateString: string): number {
   return numerator / denominator;
 }
 
-export const handler: Handler = async (event, context) => {
+export const handler: Handler = async (event) => {
   if (!event || !event.Records) {
     await publishMetric(
       "InputValidationError : Missing Records in event",
@@ -177,41 +191,76 @@ export const handler: Handler = async (event, context) => {
       body: JSON.stringify({ error: "Records is required in event" }),
     };
   }
+
   const bucket = event.Records[0].s3.bucket.name;
   const key = event.Records[0].s3.object.key;
+
   const inputBucketKey = {
     bucketName: bucket,
     objectKey: key,
   };
-
   let tmpFilePath: string | undefined;
 
   try {
     const { bucketName, objectKey } = validateInput(inputBucketKey);
-
-    const fileName = objectKey.split("/").pop();
+    const [folderName, fileName] = objectKey.split("/");
 
     if (!fileName)
       throw new Error("Failed to extract file name from objectKey");
 
     tmpFilePath = `/tmp/${fileName}`;
-
     await downloadObject(bucketName, objectKey, tmpFilePath);
-
     await fs.access(tmpFilePath, fs.constants.R_OK | fs.constants.W_OK);
-
     const frameRate = await getFrameRate(tmpFilePath);
 
     const calculatedFrameRate = calculateFrameRate(frameRate);
-
     await publishMetric(
       `FrameRateExtracted : Frame rate: ${calculatedFrameRate}`,
       1
     );
 
+    const clippingArray = convertInputClippings(calculatedFrameRate);
+    await publishMetric(`Clipping Array Created`, 1);
+
+    const base = `s3://${bucketName}/`;
+    const outputBucketName = `${base}${folderName}/`;
+    const fileInput = `${base}${objectKey}`;
+
+    const params = getMediaConverterParam(clippingArray, {
+      fileInput,
+      outputBucketName,
+      jobQueueArn: conf.jobQueueArn,
+      iamRoleArn: conf.iamRoleArn,
+      nameModifier: conf.nameModifier,
+    });
+
+    await publishMetric(`MediaConverter Param Created`, 1);
+
+    const mediaConvertClient = new MediaConvertClient({
+      endpoint: mediaConvEndpoint,
+    });
+
+    // @ts-ignore:next-line
+    const createJob = new CreateJobCommand(params);
+    const mediaConvSendData = await mediaConvertClient.send(createJob);
+
+    const { httpStatusCode } = mediaConvSendData?.$metadata || {};
+    const { Id } = mediaConvSendData?.Job || {};
+    if (httpStatusCode !== 201 || !Id) {
+      throw new Error("Failed to create MediaConvert job");
+    }
+
+    const [name] = fileName.split(".");
+    const host = `https://${bucketName}.s3.${conf.region}.amazonaws.com/`;
+    const url = `${host}${folderName}/${name}${conf.nameModifier}.${conf.videoOutputFormat}`;
+
     return {
       statusCode: 200,
-      body: JSON.stringify({ frameRate: calculatedFrameRate }),
+      body: JSON.stringify({
+        jobId: mediaConvSendData.Job.Id,
+        jobCreatedAt: mediaConvSendData.Job.CreatedAt,
+        url,
+      }),
     };
   } catch (error: any) {
     await publishMetric(

@@ -39,7 +39,7 @@ export function Main({ signOut }) {
           isResumable
           accessLevel='public'
           acceptedFileTypes={['video/*']}
-          maxFileCount={5}
+          maxFileCount={1}
           // processFile={processFile}
           onFileRemove={({ key }) => {
             setFiles((prevFiles) => {
