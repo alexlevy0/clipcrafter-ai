@@ -4,6 +4,7 @@ import { StorageManager } from '@aws-amplify/ui-react-storage'
 import { Flex, Button, defaultDarkModeOverride } from '@aws-amplify/ui-react'
 import { ThemeProvider } from '@aws-amplify/ui-react';
 import React, { useState } from 'react';
+// @ts-ignore:next-line
 import dynamic from 'next/dynamic';
 import { Auth, Storage } from 'aws-amplify';
 
@@ -11,8 +12,6 @@ import { Auth, Storage } from 'aws-amplify';
 const ReactPlayer: ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false });
 
 const noop = async () => { undefined }
-
-const nameModifier = (key: string) => `${key.split('.')[0]}_edited.mp4`
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

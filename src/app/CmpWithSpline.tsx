@@ -3,16 +3,18 @@
 import '@aws-amplify/ui-react/styles.css';
 import React, { useState, useLayoutEffect, useRef } from 'react';
 import * as THREE from 'three'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
 import { Html, Mask, useMask, Clone, Float as FloatImpl } from '@react-three/drei'
-import { Main } from './Main'
+import { Main } from './Main.tsx'
 
-const MyComponentWithSpline = (props) => {
-  const { nodes, portal } = props
+
+function MyComponentWithSpline(props) {
+  const { nodes, portal, position } = props
   let timeout = null
   const v = new THREE.Vector3()
   const wheel = useRef(0)
   const hand = useRef()
+  // const mesh = useRef<THREE.Mesh>(null!)
   const [clicked, click] = useState(false)
   const stencil = useMask(1, true)
 
@@ -47,22 +49,26 @@ const MyComponentWithSpline = (props) => {
         {
           x: v.x - 100,
           y: wheel.current + v.y,
-          y: v.y,
           z: v.z
         },
-        0.3
+        0.4
       )
 
     }
 
     state.camera.zoom = THREE.MathUtils.lerp(state.camera.zoom, clicked ? 0.9 : 0.7, clicked ? 0.025 : 0.15)
-    state.camera.position.lerp({ x: -state.pointer.x * 400, y: -state.pointer.y * 200, z: 1000 }, 0.1)
+    state.camera.position.lerp({
+      x: -state.pointer.x * 400,
+      y: -state.pointer.y * 200,
+      z: 1000
+    }
+      , 0.1)
     state.camera.lookAt(0, 0, 0)
     state.camera.updateProjectionMatrix()
   })
 
   return (
-    <group {...props} dispose={null} >
+    <group {...props} dispose={null} position={position}>
       <Float object={nodes['Bg-stuff']} />
       <Float object={nodes['Emoji-4']} />
       <Float object={nodes['Emoji-2']} />
@@ -89,23 +95,24 @@ const MyComponentWithSpline = (props) => {
               </Html>
             </Mask>
             <mesh
-              // onWheel={(e) => {
-              //   wheel.current = -e.deltaY / 2
-              //   clearTimeout(timeout)
-              //   timeout = setTimeout(() => (wheel.current = 0), 100)
-              // }}
-              // onPointerDown={(e) => {
-              //   e.target.setPointerCapture(e.pointerId)
-              //   click(true)
-              // }}
-              // onPointerUp={(e) => {
-              //   e.target.releasePointerCapture(e.pointerId)
-              //   click(false)
-              // }}
+              onWheel={(e) => {
+                wheel.current = -e.deltaY / 2
+                clearTimeout(timeout)
+                timeout = setTimeout(() => (wheel.current = 0), 100)
+              }}
+              onPointerDown={(e) => {
+                e.target.setPointerCapture(e.pointerId)
+                click(true)
+              }}
+              onPointerUp={(e) => {
+                e.target.releasePointerCapture(e.pointerId)
+                click(false)
+              }}
+              // ref={mesh}
               receiveShadow
-              geometry={nodes.screen.geometry}>
-              <meshStandardMaterial transparent opacity={0.0} />
-              {/* <meshStandardMaterial transparent opacity={1} /> */}
+              geometry={nodes.screen.geometry}
+            >
+              <meshStandardMaterial transparent opacity={0.05} />
             </mesh>
           </group>
         </group>
@@ -114,6 +121,7 @@ const MyComponentWithSpline = (props) => {
   )
 }
 
+// export default extend({ MyComponentWithSpline })
 export default MyComponentWithSpline
 
 const Float = ({ object, intensity = 300, rotation = 1, ...props }) => {
@@ -123,3 +131,4 @@ const Float = ({ object, intensity = 300, rotation = 1, ...props }) => {
     </FloatImpl>
   )
 }
+// extend({ Float })
