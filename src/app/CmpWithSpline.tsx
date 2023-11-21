@@ -8,7 +8,7 @@ import { Html, Mask, useMask, Clone, Float as FloatImpl } from '@react-three/dre
 import { Main } from './Main'
 
 const MyComponentWithSpline = (props) => {
-  const { nodes, portal, signOut } = props
+  const { nodes, portal } = props
   let timeout = null
   const v = new THREE.Vector3()
   const wheel = useRef(0)
@@ -29,6 +29,7 @@ const MyComponentWithSpline = (props) => {
         Object.assign(node.material, stencil),
     )
   })
+
   useFrame((state) => {
     v.copy({ x: state.pointer.x, y: state.pointer.y, z: 0 })
     v.unproject(state.camera)
@@ -84,23 +85,23 @@ const MyComponentWithSpline = (props) => {
             <Clone object={[nodes['Rectangle 4'], nodes['Rectangle 3'], nodes['Boolean 2']]} />
             <Mask id={1} colorWrite={false} depthWrite={false} geometry={nodes.screen.geometry} castShadow receiveShadow position={[0, 0, 9.89]}>
               <Html className="content-embed" portal={portal} scale={40} transform zIndexRange={[-1, 0]}>
-                <Main signOut={signOut} />
+                <Main />
               </Html>
             </Mask>
             <mesh
-              onWheel={(e) => {
-                wheel.current = -e.deltaY / 2
-                clearTimeout(timeout)
-                timeout = setTimeout(() => (wheel.current = 0), 100)
-              }}
-              onPointerDown={(e) => {
-                e.target.setPointerCapture(e.pointerId)
-                click(true)
-              }}
-              onPointerUp={(e) => {
-                e.target.releasePointerCapture(e.pointerId)
-                click(false)
-              }}
+              // onWheel={(e) => {
+              //   wheel.current = -e.deltaY / 2
+              //   clearTimeout(timeout)
+              //   timeout = setTimeout(() => (wheel.current = 0), 100)
+              // }}
+              // onPointerDown={(e) => {
+              //   e.target.setPointerCapture(e.pointerId)
+              //   click(true)
+              // }}
+              // onPointerUp={(e) => {
+              //   e.target.releasePointerCapture(e.pointerId)
+              //   click(false)
+              // }}
               receiveShadow
               geometry={nodes.screen.geometry}>
               <meshStandardMaterial transparent opacity={0.0} />
