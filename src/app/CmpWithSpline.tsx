@@ -121,7 +121,6 @@ function MyComponentWithSpline(props) {
   )
 }
 
-// export default extend({ MyComponentWithSpline })
 export default MyComponentWithSpline
 
 const Float = ({ object, intensity = 300, rotation = 1, ...props }) => {
@@ -131,4 +130,3 @@ const Float = ({ object, intensity = 300, rotation = 1, ...props }) => {
     </FloatImpl>
   )
 }
-// extend({ Float })

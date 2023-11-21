@@ -1,28 +1,27 @@
 "use client";
-import './polyfill';
 import '@aws-amplify/ui-react/styles.css';
 import { Amplify } from 'aws-amplify';
-import awsconfig from '../aws-exports';
+import awsconfig from '../aws-exports.js';
 import { withAuthenticator } from '@aws-amplify/ui-react';
 import React, { useRef } from 'react';
+// @ts-ignore:next-line
 import dynamic from 'next/dynamic';
 import { Canvas } from '@react-three/fiber'
-import { OrthographicCamera } from '@react-three/drei'
-// @ts-ignore:next-line
-import useSpline from '@splinetool/r3f-spline'
+import { OrthographicCamera } from '@react-three/drei';
 
 Amplify.configure({ ...awsconfig, ssr: true });
 
-const MyComponentWithSpline = dynamic(
-  // @ts-ignore:next-line
-  () => import('./CmpWithSpline'),
-  { ssr: false }
-);
+// @ts-ignore
+const MyComponentWithSpline = dynamic(() => import('./CmpWithSpline.tsx'), { ssr: false });
 
-function Scene({ portal }: any) {
+// @ts-ignore
+const useSpline = dynamic(() => import('@splinetool/r3f-spline'), { ssr: false });
+
+const Scene = ({ portal, position }: any) => {
   const { nodes }: any = useSpline('scroll.splinecode')
-  // @ts-ignore:next-line
-  return nodes && <MyComponentWithSpline nodes={nodes} portal={portal} />
+  return nodes && (
+    <MyComponentWithSpline position={position} nodes={nodes} portal={portal} />
+  )
 }
 
 const App = () => {
