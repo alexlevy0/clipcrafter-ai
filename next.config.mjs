@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+
 const nextConfig = {
   output: "standalone", // SSG (export) vs SSR (standalone)
   reactStrictMode: true,
@@ -6,6 +7,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  webpack: (config) => {
+    config.resolve.fallback = { fs: false };
+    return config;
+  },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
