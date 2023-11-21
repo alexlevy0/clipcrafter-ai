@@ -28,7 +28,7 @@ const getUrl = async (key: string) => {
     download: false, expires: 3600
   }
   const newKey = `${key.split('.')[0]}_edited.mp4`
-  return Storage.get(newKey, config)
+  return await Storage.get(newKey, config)
 }
 
 const Picker = (props: { onClick: any }) => {
@@ -57,7 +57,7 @@ export const Main = () => {
   const onResetVideoUrl = () => setUrl('')
 
   return (
-    <ThemeProvider theme={{ name: 'my-theme', overrides: [defaultDarkModeOverride] }} colorMode={'system'}>
+    <ThemeProvider theme={{ name: 'my-theme', overrides: [defaultDarkModeOverride] }} colorMode={'dark'}>
       <div>
         <StorageManager
           isResumable
@@ -70,7 +70,7 @@ export const Main = () => {
           onUploadStart={onResetVideoUrl}
           components={{ FilePicker({ onClick }) { return <Picker onClick={onClick} /> } }}
         />
-        <main className="flex min-h-screen flex-col items-center justify-between p-0">
+        <main style={{ backgroundColor: 'rgb(13, 25, 38)' }} className="flex min-h-screen flex-col items-center justify-between p-0">
           <ReactPlayer playing={true} controls={true} url={url} width={"100%"} />
         </main>
       </div>
