@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next export",
-    "build:ssr": "next build",
+    "build:ssg": "next build && next export",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "amplify:S3Trigger52a3ac74": "cd amplify/backend/function/S3Trigger52a3ac74 && npm i @aws-sdk/client-mediaconvert && tsc -p ./tsconfig.json && cd -",
