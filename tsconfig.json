@@ -30,7 +30,6 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": [
-    "src/app/polyfill.js",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
