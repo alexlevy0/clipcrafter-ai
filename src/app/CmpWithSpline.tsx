@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 // @ts-nocheck
 "use client";
 import '@aws-amplify/ui-react/styles.css';
@@ -9,6 +10,10 @@ import { Main } from './Main.tsx'
 
 
 function MyComponentWithSpline(props) {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
   const { nodes, portal, position } = props
   let timeout = null
   const v = new THREE.Vector3()

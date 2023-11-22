@@ -13,6 +13,8 @@
     "debug:local:S3Trigger": "cd amplify/backend/function/S3Trigger52a3ac74 && sam local invoke 'LambdaFunction' -e lib/event.json -t S3Trigger52a3ac74-cloudformation-template.json && cd -"
   },
   "dependencies-comments": {
+    "@splinetool/react-spline": "^2.2.6",
+    "@splinetool/runtime": "^0.9.496",
     "@aws-sdk/client-cloudwatch": "^3.454.0"
   },
   "dependencies": {
@@ -22,10 +24,9 @@
     "@aws-sdk/client-s3": "^3.454.0",
     "@react-three/drei": "9.31.1",
     "@react-three/fiber": "8.7.4",
-    "@splinetool/loader": "^0.9.73",
-    "@splinetool/r3f-spline": "^1.0.1",
-    "@splinetool/react-spline": "^2.2.6",
-    "@splinetool/runtime": "^0.9.496",
+    "@splinetool/loader": "0.9.73",
+    "@splinetool/r3f-spline": "1.0.1",
+    "@types/three": "^0.158.3",
     "aws-amplify": "^5.3.12",
     "aws-lambda": "^1.0.7",
     "aws-sdk": "^2.1495.0",
@@ -35,7 +36,6 @@
     "react-dom": "^18",
     "react-player": "^2.13.0",
     "react-scripts": "^5.0.1",
-    "@types/three": "^0.158.3",
     "three": "0.142.0",
     "three-stdlib": "^2.28.5"
   },
