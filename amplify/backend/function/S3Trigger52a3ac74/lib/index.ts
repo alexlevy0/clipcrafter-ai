@@ -3,7 +3,6 @@ import { exec } from 'child_process'
 import { promisify } from 'util'
 import * as fsSync from 'fs'
 import * as fs from 'fs/promises'
-import * as path from 'path'
 import { Handler } from 'aws-lambda'
 import { Readable } from 'stream'
 
@@ -43,21 +42,21 @@ const buildFFmpegCm = (
   outputPath: string,
   shots: SourceModel[],
 ): string => {
+  const targetWidth = 360
+  const targetHeight = 640
+
   let filterComplex = shots
     .map((clip, index) => {
-      let filter = `[0:v]trim=start=${clip.ts_start}:end=${clip.ts_end},setpts=PTS-STARTPTS[clip${index}v]; `
+      let filter = `[0:v]trim=start=${clip.ts_start}:end=${clip.ts_end},setpts=PTS-STARTPTS`
       if (clip.crop) {
-        filter += `[clip${index}v]crop=${clip.crop.w}:${clip.crop.h}:${clip.crop.x}:${clip.crop.y}[clip${index}c]; `
-      } else {
-        filter += `[clip${index}v]; `
+        filter += `,crop=${clip.crop.w}:${clip.crop.h}:${clip.crop.x}:${clip.crop.y}`
       }
+      filter += `,scale=${targetWidth}:${targetHeight},setsar=1[clip${index}v];`
       return filter
     })
     .join('')
 
-  const concatFilter = shots
-    .map((clip, index) => (clip.crop ? `[clip${index}c]` : `[clip${index}v]`))
-    .join('')
+  const concatFilter = shots.map((_, index) => `[clip${index}v]`).join('')
 
   filterComplex += `${concatFilter}concat=n=${shots.length}:v=1:a=0[outv]`
 
@@ -104,9 +103,11 @@ async function downloadObject(
 
 const log = async (data: string, err: boolean = false) => {
   if (err) {
+    // console.error(JSON.stringify(data, null, 2))
     console.error(data)
     throw new Error(data)
   }
+  // console.log(JSON.stringify(data, null, 2))
   console.log(data)
 }
 
@@ -129,8 +130,8 @@ async function processVideoWithFFmpeg(
   const ffmpegCommand = buildFFmpegCm(
     inputPath,
     outputPath,
-    // cropData.shots
-    cropData.shots.slice(0, 2), // TODO Remove only after testing
+    // cropData.shots,
+    cropData.shots.slice(0, 7), // TODO Remove only after testing
   )
 
   try {
@@ -143,6 +144,7 @@ async function processVideoWithFFmpeg(
 const uploadToS3 = async (fPath: string, BucketN: string, objKey: string) => {
   const stream = await fs.readFile(fPath)
 
+  await log(`uploadToS3 Fired w/ : ${fPath}, ${BucketN}, ${objKey}`)
   try {
     await s3.putObject({ Bucket: BucketN, Key: objKey, Body: stream })
   } catch (error) {
@@ -184,11 +186,11 @@ const getUsedDataFromEvent = async (event: any) => {
     const nameWithoutExtension = nameParts.slice(0, -1).join('.')
     const extension = nameParts.slice(-1)[0]
     const editedFileName = `${nameWithoutExtension}${conf.nameModifier}.${extension}`
-    const processedObjectKey = `processed/${editedFileName}`
+    // const processedObjectKey = `processed/${editedFileName}`
+    const processedObjectKey = `${folderName}/${editedFileName}`
 
     tmpFilePath = `/tmp/${fileName}`
     outputFilePath = `/tmp/processed_${editedFileName}`
-    await fs.access(tmpFilePath, fs.constants.R_OK | fs.constants.W_OK)
 
     return {
       processedObjectKey,
@@ -203,7 +205,7 @@ const getUsedDataFromEvent = async (event: any) => {
 }
 
 export const handler: Handler = async event => {
-  await log(`Started with event : ${event}`)
+  await log(`Started with event : ${JSON.stringify(event, null, 2)}`)
 
   const {
     processedObjectKey,
