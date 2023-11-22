@@ -49,9 +49,12 @@ const buildFFmpegCm = (
     .map((clip, index) => {
       let filter = `[0:v]trim=start=${clip.ts_start}:end=${clip.ts_end},setpts=PTS-STARTPTS`
       if (clip.crop) {
-        filter += `,crop=${clip.crop.w}:${clip.crop.h}:${clip.crop.x}:${clip.crop.y}`
+        filter += `,crop=${clip.crop.w}:${clip.crop.h}:${clip.crop.x}:${clip.crop.y},scale=${targetWidth}:${targetHeight}`
+      } else {
+        // Redimensionner tout en conservant le ratio, puis ajouter un padding si nécessaire
+        filter += `,scale=${targetWidth}:-2,pad=${targetWidth}:${targetHeight}:(ow-iw)/2:(oh-ih)/2`
       }
-      filter += `,scale=${targetWidth}:${targetHeight},setsar=1[clip${index}v];`
+      filter += `,setsar=1[clip${index}v];`
       return filter
     })
     .join('')
