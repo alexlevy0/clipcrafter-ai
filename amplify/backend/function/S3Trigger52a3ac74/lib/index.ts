@@ -37,7 +37,7 @@ interface MainSourceModel {
 
 const s3 = new S3(conf)
 
-const buildFFmpegCm = (
+const buildFFmpegCmd = (
   inputPath: string,
   outputPath: string,
   shots: SourceModel[],
@@ -48,12 +48,14 @@ const buildFFmpegCm = (
   let filterComplex = shots
     .map((clip, index) => {
       let filter = `[0:v]trim=start=${clip.ts_start}:end=${clip.ts_end},setpts=PTS-STARTPTS`
+
       if (clip.crop) {
         filter += `,crop=${clip.crop.w}:${clip.crop.h}:${clip.crop.x}:${clip.crop.y},scale=${targetWidth}:${targetHeight}`
       } else {
         // Redimensionner tout en conservant le ratio, puis ajouter un padding si nécessaire
         filter += `,scale=${targetWidth}:-2,pad=${targetWidth}:${targetHeight}:(ow-iw)/2:(oh-ih)/2`
       }
+
       filter += `,setsar=1[clip${index}v];`
       return filter
     })
@@ -130,7 +132,7 @@ async function processVideoWithFFmpeg(
     await fs.readFile('qlip-crop-model-out.json', 'utf-8'),
   )
 
-  const ffmpegCommand = buildFFmpegCm(
+  const ffmpegCommand = buildFFmpegCmd(
     inputPath,
     outputPath,
     // cropData.shots,
