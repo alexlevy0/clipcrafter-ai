@@ -4,13 +4,23 @@
     {
       "ts_start": 1.0,
       "ts_end": 2.00,
-      "crop": null,
+      "crop": {
+        "x": 221,
+        "y": 0,
+        "w": 202,
+        "h": 360
+      },
       "label": null
     },
     {
       "ts_start": 4.00,
       "ts_end": 5.00,
-      "crop": null,
+      "crop": {
+        "x": 224,
+        "y": 0,
+        "w": 202,
+        "h": 360
+      },
       "label": null
     },
     {

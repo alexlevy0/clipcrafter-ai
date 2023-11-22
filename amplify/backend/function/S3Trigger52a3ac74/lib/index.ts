@@ -1,295 +1,236 @@
-import { S3 } from "@aws-sdk/client-s3";
-import { exec } from "child_process";
-import { promisify } from "util";
-import * as fsSync from "fs";
-import * as fs from "fs/promises";
-import * as path from "path";
-import { Handler } from "aws-lambda";
-import { Readable } from "stream";
-import {
-  MediaConvertClient,
-  CreateJobCommand,
-} from "@aws-sdk/client-mediaconvert";
-import { convertInputClippings } from "./convertInputClippings";
-import { getMediaConverterParam } from "./getMediaConverterParam";
+import { S3 } from '@aws-sdk/client-s3'
+import { exec } from 'child_process'
+import { promisify } from 'util'
+import * as fsSync from 'fs'
+import * as fs from 'fs/promises'
+import * as path from 'path'
+import { Handler } from 'aws-lambda'
+import { Readable } from 'stream'
 
-const execPromise = promisify(exec);
+const execPromise = promisify(exec)
 
 const conf = {
-  region: "eu-west-3",
-  functionName: "UploadTriggeredLambda",
-  namespace: "QlipNameSpace",
-  nameModifier: "_edited",
-  videoOutputFormat: "mp4",
-  endpointUniqueString: "xpxxifqxa",
+  region: 'eu-west-3',
+  functionName: 'UploadTriggeredLambda',
+  namespace: 'QlipNameSpace',
+  nameModifier: '_edited',
+  videoOutputFormat: 'mp4',
+  endpointUniqueString: 'xpxxifqxa',
   jobQueueArn: `arn:aws:mediaconvert:eu-west-3:327852390890:queues/Default`,
   iamRoleArn: `arn:aws:iam::327852390890:role/service-role/MediaConvert_Default_Role`,
-};
-
-const mediaConvEndpoint = `https://${conf.endpointUniqueString}.mediaconvert.${conf.region}.amazonaws.com`;
-
-interface EventInput {
-  objectKey: string;
-  bucketName: string;
 }
 
-const s3 = new S3(conf);
+interface EventInput {
+  objectKey: string
+  bucketName: string
+}
+interface SourceModel {
+  ts_start: number
+  ts_end: number
+  crop?: { x: number; y: number; w: number; h: number }
+  label?: any
+}
 
-// const cloudwatch = new AWS.CloudWatch(conf);
+interface MainSourceModel {
+  video_key: string
+  shots: [SourceModel]
+}
+
+const s3 = new S3(conf)
+
+const buildFFmpegCm = (
+  inputPath: string,
+  outputPath: string,
+  shots: SourceModel[],
+): string => {
+  let filterComplex = shots
+    .map((clip, index) => {
+      let filter = `[0:v]trim=start=${clip.ts_start}:end=${clip.ts_end},setpts=PTS-STARTPTS[clip${index}v]; `
+      if (clip.crop) {
+        filter += `[clip${index}v]crop=${clip.crop.w}:${clip.crop.h}:${clip.crop.x}:${clip.crop.y}[clip${index}c]; `
+      } else {
+        filter += `[clip${index}v]; `
+      }
+      return filter
+    })
+    .join('')
+
+  const concatFilter = shots
+    .map((clip, index) => (clip.crop ? `[clip${index}c]` : `[clip${index}v]`))
+    .join('')
+
+  filterComplex += `${concatFilter}concat=n=${shots.length}:v=1:a=0[outv]`
+
+  return `ffmpeg -i "${inputPath}" -filter_complex "${filterComplex}" -map "[outv]" "${outputPath}"`
+}
 
 async function downloadObject(
   bucketName: string,
   objectKey: string,
-  filePath: string
+  filePath: string,
 ): Promise<void> {
-  const startTime = Date.now();
+  const startTime = Date.now()
 
   try {
-    await publishMetric(
-      `Downloading '${objectKey}' from bucket '${bucketName}'`,
-      1
-    );
+    await log(`Downloading '${objectKey}' from bucket '${bucketName}'`)
 
     const { Body, ContentLength } = await s3.getObject({
       Bucket: bucketName,
       Key: objectKey,
-    });
+    })
 
     if (Body instanceof Readable) {
       await new Promise((resolve, reject) => {
-        const writeStream = fsSync.createWriteStream(filePath);
-        Body.pipe(writeStream);
-        Body.on("error", reject);
-        writeStream.on("finish", resolve);
-      });
+        const writeStream = fsSync.createWriteStream(filePath)
+        Body.pipe(writeStream)
+        Body.on('error', reject)
+        writeStream.on('finish', resolve)
+      })
     } else {
-      throw new Error("Received data is not a stream");
+      await log('Received data is not a stream', true)
     }
 
-    const duration = Date.now() - startTime;
+    const duration = Date.now() - startTime
 
     if (ContentLength !== undefined) {
-      await publishMetric("FileSize", ContentLength);
+      await log(`FileSize ${ContentLength}`)
     }
 
-    await publishMetric("DownloadDuration", duration);
+    await log(`DownloadDuration ${duration}`)
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      await publishMetric(
-        `DownloadError : Error downloading object: ${error.message}`,
-        1,
-        true
-      );
-    }
-    throw error;
+    await log(`DownloadError : Error downloading object: ${error}`, true)
   }
 }
 
-async function getFrameRate(filePath: string): Promise<string> {
-  try {
-    await isValidPath(filePath);
-
-    await publishMetric(`Extracting frame rate for '${filePath}'`, 1);
-
-    const ffprobeCommand = `ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 "${filePath}"`;
-
-    const { stdout } = await execPromise(ffprobeCommand);
-
-    return stdout.trim();
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      await publishMetric(
-        `FrameRateExtractionError : Error extracting frame rate: ${error.message}`,
-        1,
-        true
-      );
-    }
-    throw error;
+const log = async (data: string, err: boolean = false) => {
+  if (err) {
+    console.error(data)
+    throw new Error(data)
   }
+  console.log(data)
 }
 
-async function isValidPath(filePath: string): Promise<boolean> {
-  if (!path.isAbsolute(filePath)) {
-    throw new Error("File path isnt absolute");
-  }
-
-  try {
-    await fs.readFile(filePath);
-    return true;
-  } catch (error) {
-    throw new Error(`Invalid file path ${error.message}`);
-  }
-}
-
-async function publishMetric(
-  metricName: string,
-  value: number,
-  isError: boolean = false
-): Promise<void> {
-  try {
-    const params = {
-      MetricData: [
-        {
-          MetricName: metricName,
-          Dimensions: [
-            {
-              Name: "FunctionName",
-              Value: conf.functionName,
-            },
-          ],
-          Timestamp: new Date(),
-          Unit: "Count",
-          Value: value,
-        },
-      ],
-      Namespace: conf.namespace,
-    };
-    if (isError) {
-      console.error(params);
-    } else {
-      console.log(params.MetricData[0].MetricName);
-      // await cloudwatch.putMetricData(params).promise();
-    }
-  } catch (error: any) {
-    console.error(`Error publishing metric: ${error.message}`);
-  }
-}
-
-function validateInput(input: EventInput): EventInput {
-  const { objectKey: oK, bucketName: bN } = input;
+const validateInput = async (input: EventInput) => {
+  const { objectKey: oK, bucketName: bN } = input
   if (!oK || !bN) {
-    throw new Error("Invalid input");
+    await log('Invalid input', true)
   }
-  return { bucketName: bN, objectKey: oK };
+  return { bucketName: bN, objectKey: oK }
 }
 
-function calculateFrameRate(frameRateString: string): number {
-  const parts = frameRateString.split("/");
-  if (parts.length !== 2) {
-    throw new Error("Invalid frame rate format");
-  }
+async function processVideoWithFFmpeg(
+  inputPath: string,
+  outputPath: string,
+): Promise<void> {
+  const cropData: MainSourceModel = JSON.parse(
+    await fs.readFile('qlip-crop-model-out.json', 'utf-8'),
+  )
 
-  const numerator = parseInt(parts[0], 10);
-  const denominator = parseInt(parts[1], 10);
-
-  if (isNaN(numerator) || isNaN(denominator) || denominator === 0) {
-    throw new Error("Invalid frame rate numbers");
-  }
-
-  return numerator / denominator;
-}
-
-export const handler: Handler = async (event) => {
-  await publishMetric(`${conf.functionName} start with event : ${event}`, 1);
-  if (!event || !event.Records) {
-    await publishMetric(
-      "InputValidationError : Missing Records in event",
-      1,
-      true
-    );
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: "Records is required in event" }),
-    };
-  }
-
-  const bucket = event.Records[0].s3.bucket.name;
-  const key = event.Records[0].s3.object.key;
-
-  const inputBucketKey = {
-    bucketName: bucket,
-    objectKey: key,
-  };
-  let tmpFilePath: string | undefined;
+  const ffmpegCommand = buildFFmpegCm(
+    inputPath,
+    outputPath,
+    // cropData.shots
+    cropData.shots.slice(0, 2), // TODO Remove only after testing
+  )
 
   try {
-    const { bucketName, objectKey } = validateInput(inputBucketKey);
-    const [folderName, fileName] = objectKey.split("/");
+    await execPromise(ffmpegCommand)
+  } catch (error) {
+    await log(`Error processing video with FFmpeg: ${error.message}`, true)
+  }
+}
 
-    if (!fileName)
-      throw new Error("Failed to extract file name from objectKey");
+const uploadToS3 = async (fPath: string, BucketN: string, objKey: string) => {
+  const stream = await fs.readFile(fPath)
+
+  try {
+    await s3.putObject({ Bucket: BucketN, Key: objKey, Body: stream })
+  } catch (error) {
+    await log(`Error uploading file to S3: ${error.message}`, true)
+  }
+}
+
+const getUsedDataFromEvent = async (event: any) => {
+  try {
+    const { bucket: { name: bucket = '' } = {}, object: { key = '' } = {} } =
+      event?.Records?.[0]?.s3 || {}
+
+    if (!event || !event.Records || !key || !bucket) {
+      await log(`Missing or malformed Records in event: ${event}`, true)
+    }
+
+    let tmpFilePath: string | undefined
+    let outputFilePath: string | undefined
+
+    const { bucketName, objectKey } = await validateInput({
+      bucketName: bucket,
+      objectKey: key,
+    })
+
+    const [folderName, fileName] = objectKey.split('/')
+
+    if (!fileName || !folderName) {
+      await log(
+        `Failed to extract file name or folderName from objectKey : ${objectKey}`,
+        true,
+      )
+    }
 
     if (fileName.includes(conf.nameModifier)) {
-      const preventDoubleProcessing = `Canceling ${conf.functionName} : prevent double processing`;
-      await publishMetric(preventDoubleProcessing, 1);
-      throw new Error(preventDoubleProcessing);
+      await log(`Canceling prevent double processing`, true)
     }
 
-    tmpFilePath = `/tmp/${fileName}`;
-    await downloadObject(bucketName, objectKey, tmpFilePath);
-    await fs.access(tmpFilePath, fs.constants.R_OK | fs.constants.W_OK);
-    const frameRate = await getFrameRate(tmpFilePath);
+    const nameParts = fileName.split('.')
+    const nameWithoutExtension = nameParts.slice(0, -1).join('.')
+    const extension = nameParts.slice(-1)[0]
+    const editedFileName = `${nameWithoutExtension}${conf.nameModifier}.${extension}`
+    const processedObjectKey = `processed/${editedFileName}`
 
-    const calculatedFrameRate = calculateFrameRate(frameRate);
-    await publishMetric(
-      `FrameRateExtracted : Frame rate: ${calculatedFrameRate}`,
-      1
-    );
-
-    const clippingArray = convertInputClippings(calculatedFrameRate);
-    await publishMetric(`Clipping Array Created`, 1);
-
-    const base = `s3://${bucketName}/`;
-    const outputBucketName = `${base}${folderName}/`;
-    const fileInput = `${base}${objectKey}`;
-
-    const params = getMediaConverterParam(clippingArray, {
-      fileInput,
-      outputBucketName,
-      jobQueueArn: conf.jobQueueArn,
-      iamRoleArn: conf.iamRoleArn,
-      nameModifier: conf.nameModifier,
-    });
-
-    await publishMetric(`MediaConverter Param Created`, 1);
-
-    const mediaConvertClient = new MediaConvertClient({
-      endpoint: mediaConvEndpoint,
-    });
-
-    // @ts-ignore:next-line
-    const createJob = new CreateJobCommand(params);
-    const mediaConvSendData = await mediaConvertClient.send(createJob);
-
-    const { httpStatusCode } = mediaConvSendData?.$metadata || {};
-    const { Id } = mediaConvSendData?.Job || {};
-    if (httpStatusCode !== 201 || !Id) {
-      throw new Error("Failed to create MediaConvert job");
-    }
-
-    const [name] = fileName.split(".");
-    const host = `https://${bucketName}.s3.${conf.region}.amazonaws.com/`;
-    const url = `${host}${folderName}/${name}${conf.nameModifier}.${conf.videoOutputFormat}`;
-
-    await publishMetric(`Job created, url : ${url}`, 1);
+    tmpFilePath = `/tmp/${fileName}`
+    outputFilePath = `/tmp/processed_${editedFileName}`
+    await fs.access(tmpFilePath, fs.constants.R_OK | fs.constants.W_OK)
 
     return {
-      statusCode: 200,
-      body: JSON.stringify({
-        jobId: mediaConvSendData.Job.Id,
-        jobCreatedAt: mediaConvSendData.Job.CreatedAt,
-        url,
-      }),
-    };
-  } catch (error: any) {
-    await publishMetric(
-      `HandlerError : Error in handler: ${error.message}`,
-      1,
-      true
-    );
-    return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
-  } finally {
-    if (tmpFilePath) {
-      await publishMetric(`Cleaning up temporary files`, 1);
-      try {
-        await fs.unlink(tmpFilePath);
-      } catch (err: any) {
-        await publishMetric(
-          `FileCleanupError : Error deleting tmp file: ${err.message}`,
-          1,
-          true
-        );
-      }
+      processedObjectKey,
+      bucketName,
+      objectKey,
+      tmpFilePath,
+      outputFilePath,
     }
+  } catch (error: any) {
+    await log(error, true)
   }
-};
+}
+
+export const handler: Handler = async event => {
+  await log(`Started with event : ${event}`)
+
+  const {
+    processedObjectKey,
+    bucketName,
+    objectKey,
+    tmpFilePath,
+    outputFilePath,
+  } = await getUsedDataFromEvent(event)
+  await log(`Get Used Data OK`)
+
+  try {
+    await downloadObject(bucketName, objectKey, tmpFilePath)
+    await log(`Download OK`)
+
+    await processVideoWithFFmpeg(tmpFilePath, outputFilePath)
+    await log(`Process Video With FFmpeg OK`)
+
+    await uploadToS3(outputFilePath, bucketName, processedObjectKey)
+    await log(`Upload To S3 OK`)
+
+    if (tmpFilePath) await fs.unlink(tmpFilePath)
+    if (outputFilePath) await fs.unlink(outputFilePath)
+    await log(`Temporary files cleaned up`)
+
+    return { statusCode: 200 }
+  } catch (error) {
+    console.error('Handler error:', error)
+    return { statusCode: 500, error }
+  }
+}
