@@ -15,7 +15,7 @@ const noop = async () => { undefined }
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const retry: any = async ({ fn = noop, retries = 10, delay = 1000, err = '' }) =>
+const retry: any = async ({ fn = noop, retries = 60, delay = 1000, err = '' }) =>
   retries > 0 ? fn().catch(async error => {
     await sleep(delay);
     return retry({ fn, retries: retries - 1, delay, error });
