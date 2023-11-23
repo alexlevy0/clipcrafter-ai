@@ -8,250 +8,120 @@ import { Readable } from 'stream'
 
 const execPromise = promisify(exec)
 
-const conf = {
-  region: 'eu-west-3',
-  functionName: 'UploadTriggeredLambda',
-  namespace: 'QlipNameSpace',
-  nameModifier: '_edited',
-  videoOutputFormat: 'mp4',
-  endpointUniqueString: 'xpxxifqxa',
-  jobQueueArn: `arn:aws:mediaconvert:eu-west-3:327852390890:queues/Default`,
-  iamRoleArn: `arn:aws:iam::327852390890:role/service-role/MediaConvert_Default_Role`,
+enum EQuality {
+  HIGH,
+  LOW,
 }
 
-interface EventInput {
-  objectKey: string
-  bucketName: string
-}
-interface SourceModel {
+interface ISourceModel {
   ts_start: number
   ts_end: number
   crop?: { x: number; y: number; w: number; h: number }
   label?: any
 }
 
-interface MainSourceModel {
-  video_key: string
-  shots: [SourceModel]
+const conf = {
+  region: 'eu-west-3',
+  nameModifier: '_edited',
+  quality: EQuality.HIGH,
+  targetWidth: 360,
+  targetHeight: 640,
+  cropFile: 'qlip-crop-model-out.json',
+  blurFilter: `boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1`,
+  high: `-preset slow -crf 18 -profile:v high`,
+  bad: `-preset fast -crf 22 -profile:v baseline`,
 }
 
-const s3 = new S3(conf)
-// [0:v]scale=-2:640,boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1,crop=360:640[bg];[0:v]scale=360:-2[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2:format=auto,setsar=1[outv]
+const s3 = new S3({ region: conf.region })
 
-const buildFFmpegCmd = (
-  inputPath: string,
-  outputPath: string,
-  shots: SourceModel[],
-): string => {
-  if (
-    !inputPath ||
-    !outputPath ||
-    !Array.isArray(shots) ||
-    shots.length === 0
-  ) {
-    throw new Error(
-      'Paramètres invalides fournis à la fonction buildFFmpegCmd.',
-    )
-  }
-
-  const targetWidth = 360
-  const targetHeight = 640
-
+function getCmd(_in: string, _out: string, shots: ISourceModel[]) {
   const filterComplex = shots
-    .map((clip, index) => {
-      let filter = `[0:v]trim=start=${clip.ts_start}:end=${clip.ts_end},setpts=PTS-STARTPTS`
+    .map((c, i) => {
+      const trim = `[0:v]trim=start=${c.ts_start}:end=${c.ts_end},setpts=PTS-STARTPTS`
+      let filter = trim
 
-      if (clip.crop) {
-        filter += `,crop=${clip.crop.w}:${clip.crop.h}:${clip.crop.x}:${clip.crop.y},scale=${targetWidth}:${targetHeight}`
+      if (c.crop) {
+        const crop = `,crop=${c.crop.w}:${c.crop.h}:${c.crop.x}:${c.crop.y}`
+        const scale = `,scale=${conf.targetWidth}:${conf.targetHeight}`
+        filter += `${crop}${scale}`
       } else {
-        let blurFilter = `boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1`
-        let scaleAndCrop = `scale=-2:640,crop=360:640`
-        filter += `,${blurFilter},${scaleAndCrop}[bg${index}v];`
-        filter += `[0:v]scale=360:-2[fg${index}v];`
-        filter += `[bg${index}v][fg${index}v]overlay=(W-w)/2:(H-h)/2:format=auto`
+        const scaleAndCrop_Bg = `scale=-2:640,crop=360:640`
+        filter += `,${conf.blurFilter},${scaleAndCrop_Bg}[bg${i}v];`
+        filter += trim
+        const scale_Fg = `,scale=360:-2[fg${i}v];`
+        const mergeBgAndFg = `[bg${i}v][fg${i}v]overlay=(W-w)/2:(H-h)/2:format=auto`
+        filter += `${scale_Fg}${mergeBgAndFg}`
       }
-
-      return `${filter},setsar=1[clip${index}v];`
+      return `${filter},setsar=1[clip${i}v];`
     })
     .join('')
 
-  const concatFilter = shots.map((_, index) => `[clip${index}v]`).join('')
-
-  console.log(`-> shots size : ${shots.length}`);
-
+  const concatFilter = shots.map((_, i) => `[clip${i}v]`).join('')
   const fullFilter = `${filterComplex}${concatFilter}concat=n=${shots.length}:v=1:a=0[outv]`
-
-  return `ffmpeg -loglevel debug -i "${inputPath}" -filter_complex "${fullFilter}" -map "[outv]" -c:v libx264 -preset fast -crf 22 "${outputPath}"`
+  const quality = conf.quality === EQuality.HIGH ? conf.high : conf.bad
+  return `ffmpeg -i "${_in}" -filter_complex "${fullFilter}" -map "[outv]" -c:v libx264 ${quality} "${_out}"`
 }
 
-async function downloadObject(
-  bucketName: string,
-  objectKey: string,
-  filePath: string,
-): Promise<void> {
-  const startTime = Date.now()
-
-  try {
-    await log(`Downloading '${objectKey}' from bucket '${bucketName}'`)
-
-    const { Body, ContentLength } = await s3.getObject({
-      Bucket: bucketName,
-      Key: objectKey,
+async function download(Bucket: string, Key: string, filePath: string) {
+  const { Body } = await s3.getObject({ Bucket, Key })
+  if (Body instanceof Readable) {
+    await new Promise((res, rej) => {
+      const writeStream = fsSync.createWriteStream(filePath)
+      Body.pipe(writeStream)
+      Body.on('error', rej)
+      writeStream.on('finish', res)
     })
-
-    if (Body instanceof Readable) {
-      await new Promise((resolve, reject) => {
-        const writeStream = fsSync.createWriteStream(filePath)
-        Body.pipe(writeStream)
-        Body.on('error', reject)
-        writeStream.on('finish', resolve)
-      })
-    } else {
-      await log('Received data is not a stream', true)
-    }
-
-    const duration = Date.now() - startTime
-
-    if (ContentLength !== undefined) {
-      await log(`FileSize ${ContentLength}`)
-    }
-
-    await log(`DownloadDuration ${duration}`)
-  } catch (error: unknown) {
-    await log(`DownloadError : Error downloading object: ${error}`, true)
   }
 }
 
-const log = async (data: string, err: boolean = false) => {
-  if (err) {
-    // console.error(JSON.stringify(data, null, 2))
-    console.error(data)
-    throw new Error(data)
-  }
-  // console.log(JSON.stringify(data, null, 2))
-  console.log(data)
+const log = (data: string, err: boolean = false) => {
+  if (!err) return console.log(data)
+  throw new Error(data)
 }
 
-const validateInput = async (input: EventInput) => {
-  const { objectKey: oK, bucketName: bN } = input
-  if (!oK || !bN) {
-    await log('Invalid input', true)
-  }
-  return { bucketName: bN, objectKey: oK }
+async function processVideoWithFFmpeg(_in: string, _out: string) {
+  const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
+  const ffmpegCommand = getCmd(_in, _out, cropData.shots.slice(0, 4))
+  await execPromise(ffmpegCommand)
 }
 
-async function processVideoWithFFmpeg(
-  inputPath: string,
-  outputPath: string,
-): Promise<void> {
-  const cropData: MainSourceModel = JSON.parse(
-    await fs.readFile('qlip-crop-model-out.json', 'utf-8'),
-  )
-
-  const ffmpegCommand = buildFFmpegCmd(
-    inputPath,
-    outputPath,
-    // cropData.shots,
-    cropData.shots.slice(0, 2), // TODO Remove only after testing
-  )
-
-  try {
-    console.log(`ffmpegCommand : ${ffmpegCommand}`)
-    await execPromise(ffmpegCommand)
-  } catch (error) {
-    await log(`Error processing video with FFmpeg: ${error.message}`, true)
-  }
-}
-
-const uploadToS3 = async (fPath: string, BucketN: string, objKey: string) => {
+async function upload(fPath: string, BucketN: string, objKey: string) {
   const stream = await fs.readFile(fPath)
-
-  await log(`uploadToS3 Fired w/ : ${fPath}, ${BucketN}, ${objKey}`)
-  try {
-    await s3.putObject({ Bucket: BucketN, Key: objKey, Body: stream })
-  } catch (error) {
-    await log(`Error uploading file to S3: ${error.message}`, true)
-  }
+  await s3.putObject({ Bucket: BucketN, Key: objKey, Body: stream })
 }
 
-const getUsedDataFromEvent = async (event: any) => {
-  try {
-    const { bucket: { name: bucket = '' } = {}, object: { key = '' } = {} } =
-      event?.Records?.[0]?.s3 || {}
+async function getUsedDataFromEvent(event: any) {
+  const {
+    bucket: { name: bucketName = '' } = {},
+    object: { key: objectKey = '' } = {},
+  } = event?.Records?.[0]?.s3 || {}
+  const [folderName, fileName] = objectKey.split('/')
 
-    if (!event || !event.Records || !key || !bucket) {
-      await log(`Missing or malformed Records in event: ${event}`, true)
-    }
+  if (!folderName || !fileName || !objectKey || !bucketName)
+    log(`Error in event records : ${event}`, true)
+  if (fileName.includes(conf.nameModifier))
+    log(`Prevent double processing`, true)
 
-    let tmpFilePath: string | undefined
-    let outputFilePath: string | undefined
-
-    const { bucketName, objectKey } = await validateInput({
-      bucketName: bucket,
-      objectKey: key,
-    })
-
-    const [folderName, fileName] = objectKey.split('/')
-
-    if (!fileName || !folderName) {
-      await log(
-        `Failed to extract file name or folderName from objectKey : ${objectKey}`,
-        true,
-      )
-    }
-
-    if (fileName.includes(conf.nameModifier)) {
-      await log(`Canceling prevent double processing`, true)
-    }
-
-    const nameParts = fileName.split('.')
-    const nameWithoutExtension = nameParts.slice(0, -1).join('.')
-    const extension = nameParts.slice(-1)[0]
-    const editedFileName = `${nameWithoutExtension}${conf.nameModifier}.${extension}`
-    // const processedObjectKey = `processed/${editedFileName}`
-    const processedObjectKey = `${folderName}/${editedFileName}`
-
-    tmpFilePath = `/tmp/${fileName}`
-    outputFilePath = `/tmp/processed_${editedFileName}`
-
-    return {
-      processedObjectKey,
-      bucketName,
-      objectKey,
-      tmpFilePath,
-      outputFilePath,
-    }
-  } catch (error: any) {
-    await log(error, true)
+  const extension = fileName.split('.').pop()
+  const name = fileName.substring(0, fileName.lastIndexOf('.'))
+  const editedFileName = `${name}${conf.nameModifier}.${extension}`
+  return {
+    processedObjectKey: `${folderName}/${editedFileName}`,
+    bucketName,
+    objectKey,
+    tmpFilePath: `/tmp/${fileName}`,
+    outputFilePath: `/tmp/processed_${editedFileName}`,
   }
 }
 
 export const handler: Handler = async event => {
-  await log(`Started with event : ${JSON.stringify(event, null, 2)}`)
-
-  const {
-    processedObjectKey,
-    bucketName,
-    objectKey,
-    tmpFilePath,
-    outputFilePath,
-  } = await getUsedDataFromEvent(event)
-  await log(`Get Used Data OK`)
-
   try {
-    await downloadObject(bucketName, objectKey, tmpFilePath)
-    await log(`Download OK`)
-
-    await processVideoWithFFmpeg(tmpFilePath, outputFilePath)
-    await log(`Process Video With FFmpeg OK`)
-
-    await uploadToS3(outputFilePath, bucketName, processedObjectKey)
-    await log(`Upload To S3 OK`)
-
-    if (tmpFilePath) await fs.unlink(tmpFilePath)
-    if (outputFilePath) await fs.unlink(outputFilePath)
-    await log(`Temporary files cleaned up`)
-
+    const data = await getUsedDataFromEvent(event)
+    await download(data.bucketName, data.objectKey, data.tmpFilePath)
+    await processVideoWithFFmpeg(data.tmpFilePath, data.outputFilePath)
+    await upload(data.outputFilePath, data.bucketName, data.processedObjectKey)
+    if (data.tmpFilePath) await fs.unlink(data.tmpFilePath)
+    if (data.outputFilePath) await fs.unlink(data.outputFilePath)
     return { statusCode: 200 }
   } catch (error) {
     console.error('Handler error:', error)

@@ -3,19 +3,7 @@
   "shots": [
     {
       "ts_start": 0.00,
-      "ts_end": 1.00,
-      "crop": null,
-      "label": null
-    },
-    {
-      "ts_start": 1.00,
-      "ts_end": 2.00,
-      "crop": null,
-      "label": null
-    },
-    {
-      "ts_start": 16.12,
-      "ts_end": 29.32,
+      "ts_end": 0.50,
       "crop": {
         "x": 221,
         "y": 0,
@@ -25,8 +13,25 @@
       "label": null
     },
     {
-      "ts_start": 29.32,
-      "ts_end": 29.52,
+      "ts_start": 0.50,
+      "ts_end": 1.00,
+      "crop": null,
+      "label": null
+    },
+    {
+      "ts_start": 1.00,
+      "ts_end": 1.50,
+      "crop": {
+        "x": 221,
+        "y": 0,
+        "w": 202,
+        "h": 360
+      },
+      "label": null
+    },
+    {
+      "ts_start": 1.50,
+      "ts_end": 2.0,
       "crop": null,
       "label": null
     },
