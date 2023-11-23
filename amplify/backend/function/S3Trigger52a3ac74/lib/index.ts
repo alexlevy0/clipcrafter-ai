@@ -53,28 +53,9 @@ const buildFFmpegCmd = (
     )
   }
 
-  const targetWidth = 360
-  const targetHeight = 640
+  const filterComplex = `[0:v]scale=iw:-2,boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1[bg];[0:v]scale=iw:ih*9/16[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,setsar=1[outv]`
 
-  const filterComplex = shots
-    .map((clip, index) => {
-      let filter = `[0:v]trim=start=${clip.ts_start}:end=${clip.ts_end},setpts=PTS-STARTPTS`
-
-      if (clip.crop) {
-        filter += `,crop=${clip.crop.w}:${clip.crop.h}:${clip.crop.x}:${clip.crop.y},scale=${targetWidth}:${targetHeight}`
-      } else {
-        filter += `,scale=${targetWidth}:-2,pad=${targetWidth}:${targetHeight}:(ow-iw)/2:(oh-ih)/2`
-      }
-
-      return `${filter},setsar=1[clip${index}v];`
-    })
-    .join('')
-
-  const concatFilter = shots.map((_, index) => `[clip${index}v]`).join('')
-
-  const fullFilter = `${filterComplex}${concatFilter}concat=n=${shots.length}:v=1:a=0[outv]`
-
-  return `ffmpeg -i "${inputPath}" -filter_complex "${fullFilter}" -map "[outv]" "${outputPath}"`
+  return `ffmpeg -i "${inputPath}" -filter_complex "${filterComplex}" -map "[outv]" -c:v libx264 -preset fast -crf 22 "${outputPath}"`
 }
 
 async function downloadObject(
