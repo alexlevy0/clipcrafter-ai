@@ -52,12 +52,10 @@ const buildFFmpegCmd = (
       'Paramètres invalides fournis à la fonction buildFFmpegCmd.',
     )
   }
-
-  const filterComplex = `[0:v]scale=iw:-2,boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1[bg];[0:v]scale=iw:ih*9/16[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,setsar=1[outv]`
+  const filterComplex = `[0:v]scale=-2:640,boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1[bg];[0:v]scale=360:-2[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2:format=auto,setsar=1[outv]`
 
   return `ffmpeg -i "${inputPath}" -filter_complex "${filterComplex}" -map "[outv]" -c:v libx264 -preset fast -crf 22 "${outputPath}"`
 }
-
 async function downloadObject(
   bucketName: string,
   objectKey: string,
