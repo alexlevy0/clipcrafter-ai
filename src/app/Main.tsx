@@ -68,10 +68,19 @@ export const Main = () => {
 
   const onSuccess = async ({ key = '' }) => {
     if (!key) return
-    const url = await retry({ fn: () => getData(key) })
+    const url = await retry({
+      fn: async () => {
+        await getData(key)
+      }
+    })
       .catch(console.error)
     setUrl(url)
-    const props = await retry({ n: () => getData(`${key}:status`, true) })
+    const props = await retry({
+      keepTrying: true,
+      fn: async () => {
+        await getData(`${key}:status`, true)
+      }
+    })
       .catch(console.error)
     const { metadata: { status = '' } } = props || {}
     setStatus(status)
