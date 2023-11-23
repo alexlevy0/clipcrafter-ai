@@ -42,30 +42,39 @@ const buildFFmpegCmd = (
   outputPath: string,
   shots: SourceModel[],
 ): string => {
+  if (
+    !inputPath ||
+    !outputPath ||
+    !Array.isArray(shots) ||
+    shots.length === 0
+  ) {
+    throw new Error(
+      'Paramètres invalides fournis à la fonction buildFFmpegCmd.',
+    )
+  }
+
   const targetWidth = 360
   const targetHeight = 640
 
-  let filterComplex = shots
+  const filterComplex = shots
     .map((clip, index) => {
       let filter = `[0:v]trim=start=${clip.ts_start}:end=${clip.ts_end},setpts=PTS-STARTPTS`
 
       if (clip.crop) {
         filter += `,crop=${clip.crop.w}:${clip.crop.h}:${clip.crop.x}:${clip.crop.y},scale=${targetWidth}:${targetHeight}`
       } else {
-        // Redimensionner tout en conservant le ratio, puis ajouter un padding si nécessaire
         filter += `,scale=${targetWidth}:-2,pad=${targetWidth}:${targetHeight}:(ow-iw)/2:(oh-ih)/2`
       }
 
-      filter += `,setsar=1[clip${index}v];`
-      return filter
+      return `${filter},setsar=1[clip${index}v];`
     })
     .join('')
 
   const concatFilter = shots.map((_, index) => `[clip${index}v]`).join('')
 
-  filterComplex += `${concatFilter}concat=n=${shots.length}:v=1:a=0[outv]`
+  const fullFilter = `${filterComplex}${concatFilter}concat=n=${shots.length}:v=1:a=0[outv]`
 
-  return `ffmpeg -i "${inputPath}" -filter_complex "${filterComplex}" -map "[outv]" "${outputPath}"`
+  return `ffmpeg -i "${inputPath}" -filter_complex "${fullFilter}" -map "[outv]" "${outputPath}"`
 }
 
 async function downloadObject(
