@@ -7,8 +7,14 @@ import { conf } from './config'
 
 const s3 = new S3({ region: conf.region })
 
+export function decodeS3Key(key) {
+  return decodeURIComponent(key.replace(/\+/g, ' '))
+}
+
 export async function download(Bucket: string, Key: string, filePath: string) {
-  const { Body } = await s3.getObject({ Bucket, Key })
+  const _key = decodeS3Key(Key)
+  const _Bucket = decodeS3Key(Bucket)
+  const { Body } = await s3.getObject({ Bucket: _Bucket, Key: _key })
   if (Body instanceof Readable) {
     await new Promise((res, rej) => {
       const writeStream = fsSync.createWriteStream(filePath)
