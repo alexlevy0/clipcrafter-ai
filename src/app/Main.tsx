@@ -26,7 +26,8 @@ const getUrl = async (key: string) => {
     validateObjectExistence: true,
     download: false, expires: 3600
   }
-  const newKey = `${key.split('.')[0]}_edited.mp4`
+  const [name, format] = key.split('.')
+  const newKey = `${name}_edited.${format}`
   return await Storage.get(newKey, config)
 }
 
