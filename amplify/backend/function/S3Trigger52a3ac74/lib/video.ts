@@ -1,12 +1,17 @@
 import * as fs from 'fs/promises'
 import { exec } from 'child_process'
 import { promisify } from 'util'
-import { ISourceModel, EQuality } from './types'
+import { IShot, EQuality } from './types'
 import { conf } from './config'
 
 const execPromise = promisify(exec)
 
-export function getCmd(_in: string, _out: string, shots: ISourceModel[]) {
+export function getCmd(
+  _in: string,
+  _out: string,
+  shots: IShot[],
+  _quality: EQuality = conf.quality,
+) {
   const filterComplex = shots
     .map((c, i) => {
       const trim = `[0:v]trim=start=${c.ts_start}:end=${c.ts_end},setpts=PTS-STARTPTS`
@@ -32,7 +37,7 @@ export function getCmd(_in: string, _out: string, shots: ISourceModel[]) {
   const concatVideo = shots.map((_, i) => `[clip${i}v]`).join('')
   const concatAudio = shots.map((_, i) => `[clip${i}a]`).join('')
   const fullFilter = `${filterComplex}${concatVideo}concat=n=${shots.length}:v=1:a=0[outv];${concatAudio}concat=n=${shots.length}:v=0:a=1[outa]`
-  const quality = conf.quality === EQuality.HIGH ? conf.high : conf.bad
+  const quality = _quality === EQuality.HIGH ? conf.high : conf.bad
   return `ffmpeg -i "${_in}" -filter_complex "${fullFilter}" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac ${quality} "${_out}"`
 }
 

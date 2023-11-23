@@ -3,7 +3,7 @@ export enum EQuality {
   LOW,
 }
 
-export interface ISourceModel {
+export interface IShot {
   ts_start: number
   ts_end: number
   crop?: { x: number; y: number; w: number; h: number }
