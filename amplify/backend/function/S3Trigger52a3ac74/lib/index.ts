@@ -52,14 +52,16 @@ function getCmd(_in: string, _out: string, shots: ISourceModel[]) {
         const mergeBgAndFg = `[bg${i}v][fg${i}v]overlay=(W-w)/2:(H-h)/2:format=auto`
         filter += `${scale_Fg}${mergeBgAndFg}`
       }
-      return `${filter},setsar=1[clip${i}v];`
+      const trimAudio = `[0:a]atrim=start=${c.ts_start}:end=${c.ts_end},asetpts=PTS-STARTPTS[clip${i}a];`
+      return `${filter},setsar=1[clip${i}v];${trimAudio}`
     })
     .join('')
 
-  const concatFilter = shots.map((_, i) => `[clip${i}v]`).join('')
-  const fullFilter = `${filterComplex}${concatFilter}concat=n=${shots.length}:v=1:a=0[outv]`
+  const concatVideo = shots.map((_, i) => `[clip${i}v]`).join('')
+  const concatAudio = shots.map((_, i) => `[clip${i}a]`).join('')
+  const fullFilter = `${filterComplex}${concatVideo}concat=n=${shots.length}:v=1:a=0[outv];${concatAudio}concat=n=${shots.length}:v=0:a=1[outa]`
   const quality = conf.quality === EQuality.HIGH ? conf.high : conf.bad
-  return `ffmpeg -i "${_in}" -filter_complex "${fullFilter}" -map "[outv]" -c:v libx264 ${quality} "${_out}"`
+  return `ffmpeg -i "${_in}" -filter_complex "${fullFilter}" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac ${quality} "${_out}"`
 }
 
 async function download(Bucket: string, Key: string, filePath: string) {
