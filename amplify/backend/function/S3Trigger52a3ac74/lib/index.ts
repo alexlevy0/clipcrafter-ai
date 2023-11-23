@@ -37,6 +37,7 @@ interface MainSourceModel {
 
 const s3 = new S3(conf)
 // [0:v]scale=-2:640,boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1,crop=360:640[bg];[0:v]scale=360:-2[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2:format=auto,setsar=1[outv]
+
 const buildFFmpegCmd = (
   inputPath: string,
   outputPath: string,
@@ -56,7 +57,7 @@ const buildFFmpegCmd = (
   const targetWidth = 360
   const targetHeight = 640
 
-  const filterToApplyWhenNoCrop = `[0:v]scale=-2:640,boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1,crop=360:640[bg];[0:v]scale=360:-2[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2:format=auto,setsar=1[outv]`
+  // const filterToApplyWhenNoCrop = `[0:v]scale=-2:640,boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1,crop=360:640[bg];[0:v]scale=360:-2[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2:format=auto,setsar=1[outv]`
 
   const filterComplex = shots
     .map((clip, index) => {
@@ -65,7 +66,13 @@ const buildFFmpegCmd = (
       if (clip.crop) {
         filter += `,crop=${clip.crop.w}:${clip.crop.h}:${clip.crop.x}:${clip.crop.y},scale=${targetWidth}:${targetHeight}`
       } else {
-        filter += ``
+        const blur = `boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1`
+        filter += `,scale=${targetWidth}:${targetHeight},${blur},crop=${targetWidth}:${targetHeight}[bg];`
+        filter += `scale=${targetWidth}:-2[fg];`
+        filter += `[bg][fg]overlay=(W-w)/2:(H-h)/2:format=auto`
+
+        // ORIGINAL
+        // filter += `,scale=${targetWidth}:-2,pad=${targetWidth}:${targetHeight}:(ow-iw)/2:(oh-ih)/2`
       }
 
       return `${filter},setsar=1[clip${index}v];`
