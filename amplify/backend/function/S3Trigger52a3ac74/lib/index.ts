@@ -57,8 +57,6 @@ const buildFFmpegCmd = (
   const targetWidth = 360
   const targetHeight = 640
 
-  // const filterToApplyWhenNoCrop = `[0:v]scale=-2:640,boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1,crop=360:640[bg];[0:v]scale=360:-2[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2:format=auto,setsar=1[outv]`
-
   const filterComplex = shots
     .map((clip, index) => {
       let filter = `[0:v]trim=start=${clip.ts_start}:end=${clip.ts_end},setpts=PTS-STARTPTS`
@@ -66,13 +64,11 @@ const buildFFmpegCmd = (
       if (clip.crop) {
         filter += `,crop=${clip.crop.w}:${clip.crop.h}:${clip.crop.x}:${clip.crop.y},scale=${targetWidth}:${targetHeight}`
       } else {
-        const blur = `boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1`
-        filter += `,scale=${targetWidth}:${targetHeight},${blur},crop=${targetWidth}:${targetHeight}[bg];`
-        filter += `scale=${targetWidth}:-2[fg];`
-        filter += `[bg][fg]overlay=(W-w)/2:(H-h)/2:format=auto`
-
-        // ORIGINAL
-        // filter += `,scale=${targetWidth}:-2,pad=${targetWidth}:${targetHeight}:(ow-iw)/2:(oh-ih)/2`
+        let blurFilter = `boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1`
+        let scaleAndCrop = `scale=-2:640,crop=360:640`
+        filter += `,${blurFilter},${scaleAndCrop}[bg${index}v];`
+        filter += `[0:v]scale=360:-2[fg${index}v];`
+        filter += `[bg${index}v][fg${index}v]overlay=(W-w)/2:(H-h)/2:format=auto`
       }
 
       return `${filter},setsar=1[clip${index}v];`
@@ -81,9 +77,11 @@ const buildFFmpegCmd = (
 
   const concatFilter = shots.map((_, index) => `[clip${index}v]`).join('')
 
+  console.log(`-> shots size : ${shots.length}`);
+
   const fullFilter = `${filterComplex}${concatFilter}concat=n=${shots.length}:v=1:a=0[outv]`
 
-  return `ffmpeg -i "${inputPath}" -filter_complex "${fullFilter}" -map "[outv]" -c:v libx264 -preset fast -crf 22 "${outputPath}"`
+  return `ffmpeg -loglevel debug -i "${inputPath}" -filter_complex "${fullFilter}" -map "[outv]" -c:v libx264 -preset fast -crf 22 "${outputPath}"`
 }
 
 async function downloadObject(
@@ -154,10 +152,11 @@ async function processVideoWithFFmpeg(
     inputPath,
     outputPath,
     // cropData.shots,
-    cropData.shots.slice(0, 7), // TODO Remove only after testing
+    cropData.shots.slice(0, 2), // TODO Remove only after testing
   )
 
   try {
+    console.log(`ffmpegCommand : ${ffmpegCommand}`)
     await execPromise(ffmpegCommand)
   } catch (error) {
     await log(`Error processing video with FFmpeg: ${error.message}`, true)
