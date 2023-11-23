@@ -15,19 +15,37 @@ const noop = async () => { undefined }
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const retry: any = async ({ fn = noop, retries = 60, delay = 1000, err = '' }) =>
-  retries > 0 ? fn().catch(async error => {
-    await sleep(delay);
-    return retry({ fn, retries: retries - 1, delay, error });
-  }) : Promise.reject(err);
+const retry = async ({ fn = noop, retries = 60, delay = 1000, keepTrying = false, err = '' }) => {
+  const attempt = async (remainingRetries: number): Promise<any> => {
+    try {
+      const result = await fn();
+      if (keepTrying && remainingRetries > 0) {
+        await sleep(delay);
+        return attempt(remainingRetries - 1);
+      }
+      return result;
+    } catch (error) {
+      if (remainingRetries <= 0) {
+        throw err || error;
+      }
+      await sleep(delay);
+      return attempt(remainingRetries - 1);
+    }
+  };
 
-const getUrl = async (key: string) => {
+  return attempt(retries);
+}
+
+const getData = async (key: string, getProps: boolean = false) => {
   const config = {
     validateObjectExistence: true,
     download: false, expires: 3600
   }
   const [name, format] = key.split('.')
   const newKey = `${name}_edited.${format}`
+  if (getProps) {
+    return await Storage.getProperties(newKey)
+  }
   return await Storage.get(newKey, config)
 }
 
@@ -46,12 +64,18 @@ const Picker = (props: { onClick: any }) => {
 
 export const Main = () => {
   const [url, setUrl] = useState('')
+  const [status, setStatus] = useState('')
 
   const onSuccess = async ({ key = '' }) => {
     if (!key) return
-    const url = await retry({ fn: () => getUrl(key) })
+    const url = await retry({ fn: () => getData(key) })
       .catch(console.error)
     setUrl(url)
+    const props = await retry({ n: () => getData(`${key}:status`, true) })
+      .catch(console.error)
+    const { metadata: { status = '' } } = props || {}
+    setStatus(status)
+    console.log({ status });
   }
 
   const onResetVideoUrl = () => setUrl('')

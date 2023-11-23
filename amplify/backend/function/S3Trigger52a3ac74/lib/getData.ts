@@ -1,14 +1,15 @@
 import { conf } from './config'
 import { log } from './logger'
-import { decodeS3Key } from './s3'
+import { decodeS3Key } from './utils'
 
 export async function getData(event: any) {
+  log(`getData start : ${JSON.stringify(event, null, 2)}`)
   const { bucket: { name: bucketName = '' } = {}, object: { key: objectKey = '' } = {} } =
     event?.Records?.[0]?.s3 || {}
 
   const [folderName, fileName] = objectKey.split('/').map(decodeS3Key)
 
-  log(`getData In ${folderName}, ${fileName}, ${objectKey}, ${bucketName}`)
+  log(`getData In : ${folderName}, ${fileName}, ${objectKey}, ${bucketName}`)
 
   if (!folderName || !fileName || !objectKey || !bucketName)
     throw new Error(`Error in event records : ${event}`)
@@ -18,7 +19,7 @@ export async function getData(event: any) {
   const extension = fileName.split('.').pop()
   const name = fileName.substring(0, fileName.lastIndexOf('.'))
   const editedFileName = `${name}${conf.nameModifier}.${extension}`
-  log(`getData ${extension}, ${name}, ${editedFileName}`)
+  log(`getData : ${extension}, ${name}, ${editedFileName}`)
 
   return {
     processedObjectKey: `${folderName}/${editedFileName}`,

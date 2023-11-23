@@ -1,34 +1,34 @@
-import * as fs from 'fs/promises'
 import { Handler } from 'aws-lambda'
-import { processVideoWithFFmpeg } from './video'
+import { processVideo } from './video'
 import { download, upload } from './s3'
 import { getData } from './getData'
 import { log } from './logger'
+import StatusUploader from './StatusUploader'
+import { EStatus, LambdaS3Event } from './types'
+import { cleanTempFiles } from './utils'
 
-export const handler: Handler = async event => {
+export const handler: Handler = async (event: LambdaS3Event) => {
+  if (event.debug) {
+    log('Debug mode enabled')
+  }
+  const {
+    tmpFilePath: tmpFP,
+    outputFilePath: outputFP,
+    bucketName: bK,
+    processedObjectKey: newKey,
+    objectKey: objKey,
+  } = await getData(event)
+  const statusUploader = StatusUploader.getInstance(bK, newKey)
+
   try {
-    log(`getData try ${JSON.stringify(event, null, 2)}`)
-    const data = await getData(event)
-    log(`getData OK ${JSON.stringify(data, null, 2)}`)
-
-    log(`download try ${data.bucketName}, ${data.objectKey}, ${data.tmpFilePath}`)
-    await download(data.bucketName, data.objectKey, data.tmpFilePath)
-    log(`download OK`)
-
-    log(`processVideoWithFFmpeg ${data.tmpFilePath}, ${data.outputFilePath}`)
-    await processVideoWithFFmpeg(data.tmpFilePath, data.outputFilePath)
-    log(`processVideoWithFFmpeg OK`)
-
-    log(`upload try ${data.bucketName}, ${data.processedObjectKey}, ${data.outputFilePath}`)
-    await upload(data.outputFilePath, data.bucketName, data.processedObjectKey)
-    log(`upload OK`)
-
-    log(`unlink try ${data.tmpFilePath}, ${data.outputFilePath}`)
-    if (data.tmpFilePath) await fs.unlink(data.tmpFilePath)
-    if (data.outputFilePath) await fs.unlink(data.outputFilePath)
-    log(`unlink OK`)
+    await statusUploader.setStatus(EStatus.Init)
+    await download(bK, objKey, tmpFP)
+    await processVideo(tmpFP, outputFP)
+    await upload(outputFP, bK, newKey)
+    await cleanTempFiles(tmpFP, outputFP)
     return { statusCode: 200 }
   } catch (error) {
+    await statusUploader.setStatus(EStatus.Error)
     console.error('Handler error:', error)
     return { statusCode: 500, error }
   }

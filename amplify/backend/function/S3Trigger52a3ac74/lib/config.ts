@@ -10,4 +10,5 @@ export const conf = {
   blurFilter: `boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1`,
   high: `-preset slow -crf 18 -profile:v high`,
   bad: `-preset fast -crf 22 -profile:v baseline`,
+  updateIntervalProgress: 3000,
 }

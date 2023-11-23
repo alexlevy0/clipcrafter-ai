@@ -1,8 +1,9 @@
 import * as fs from 'fs/promises'
 import { exec } from 'child_process'
 import { promisify } from 'util'
-import { IShot, EQuality } from './types'
+import { IShot, EQuality, EStatus } from './types'
 import { conf } from './config'
+import StatusUploader from './StatusUploader'
 
 const execPromise = promisify(exec)
 
@@ -41,8 +42,17 @@ export function getCmd(
   return `ffmpeg -i "${_in}" -filter_complex "${fullFilter}" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac ${quality} "${_out}"`
 }
 
-export async function processVideoWithFFmpeg(_in: string, _out: string) {
+export async function processVideo(_in: string, _out: string) {
+  const statusUploader = StatusUploader.getInstance()
+
+  await statusUploader.setStatus(EStatus.ffmpegParse)
   const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
+
+  await statusUploader.setStatus(EStatus.ffmpegCmd)
   const ffmpegCommand = getCmd(_in, _out, cropData.shots.slice(0, 4))
+
+  await statusUploader.setStatus(EStatus.ffmpegExec)
   await execPromise(ffmpegCommand)
+
+  await statusUploader.setStatus(EStatus.ffmpegEnded)
 }
