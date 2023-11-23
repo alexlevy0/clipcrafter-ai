@@ -74,7 +74,7 @@
           }
         },
         "Layers": [
-          "arn:aws:lambda:eu-west-3:327852390890:layer:ffmpeg:3"
+          "arn:aws:lambda:eu-west-3:327852390890:layer:ffmpeg:4"
         ]
       }
     },
