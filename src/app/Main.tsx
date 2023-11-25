@@ -29,7 +29,7 @@ const noop = async () => { undefined }
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const retry = async ({ fn = noop, retries = 60, delay = 1000, err = '' }) => {
+const retry = async ({ fn = noop, retries = 120, delay = 4000, err = '' }) => {
   const attempt = async (remainingRetries: number, lastError = null): Promise<any> => {
     if (remainingRetries <= 0) {
       throw new Error(`Échec après ${retries} tentatives: ${err}\nDernière erreur: ${lastError}`);
@@ -67,9 +67,10 @@ export const Main = () => {
   const onSuccess = async ({ key = '' }) => {
     if (!key) return
 
+    // setStatus('Computing Video')
     // @ts-ignore
     const url = await retry({ fn: async () => await getData(key) }).catch(console.error)
-    setStatus('Voilà!')
+    // setStatus('Voilà!')
     setUrl(url)
   }
 
@@ -89,7 +90,7 @@ export const Main = () => {
           onUploadSuccess={onSuccess}
           onFileRemove={onResetVideoUrl}
           onUploadError={onResetVideoUrl}
-          onUploadStart={() => setStatus('Computing Video')}
+          onUploadStart={onResetVideoUrl}
           components={{ FilePicker({ onClick }) { return <Picker onClick={onClick} /> } }}
         />
         <Flex
@@ -99,12 +100,12 @@ export const Main = () => {
           paddingTop={50}
           direction="column" justifyContent="space-around">
           <>
-            {status && status !== 'Voilà!' && <Loader
+            {/*             {status && status !== 'Voilà!' && <Loader
               emptyColor={'rgb(13, 25, 38)'}
               filledColor={'grey'}
               variation="linear"
-            />}
-            <Text
+            />} */}
+            {/* <Text
               variation="primary"
               as="p"
               lineHeight="1.5em"
@@ -114,7 +115,7 @@ export const Main = () => {
               width="50vw"
             >
               {!status ? 'Upload a file to get started' : status}
-            </Text>
+            </Text> */}
           </>
         </Flex>
 
