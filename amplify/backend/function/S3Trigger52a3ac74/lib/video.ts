@@ -49,7 +49,7 @@ export async function processVideo(_in: string, _out: string) {
   const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
 
   await statusUploader.setStatus(EStatus.ffmpegCmd)
-  const ffmpegCommand = getCmd(_in, _out, cropData.shots.slice(0, 4))
+  const ffmpegCommand = getCmd(_in, _out, cropData)
 
   await statusUploader.setStatus(EStatus.ffmpegExec)
   await execPromise(ffmpegCommand)
