@@ -25,9 +25,6 @@ class StatusUploader {
   }
 
   private useStatus(status: EStatus | string): void {
-    if (this._usedStatuses.has(status)) {
-      throw new Error(`Status ${status} has already been used`)
-    }
     this._usedStatuses.add(status)
   }
 
@@ -56,7 +53,8 @@ class StatusUploader {
 
       if (
         status.startsWith(EStatus.dlProgress) ||
-        status.startsWith(EStatus.upProgress)
+        status.startsWith(EStatus.upProgress) ||
+        status.startsWith(EStatus.ffmpegCmd)
       ) {
         baseStatus = status.split('-').slice(0, 2).join('-')
       }

@@ -88,20 +88,9 @@ export async function download(
   }
 }
 
-export async function upload(
-  fPath: string,
-  BucketN: string,
-  objKey: string,
-  isDebug: boolean,
-) {
+export async function upload(fPath: string, BucketN: string, objKey: string) {
   const statusUploader = StatusUploader.getInstance()
   await statusUploader.setStatus(EStatus.upStart)
-
-  if (isDebug) {
-    console.log('upload reald');
-    // await statusUploader.setStatus(EStatus.upEnded)
-    // return
-  }
 
   let uploadedBytes = 0
   let updateInProgress = false
@@ -116,6 +105,9 @@ export async function upload(
   })
   fileStream.on('end', () => {
     clearInterval(statusUpdateInterval)
+  })
+  fileStream.on('data', chunk => {
+    uploadedBytes += chunk.length
   })
 
   const statusUpdateInterval = setInterval(async () => {

@@ -49,5 +49,8 @@ export function generateProgressStatus(status: EStatus, progress: string): strin
   if (status === EStatus.upProgress) {
     return `${status}-${progress}`
   }
+  if (status === EStatus.ffmpegCmd) {
+    return `${status}-${progress}`
+  }
   return status
 }

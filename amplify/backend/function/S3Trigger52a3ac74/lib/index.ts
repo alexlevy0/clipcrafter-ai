@@ -25,7 +25,7 @@ export const handler: Handler = async (event: LambdaS3Event) => {
 
     await download(bK, objKey, tmpFP, event.debug)
     await processVideo(tmpFP, outputFP, event.debug)
-    await upload(outputFP, bK, newKey, event.debug)
+    await upload(outputFP, bK, newKey)
     await cleanTempFiles(tmpFP, outputFP)
 
     await statusUploader.setStatus(EStatus.Succeded)
