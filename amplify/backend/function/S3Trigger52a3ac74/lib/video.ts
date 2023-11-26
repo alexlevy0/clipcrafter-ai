@@ -50,7 +50,11 @@ export async function processVideo(_in: string, _out: string) {
   // const clip: IShot[] = cropData.shots.slice(0, 4) // 4 ok // 5 KO
   // const clip: IShot[] = cropData.shots.slice(4, 9) // ok
   // const clip: IShot[] = cropData.shots.slice(5, 11)// OK
-  const clip: IShot[] = cropData.shots.slice(4, 11) // KO
+  // const clip: IShot[] = cropData.shots.slice(11, 13) // OK
+
+  // { ts_start: 77.32, ts_end: 97.68, crop: [Object], label: null },
+  // { ts_start: 97.68, ts_end: 121.68, crop: [Object], label: null }
+  const clip: IShot[] = cropData.shots.slice(12, 14) // KO
   console.log('clip length', { clip })
 
   await statusUploader.setStatus(EStatus.ffmpegCmd)
