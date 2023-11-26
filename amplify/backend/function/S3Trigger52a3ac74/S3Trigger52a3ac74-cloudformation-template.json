@@ -63,7 +63,7 @@
           ]
         },
         "Runtime": "nodejs18.x",
-        "MemorySize": 10240,
+        "MemorySize": 3000,
         "Timeout": 900,
         "Code": {
           "S3Bucket": {
