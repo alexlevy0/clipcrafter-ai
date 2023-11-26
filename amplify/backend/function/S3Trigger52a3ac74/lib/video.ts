@@ -47,7 +47,7 @@ export async function processVideo(_in: string, _out: string) {
   await statusUploader.setStatus(EStatus.ffmpegParse)
 
   const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
-  const clip: IShot[] = cropData.shots.slice(0, 5)
+  const clip: IShot[] = cropData.shots.slice(0, 4) // 4 ok // 5 KO
   console.log('clip length', { clip })
 
   await statusUploader.setStatus(EStatus.ffmpegCmd)
