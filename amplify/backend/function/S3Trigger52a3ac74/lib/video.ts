@@ -39,7 +39,10 @@ export function getCmd(
   const concatVideo = shots.map((_, i) => `[clip${i}v]`).join('')
   const concatAudio = shots.map((_, i) => `[clip${i}a]`).join('')
   const fullFilter = `${filterComplex}${concatVideo}concat=n=${shots.length}:v=1:a=0[outv];${concatAudio}concat=n=${shots.length}:v=0:a=1[outa]`
-  const quality = _quality === EQuality.HIGH ? conf.high : conf.bad
+
+  const high = `-preset slow -crf 18 -profile:v high`
+  const bad = `-preset fast -crf 22 -profile:v baseline`
+  const quality = _quality === EQuality.HIGH ? high : bad
   const debugCmds = '-loglevel debug -v verbose'
 
   return `ffmpeg -i "${_in}" -filter_complex "${fullFilter}" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac ${quality} "${_out}" ${
@@ -56,8 +59,9 @@ export async function processVideo(
   await statusUploader.setStatus(EStatus.ffmpegParse)
 
   const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
- 
-  const clip: IShot[] = cropData.shots
+
+  // const clip: IShot[] = cropData.shots
+  const clip: IShot[] = cropData.shots.slice(0, 20)
 
   await statusUploader.setStatus(EStatus.ffmpegCmd)
   const ffmpegCommand = getCmd(_in, _out, clip, conf.quality, isDebug)
