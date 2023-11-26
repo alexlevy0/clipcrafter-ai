@@ -13,8 +13,9 @@
     "installAll": "npm i && cd amplify/backend/function/S3Trigger52a3ac74 && npm i && cd -",
     "i": "npm run installAll",
     "amplify:S3Trigger52a3ac74": "cd amplify/backend/function/S3Trigger52a3ac74 && tsc -p ./tsconfig.json && cd -",
-    "debug:localShare:S3Trigger": "npm run amplify:S3Trigger52a3ac74 && cd amplify/backend/function/S3Trigger52a3ac74 && sam local invoke 'LambdaFunction' --debug -e lib/event.json -v /Users/alexlevy0/Dev/amplify_qlip/qlip-app/amplify/backend/function/S3Trigger52a3ac74 -t S3Trigger52a3ac74-cloudformation-template.json && cd -",
-    "debug:local:S3Trigger": "npm run amplify:S3Trigger52a3ac74 && cd amplify/backend/function/S3Trigger52a3ac74 && sam local invoke 'LambdaFunction' -e lib/event.json -t S3Trigger52a3ac74-cloudformation-template.json && cd -"
+    "---": "---",
+    "invoke": "cd amplify/backend/function/S3Trigger52a3ac74 && sam local invoke 'LambdaFunction' -e lib/event.json -t S3Trigger52a3ac74-cloudformation-template.json",
+    "run:invoke": "npm run amplify:S3Trigger52a3ac74 && npm run invoke && cd -"
   },
   "jest": {
     "preset": "ts-jest",

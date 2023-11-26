@@ -44,12 +44,14 @@ export function getCmd(
 
 export async function processVideo(_in: string, _out: string) {
   const statusUploader = StatusUploader.getInstance()
-
   await statusUploader.setStatus(EStatus.ffmpegParse)
+
   const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
+  const clip: IShot[] = cropData.shots.slice(0, 5)
+  console.log('clip length', { clip })
 
   await statusUploader.setStatus(EStatus.ffmpegCmd)
-  const ffmpegCommand = getCmd(_in, _out, cropData.shots)
+  const ffmpegCommand = getCmd(_in, _out, clip)
 
   await statusUploader.setStatus(EStatus.ffmpegExec)
   await execPromise(ffmpegCommand)
