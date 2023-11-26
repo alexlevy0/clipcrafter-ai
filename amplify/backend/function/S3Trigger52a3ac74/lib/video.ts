@@ -37,11 +37,13 @@ export function getCmd(
     .join('')
 
   const concatVideo = shots.map((_, i) => `[clip${i}v]`).join('')
+
   const concatAudio = shots.map((_, i) => `[clip${i}a]`).join('')
-  const fullFilter = `${filterComplex}${concatVideo}concat=n=${shots.length}:v=1:a=0[outv];${concatAudio}concat=n=${shots.length}:v=0:a=1[outa]`
+  const scaledFilter = `${filterComplex},scale=trunc(iw/2)*2:trunc(ih/2)*2`
+  const fullFilter = `${scaledFilter}${concatVideo}concat=n=${shots.length}:v=1:a=0[outv];${concatAudio}concat=n=${shots.length}:v=0:a=1[outa]`
 
   const high = `-preset slow -crf 18 -profile:v high`
-  const bad = `-preset fast -crf 22 -profile:v baseline`
+  const bad = `-preset ultrafast -crf 30 -profile:v baseline -tune fastdecode -threads 1 -bufsize 1000k -maxrate 1000k`
   const quality = _quality === EQuality.HIGH ? high : bad
   const debugCmds = '-loglevel debug -v verbose'
 
