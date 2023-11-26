@@ -1,5 +1,4 @@
 {
-  "debug": true,
   "Records": [
     {
       "s3": {
@@ -7,7 +6,7 @@
           "name": "qlip-bucket104807-main"
         },
         "object": {
-          "key": "public/5_YOUTUBERS_para_MEJORAR_tu_ESPANOL___Mis_favoritos-(1080p).mp4"
+          "key": "public/5 YOUTUBERSS para MEJORAR tu ESPAÑOL _ Mis favoritos-(720p).mp4"
         }
       }
     }

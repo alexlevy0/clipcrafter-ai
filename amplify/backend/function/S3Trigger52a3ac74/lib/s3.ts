@@ -2,8 +2,6 @@ import { S3 } from '@aws-sdk/client-s3'
 import * as fsSync from 'fs'
 import * as fs from 'fs/promises'
 import { Readable } from 'stream'
-import path from 'node:path'
-
 import { conf } from './config'
 import { log } from './logger'
 import StatusUploader from './StatusUploader'
@@ -19,20 +17,16 @@ export async function moveLocalFile(oldPath: string, newPath: string) {
     await fs.access(newPath, fsSync.constants.R_OK)
     log('Move Local File Succeded!')
   } catch (error) {
+    console.error(error)
     throw new Error('moveLocalFile Error', error)
   }
 }
 
-export async function download(
-  Bucket: string,
-  Key: string,
-  filePath: string,
-  isDebug: boolean,
-) {
+export async function download(Bucket: string, Key: string, filePath: string) {
   const statusUploader = StatusUploader.getInstance()
   await statusUploader.setStatus(EStatus.dlStart)
   try {
-    if (isDebug) {
+    if (conf.debug) {
       const name = filePath.split('/').pop()
       const oldPath = `/var/task/${name}`
       await moveLocalFile(oldPath, filePath)
@@ -92,6 +86,8 @@ export async function download(
 
 export async function upload(fPath: string, Bucket: string, Key: string) {
   try {
+    const statusUploader = StatusUploader.getInstance()
+    await statusUploader.setStatus(EStatus.upProgress)
     const Body = fsSync.createReadStream(fPath)
     await s3.putObject({ Bucket, Key, Body })
   } catch (error) {
@@ -100,7 +96,7 @@ export async function upload(fPath: string, Bucket: string, Key: string) {
   }
 }
 
-export async function addLifecyclePolicy(bucketName) {
+export async function addLifecyclePolicy(bucketName: string) {
   try {
     await s3.putBucketLifecycleConfiguration({
       Bucket: bucketName,

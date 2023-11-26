@@ -1,16 +1,9 @@
 import * as fs from 'fs/promises'
-import { log } from './logger'
 
-export async function cleanTempFiles(tmpFP: string, outputFP): Promise<void> {
-  if (tmpFP) {
-    await fs.unlink(tmpFP)
-  }
-  if (outputFP) {
-    await fs.unlink(outputFP)
-  }
-  log(`unlink OK`)
+export async function cleanTempFiles(tmpFP: string, outputFP: string) {
+  if (tmpFP) await fs.unlink(tmpFP)
+  if (outputFP) await fs.unlink(outputFP)
 }
 
-export function decodeS3Key(key) {
-  return decodeURIComponent(key.replace(/\+/g, ' '))
-}
+export const decodeS3Key = (key: string) =>
+  decodeURIComponent(key.replace(/\+/g, ' '))

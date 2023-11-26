@@ -28,6 +28,15 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+.amplify-storagemanager,
+.amplify-storagemanager__previewer,
+.amplify-storagemanager__dropzone {
+  border-top-style: none!important;
+  border-bottom-style: none!important;
+  border-right-style: none!important;
+  border-left-style: none!important;
+  border-radius: 0px!important;
+}
 
 
 * {

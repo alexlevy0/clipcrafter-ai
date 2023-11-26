@@ -4,6 +4,7 @@ import { decodeS3Key } from './utils'
 
 export async function getData(event: any) {
   log(`getData start : ${JSON.stringify(event, null, 2)}`)
+  log(`config : ${JSON.stringify(conf, null, 2)}`)
   const {
     bucket: { name: bucketName = '' } = {},
     object: { key: objectKey = '' } = {},

@@ -1,6 +1,6 @@
 import { getData } from './getData' // Assurez-vous que le chemin est correct
 import { conf } from './config'
-import { log } from './logger'
+// import { log } from './logger'
 
 jest.mock('./logger')
 

@@ -1,6 +1,6 @@
-import { describe, expect, test } from '@jest/globals'
-import { conf } from './config'
-import { EQuality } from './types'
+// import { describe, expect, test } from '@jest/globals'
+// import { conf } from './config'
+// import { EQuality } from './types'
 // import { getCmd } from './video'
 
 // describe('getCmd Function Tests', () => {

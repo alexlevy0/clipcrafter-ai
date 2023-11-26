@@ -10,12 +10,9 @@
       "dom",
       "esnext"
     ],
-    // "noUnusedParameters": true,
-    "noUnusedParameters": false,
-    // "noUnusedLocals": true,
-    // "noImplicitAny":false,
-    // "allowUnreachableCode":true,
-    // "strict":true,// TODO SET TO TRUE
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "noImplicitAny": false,
     "alwaysStrict": false,
     "strictNullChecks": false,
     "module": "CommonJS",

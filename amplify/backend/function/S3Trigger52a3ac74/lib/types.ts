@@ -36,6 +36,7 @@ export enum EStatus {
   ffmpegCmd = 'ffmpeg-cmd',
   ffmpegExec = 'ffmpeg-exec',
   ffmpegEnded = 'ffmpeg-ended',
+  upProgress = 'up-progress',
   Error = 'error',
 }
 
@@ -44,6 +45,9 @@ export function generateProgressStatus(
   progress: string,
 ): string {
   if (status === EStatus.dlProgress) {
+    return `${status}-${progress}`
+  }
+  if (status === EStatus.upProgress) {
     return `${status}-${progress}`
   }
   if (status === EStatus.ffmpegCmd) {

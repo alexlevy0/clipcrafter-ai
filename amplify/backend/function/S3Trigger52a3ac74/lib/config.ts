@@ -3,12 +3,12 @@ import { EQuality } from './types'
 export const conf = {
   region: 'eu-west-3',
   nameModifier: '_edited',
+  batchModifier: '_batch_',
   quality: EQuality.HIGH,
-  debug: true,
+  debug: false,
   targetWidth: 360,
   targetHeight: 640,
   batchSize: 5,
   cropFile: 'qlip-crop-model-out.json',
-  blurFilter: `boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1`,
   updateIntervalProgress: 3000,
 }

@@ -1,20 +1,16 @@
 import { Handler } from 'aws-lambda'
 import { processVideo } from './video'
-import { download, moveLocalFile, upload } from './s3'
+import { download, upload } from './s3'
 import { getData } from './getData'
-import { log } from './logger'
 import StatusUploader from './StatusUploader'
 import { EStatus, LambdaS3Event } from './types'
 import { cleanTempFiles } from './utils'
 
 export const handler: Handler = async (event: LambdaS3Event) => {
-  if (event.debug) {
-    log('Debug mode enabled')
-  }
   const statusUploader = StatusUploader.getInstance()
-  await statusUploader.setStatus(EStatus.Init)
 
   try {
+    await statusUploader.setStatus(EStatus.Init)
     const {
       tmpFilePath: tmpFP,
       outputFilePath: outputFP,
@@ -22,12 +18,10 @@ export const handler: Handler = async (event: LambdaS3Event) => {
       processedObjectKey: newKey,
       objectKey: objKey,
     } = await getData(event)
-
-    await download(bK, objKey, tmpFP, event.debug)
+    await download(bK, objKey, tmpFP)
     await processVideo(tmpFP, outputFP)
     await upload(outputFP, bK, newKey)
     await cleanTempFiles(tmpFP, outputFP)
-
     await statusUploader.setStatus(EStatus.Succeded)
     return { statusCode: 200 }
   } catch (error) {

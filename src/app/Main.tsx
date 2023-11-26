@@ -32,12 +32,11 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const retry = async ({ fn = noop, retries = 120, delay = 4000, err = '' }) => {
   const attempt = async (remainingRetries: number, lastError = null): Promise<any> => {
     if (remainingRetries <= 0) {
-      throw new Error(`Échec après ${retries} tentatives: ${err}\nDernière erreur: ${lastError}`);
+      throw new Error(`RemainingRetries ${retries}, ${lastError}`);
     }
     try {
       return await fn();
     } catch (error) {
-      console.log(`Tentative échouée avec l'erreur: ${error}, réessayer...`);
       await sleep(delay);
       return attempt(remainingRetries - 1);
     }
@@ -56,21 +55,28 @@ const getData = async (key: string) => {
     const newKey = `${name}_edited.${format}`
     return await Storage.get(newKey, config)
   } catch (error) {
-    console.log('getData Err' + error);
+    throw new Error("No data yet");
   }
 }
 
+const READY = 'Ready'
+const STANDBY = ''
+const PROCESSING = 'Processing'
+
 export const Main = () => {
   const [url, setUrl] = useState('')
-  const [status, setStatus] = useState('')
+  const [status, setStatus] = useState(STANDBY)
+
+  const onReady = () => {
+    setStatus(READY)
+  }
 
   const onSuccess = async ({ key = '' }) => {
     if (!key) return
-
-    // setStatus('Computing Video')
+    setStatus(`${PROCESSING} : ${key}…`)
     // @ts-ignore
-    const url = await retry({ fn: async () => await getData(key) }).catch(console.error)
-    // setStatus('Voilà!')
+    const url = await retry({ fn: async () => await getData(key) })
+    console.log({ url });
     setUrl(url)
   }
 
@@ -82,6 +88,7 @@ export const Main = () => {
     <ThemeProvider theme={{ name: 'my-theme', overrides: [defaultDarkModeOverride] }} colorMode={'dark'}>
       <div>
         <StorageManager
+          defaultFiles={[{ key: 'public/5_YOUTUBERS_para_MEJORAR_tu_ESPANOL___Mis_favoritos-(1080p).mp4' }]}
           ref={ref}
           isResumable
           accessLevel='public'
@@ -100,27 +107,28 @@ export const Main = () => {
           paddingTop={50}
           direction="column" justifyContent="space-around">
           <>
-            {/*             {status && status !== 'Voilà!' && <Loader
-              emptyColor={'rgb(13, 25, 38)'}
-              filledColor={'grey'}
-              variation="linear"
-            />} */}
-            {/* <Text
+            <Text
               variation="primary"
               as="p"
               lineHeight="1.5em"
               fontWeight={600}
-              fontSize="2em"
+              fontSize="1em"
               fontStyle="normal"
-              width="50vw"
+              width="100%"
             >
-              {!status ? 'Upload a file to get started' : status}
-            </Text> */}
+              {status}
+            </Text>
+            {status !== READY && status !== STANDBY && (
+              <Loader
+                emptyColor={'rgb(13, 25, 38)'}
+                filledColor={'rgb(125, 214, 232)'}
+                variation="linear"
+              />
+            )}
           </>
         </Flex>
-
         <main style={{ backgroundColor: 'rgb(13, 25, 38)' }} className="flex min-h-screen flex-col items-center justify-between p-0">
-          <ReactPlayer playing={true} controls={true} url={url} width={"100%"} />
+          <ReactPlayer onReady={onReady} playing={true} controls={true} url={url} width={"100%"} />
         </main>
       </div>
     </ThemeProvider>

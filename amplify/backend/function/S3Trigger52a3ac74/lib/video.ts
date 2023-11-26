@@ -13,6 +13,8 @@ import StatusUploader from './StatusUploader'
 
 const execPromise = promisify(exec)
 
+const blurFilter = `boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1`
+
 export function getCmd(_in: string, _out: string, shots: IShot[]) {
   const filterComplex = shots
     .map((c, i) => {
@@ -25,7 +27,7 @@ export function getCmd(_in: string, _out: string, shots: IShot[]) {
         filter += `${crop}${scale}`
       } else {
         const scaleAndCrop_Bg = `scale=-2:640,crop=360:640`
-        filter += `,${conf.blurFilter},${scaleAndCrop_Bg}[bg${i}v];`
+        filter += `,${blurFilter},${scaleAndCrop_Bg}[bg${i}v];`
         filter += trim
         const scale_Fg = `,scale=360:-2[fg${i}v];`
         const mergeBgAndFg = `[bg${i}v][fg${i}v]overlay=(W-w)/2:(H-h)/2:format=auto`
@@ -80,7 +82,7 @@ export async function processVideo(_in: string, _out: string) {
           getProgress(index, batches.length),
         ),
       )
-      const batchOutput = `${baseOut}_batch_${index}${ext}`
+      const batchOutput = `${baseOut}${conf.batchModifier}${index}${ext}`
       const ffmpegCommand = getCmd(_in, batchOutput, batchShots)
       await execPromise(ffmpegCommand)
     } catch (error) {
@@ -105,7 +107,7 @@ export async function processVideo(_in: string, _out: string) {
 const createConcatFile = async (outputBase, batchCount, extension) => {
   const fileList = Array.from(
     { length: batchCount },
-    (_, i) => `file '${outputBase}_batch_${i}${extension}'`,
+    (_, i) => `file '${outputBase}${conf.batchModifier}${i}${extension}'`,
   ).join('\n')
   const concatFileName = `${outputBase}_concatList.txt`
   await fs.writeFile(concatFileName, fileList)
