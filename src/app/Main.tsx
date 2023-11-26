@@ -88,7 +88,7 @@ export const Main = () => {
     <ThemeProvider theme={{ name: 'my-theme', overrides: [defaultDarkModeOverride] }} colorMode={'dark'}>
       <div>
         <StorageManager
-          defaultFiles={[{ key: 'public/5_YOUTUBERS_para_MEJORAR_tu_ESPANOL___Mis_favoritos-(1080p).mp4' }]}
+          // defaultFiles={[{ key: 'public/5_YOUTUBERS_para_MEJORAR_tu_ESPANOL___Mis_favoritos-(1080p).mp4' }]}
           ref={ref}
           isResumable
           accessLevel='public'
