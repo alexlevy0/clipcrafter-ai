@@ -3,7 +3,7 @@ import { EQuality } from './types'
 export const conf = {
   region: 'eu-west-3',
   nameModifier: '_edited',
-  quality: EQuality.HIGH,
+  quality: EQuality.LOW,
   targetWidth: 360,
   targetHeight: 640,
   cropFile: 'qlip-crop-model-out.json',

@@ -63,8 +63,8 @@
           ]
         },
         "Runtime": "nodejs18.x",
-        "MemorySize": 1024,
-        "Timeout": 300,
+        "MemorySize": 10240,
+        "Timeout": 900,
         "Code": {
           "S3Bucket": {
             "Ref": "deploymentBucketName"

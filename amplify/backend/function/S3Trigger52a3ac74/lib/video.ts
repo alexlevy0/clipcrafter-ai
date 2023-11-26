@@ -11,7 +11,8 @@ export function getCmd(
   _in: string,
   _out: string,
   shots: IShot[],
-  _quality: EQuality = conf.quality,
+  _quality: EQuality = EQuality.LOW,
+  isDebug: boolean = false,
 ) {
   const filterComplex = shots
     .map((c, i) => {
@@ -39,29 +40,35 @@ export function getCmd(
   const concatAudio = shots.map((_, i) => `[clip${i}a]`).join('')
   const fullFilter = `${filterComplex}${concatVideo}concat=n=${shots.length}:v=1:a=0[outv];${concatAudio}concat=n=${shots.length}:v=0:a=1[outa]`
   const quality = _quality === EQuality.HIGH ? conf.high : conf.bad
-  return `ffmpeg -i "${_in}" -filter_complex "${fullFilter}" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac ${quality} "${_out}"`
+  const debugCmds = '-loglevel debug -v verbose'
+
+  return `ffmpeg -i "${_in}" -filter_complex "${fullFilter}" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac ${quality} "${_out}" ${
+    isDebug ? debugCmds : ''
+  }`
 }
 
-export async function processVideo(_in: string, _out: string) {
+export async function processVideo(
+  _in: string,
+  _out: string,
+  isDebug: boolean,
+) {
   const statusUploader = StatusUploader.getInstance()
   await statusUploader.setStatus(EStatus.ffmpegParse)
 
   const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
-  // const clip: IShot[] = cropData.shots.slice(0, 4) // 4 ok // 5 KO
-  // const clip: IShot[] = cropData.shots.slice(4, 9) // ok
-  // const clip: IShot[] = cropData.shots.slice(5, 11)// OK
-  // const clip: IShot[] = cropData.shots.slice(11, 13) // OK
-
-  // { ts_start: 77.32, ts_end: 97.68, crop: [Object], label: null },
-  // { ts_start: 97.68, ts_end: 121.68, crop: [Object], label: null }
-  const clip: IShot[] = cropData.shots.slice(12, 14) // KO
-  console.log('clip length', { clip })
+ 
+  const clip: IShot[] = cropData.shots
 
   await statusUploader.setStatus(EStatus.ffmpegCmd)
-  const ffmpegCommand = getCmd(_in, _out, clip)
+  const ffmpegCommand = getCmd(_in, _out, clip, conf.quality, isDebug)
 
   await statusUploader.setStatus(EStatus.ffmpegExec)
-  await execPromise(ffmpegCommand)
+  try {
+    await execPromise(ffmpegCommand)
+  } catch (error) {
+    console.log('--ERROR execPromise :')
+    throw new Error(error)
+  }
 
   await statusUploader.setStatus(EStatus.ffmpegEnded)
 }
