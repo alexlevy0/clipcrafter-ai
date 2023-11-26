@@ -52,32 +52,40 @@ const execPromise = promisify(exec)
 //   }`
 // }
 
-export function getCmdSimple(_in: string, _out: string, shots: IShot[]) {
+export function getCmdSimple(
+  inputFile: string,
+  outputFile: string,
+  shots: IShot[],
+) {
   const targetWidth = 360
   const targetHeight = 640
 
-  const filterComplex = shots
-    .map((c, i) => {
-      const trim = `[0:v]trim=start=${c.ts_start}:end=${c.ts_end},setpts=PTS-STARTPTS`
-      let filter = trim
+  const buildVideoFilter = (c, i) => {
+    let filter = `[0:v]trim=start=${c.ts_start}:end=${c.ts_end},setpts=PTS-STARTPTS`
 
-      if (c.crop) {
-        const crop = `,crop=${c.crop.w}:${c.crop.h}:${c.crop.x}:${c.crop.y}`
-        const scale = `,scale=${targetWidth}:${targetHeight}`
-        filter += `${crop}${scale}`
-      } else {
-        filter += `,scale=${targetWidth}:-2,pad=${targetWidth}:${targetHeight}:(ow-iw)/2:(oh-ih)/2`
-      }
-      const trimAudio = `[0:a]atrim=start=${c.ts_start}:end=${c.ts_end},asetpts=PTS-STARTPTS[clip${i}a];`
-      return `${filter},setsar=1[clip${i}v];${trimAudio}`
-    })
+    if (c.crop) {
+      filter += `,crop=${c.crop.w}:${c.crop.h}:${c.crop.x}:${c.crop.y},scale=${targetWidth}:${targetHeight}`
+    } else {
+      filter += `,scale=${targetWidth}:-2,pad=${targetWidth}:${targetHeight}:(ow-iw)/2:(oh-ih)/2`
+    }
+
+    return `${filter},setsar=1[clip${i}v];`
+  }
+
+  const buildAudioFilter = (c, i) => {
+    return `[0:a]atrim=start=${c.ts_start}:end=${c.ts_end},asetpts=PTS-STARTPTS[clip${i}a];`
+  }
+
+  const filterComplex = shots
+    .map((c, i) => buildVideoFilter(c, i) + buildAudioFilter(c, i))
     .join('')
 
   const concatVideo = shots.map((_, i) => `[clip${i}v]`).join('')
   const concatAudio = shots.map((_, i) => `[clip${i}a]`).join('')
+
   const fullFilter = `${filterComplex}${concatVideo}concat=n=${shots.length}:v=1:a=0[outv];${concatAudio}concat=n=${shots.length}:v=0:a=1[outa]`
 
-  return `ffmpeg -i "${_in}" -filter_complex "${fullFilter}" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac -preset ultrafast -crf 35 -profile:v baseline -tune zerolatency -threads 1 -bufsize 500k -maxrate 500k "${_out}" -loglevel debug -v verbose`
+  return `ffmpeg -i "${inputFile}" -filter_complex "${fullFilter}" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac -preset ultrafast -crf 35 -profile:v baseline -tune zerolatency -threads 1 -bufsize 500k -maxrate 500k "${outputFile}" -loglevel debug -v verbose`
 }
 
 export async function processVideo(
@@ -91,8 +99,8 @@ export async function processVideo(
   const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
 
   // const clip: IShot[] = cropData.shots
+  const clip: IShot[] = cropData.shots.slice(0, 15)
   // const clip: IShot[] = cropData.shots.slice(0, 20)
-  const clip: IShot[] = cropData.shots.slice(0, 20)
 
   await statusUploader.setStatus(EStatus.ffmpegCmd)
   const ffmpegCommand = getCmdSimple(_in, _out, clip)
