@@ -10,8 +10,9 @@
       "dom",
       "esnext"
     ],
+    // "noUnusedParameters": true,
+    "noUnusedParameters": false,
     // "noUnusedLocals": true,
-    "noUnusedParameters": true,
     // "noImplicitAny":false,
     // "allowUnreachableCode":true,
     // "strict":true,// TODO SET TO TRUE

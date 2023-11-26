@@ -9,5 +9,5 @@ export const conf = {
   cropFile: 'qlip-crop-model-out.json',
   blurFilter: `boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1`,
   // updateIntervalProgress: 500,
-  updateIntervalProgress: 0,
+  updateIntervalProgress: 1000,
 }

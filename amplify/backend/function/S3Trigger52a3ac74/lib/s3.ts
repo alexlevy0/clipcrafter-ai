@@ -98,8 +98,9 @@ export async function upload(
   await statusUploader.setStatus(EStatus.upStart)
 
   if (isDebug) {
-    await statusUploader.setStatus(EStatus.upEnded)
-    return
+    console.log('upload reald');
+    // await statusUploader.setStatus(EStatus.upEnded)
+    // return
   }
 
   let uploadedBytes = 0
