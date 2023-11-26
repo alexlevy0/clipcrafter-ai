@@ -1,5 +1,3 @@
-import { red, green } from 'ansis';
-
 export const log = (
   data: string | { data: string; err?: boolean },
   err: boolean = false,
@@ -16,9 +14,9 @@ export const log = (
   }
 
   if (!isError) {
-    console.log(green.bold(message));
+    console.log(message);
   } else {
-    console.log(red.bold(message));
+    console.log(message);
     throw new Error(message)
   }
 }

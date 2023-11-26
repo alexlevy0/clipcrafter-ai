@@ -41,7 +41,6 @@
     "@splinetool/loader": "0.9.73",
     "@splinetool/r3f-spline": "1.0.1",
     "@types/three": "^0.158.3",
-    "ansis": "^2.0.2",
     "aws-amplify": "^5.3.12",
     "aws-lambda": "^1.0.7",
     "aws-sdk": "^2.1495.0",
