@@ -53,7 +53,6 @@ class StatusUploader {
 
       if (
         status.startsWith(EStatus.dlProgress) ||
-        status.startsWith(EStatus.upProgress) ||
         status.startsWith(EStatus.ffmpegCmd) ||
         status.startsWith(EStatus.ffmpegExec)
       ) {

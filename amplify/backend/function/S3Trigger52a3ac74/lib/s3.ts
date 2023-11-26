@@ -7,7 +7,7 @@ import path from 'node:path'
 import { conf } from './config'
 import { log } from './logger'
 import StatusUploader from './StatusUploader'
-import { EStatus, generateProgressStatus } from './types'
+import { EStatus, generateProgressStatus, getProgress } from './types'
 import { decodeS3Key } from './utils'
 
 const s3 = new S3({ region: conf.region })
@@ -55,9 +55,11 @@ export async function download(
       const statusUpdateInterval = setInterval(async () => {
         if (!updateInProgress) {
           updateInProgress = true
-          const progress = ((downloadedBytes / ContentLength) * 100).toFixed(2)
           await statusUploader.setStatus(
-            generateProgressStatus(EStatus.dlProgress, progress),
+            generateProgressStatus(
+              EStatus.dlProgress,
+              getProgress(downloadedBytes, ContentLength),
+            ),
           )
           updateInProgress = false
         }
@@ -88,56 +90,12 @@ export async function download(
   }
 }
 
-export async function upload(fPath: string, BucketN: string, objKey: string) {
-  const statusUploader = StatusUploader.getInstance()
-  await statusUploader.setStatus(EStatus.upStart)
-
-  let uploadedBytes = 0
-  let updateInProgress = false
-
-  const fileStream = fsSync.createReadStream(fPath)
-  const fileStats = fsSync.statSync(fPath)
-  const totalSize = fileStats.size
-
-  fileStream.on('error', error => {
-    console.error('Error reading file:', error)
-    clearInterval(statusUpdateInterval)
-  })
-  fileStream.on('end', () => {
-    clearInterval(statusUpdateInterval)
-  })
-  // TODO FIX ME : RequestTimeout
-  // fileStream.on('data', chunk => {
-  //   uploadedBytes += chunk.length
-  // })
-
-  await statusUploader.setStatus(EStatus.upProgress)
-
-  const statusUpdateInterval = setInterval(async () => {
-    if (!updateInProgress) {
-      updateInProgress = true
-      // TODO FIXME WHEN fileStream.on('data')...
-      // const progress = ((uploadedBytes / totalSize) * 100).toFixed(2)
-      // await statusUploader.setStatus(
-      //   generateProgressStatus(EStatus.upProgress, progress),
-      // )
-      updateInProgress = false
-    }
-  }, conf.updateIntervalProgress)
-
-  const params = {
-    Bucket: BucketN,
-    Key: objKey,
-    Body: fileStream,
-  }
-
+export async function upload(fPath: string, Bucket: string, Key: string) {
   try {
-    await s3.putObject(params)
-    clearInterval(statusUpdateInterval)
-    await statusUploader.setStatus(EStatus.upEnded)
+    const Body = fsSync.createReadStream(fPath)
+    await s3.putObject({ Bucket, Key, Body })
   } catch (error) {
     console.error(error)
-    clearInterval(statusUpdateInterval)
     throw new Error(error)
   }
 }

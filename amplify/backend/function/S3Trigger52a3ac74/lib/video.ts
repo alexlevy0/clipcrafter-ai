@@ -1,19 +1,19 @@
 import * as fs from 'fs/promises'
 import { exec } from 'child_process'
 import { promisify } from 'util'
-import { IShot, EQuality, EStatus, generateProgressStatus } from './types'
+import {
+  IShot,
+  EQuality,
+  EStatus,
+  generateProgressStatus,
+  getProgress,
+} from './types'
 import { conf } from './config'
 import StatusUploader from './StatusUploader'
 
 const execPromise = promisify(exec)
 
-export function getCmd(
-  _in: string,
-  _out: string,
-  shots: IShot[],
-  _quality: EQuality = EQuality.LOW,
-  isDebug: boolean = false,
-) {
+export function getCmd(_in: string, _out: string, shots: IShot[]) {
   const filterComplex = shots
     .map((c, i) => {
       const trim = `[0:v]trim=start=${c.ts_start}:end=${c.ts_end},setpts=PTS-STARTPTS`
@@ -24,7 +24,6 @@ export function getCmd(
         const scale = `,scale=${conf.targetWidth}:${conf.targetHeight}`
         filter += `${crop}${scale}`
       } else {
-        // filter += `,scale=${conf.targetWidth}:-2,pad=${conf.targetWidth}:${conf.targetHeight}:(ow-iw)/2:(oh-ih)/2`
         const scaleAndCrop_Bg = `scale=-2:640,crop=360:640`
         filter += `,${conf.blurFilter},${scaleAndCrop_Bg}[bg${i}v];`
         filter += trim
@@ -44,26 +43,22 @@ export function getCmd(
   const high = `-preset slow -crf 18 -profile:v high`
   const bad = `-preset ultrafast -crf 35 -profile:v baseline -tune zerolatency -threads 1 -bufsize 500k -maxrate 500k`
 
-  const quality = _quality === EQuality.HIGH ? high : bad
+  const quality = conf.quality === EQuality.HIGH ? high : bad
   const debugCmds = '-loglevel debug -v verbose'
 
   return `ffmpeg -i "${_in}" -filter_complex "${fullFilter}" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac ${quality} "${_out}" ${
-    isDebug ? debugCmds : ''
+    conf.debug ? debugCmds : ''
   }`
 }
 
-export async function processVideo(
-  _in: string,
-  _out: string,
-  isDebug: boolean,
-) {
+export async function processVideo(_in: string, _out: string) {
   const statusUploader = StatusUploader.getInstance()
   await statusUploader.setStatus(EStatus.ffmpegParse)
 
   const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
   const clip: IShot[] = cropData.shots
 
-  const batchSize = conf.batchSize
+  const batchSize: number = conf.batchSize
   const batchStartIndices = Array.from(
     { length: Math.ceil(clip.length / batchSize) },
     (_, i) => i * batchSize,
@@ -77,25 +72,16 @@ export async function processVideo(
   const baseOut = _out.replace(reg, '')
   let ext = _out.match(reg)[0]
 
-  await statusUploader.setStatus(EStatus.ffmpegCmd)
   for (const [index, batchShots] of batches.entries()) {
-    const progress = ((index / batches.length) * 100).toFixed(2)
-    await statusUploader.setStatus(
-      generateProgressStatus(EStatus.ffmpegCmd, progress),
-    )
-
-    const batchOutputPrefix = 'batch_'
-    const batchOutput = `${baseOut}_${batchOutputPrefix}${index}${ext}`
-
-    const ffmpegCommand = getCmd(
-      _in,
-      batchOutput,
-      batchShots,
-      conf.quality,
-      isDebug,
-    )
-
     try {
+      await statusUploader.setStatus(
+        generateProgressStatus(
+          EStatus.ffmpegCmd,
+          getProgress(index, batches.length),
+        ),
+      )
+      const batchOutput = `${baseOut}_batch_${index}${ext}`
+      const ffmpegCommand = getCmd(_in, batchOutput, batchShots)
       await execPromise(ffmpegCommand)
     } catch (error) {
       console.log('--ERROR execPromise :')
@@ -117,13 +103,11 @@ export async function processVideo(
 }
 
 const createConcatFile = async (outputBase, batchCount, extension) => {
+  const fileList = Array.from(
+    { length: batchCount },
+    (_, i) => `file '${outputBase}_batch_${i}${extension}'`,
+  ).join('\n')
   const concatFileName = `${outputBase}_concatList.txt`
-  let fileList = ''
-
-  for (let i = 0; i < batchCount; i++) {
-    fileList += `file '${outputBase}_batch_${i}${extension}'\n`
-  }
-
   await fs.writeFile(concatFileName, fileList)
   return concatFileName
 }

@@ -4,6 +4,7 @@ export const conf = {
   region: 'eu-west-3',
   nameModifier: '_edited',
   quality: EQuality.HIGH,
+  debug: true,
   targetWidth: 360,
   targetHeight: 640,
   batchSize: 5,
