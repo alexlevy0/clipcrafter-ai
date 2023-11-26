@@ -106,17 +106,21 @@ export async function upload(fPath: string, BucketN: string, objKey: string) {
   fileStream.on('end', () => {
     clearInterval(statusUpdateInterval)
   })
-  fileStream.on('data', chunk => {
-    uploadedBytes += chunk.length
-  })
+  // TODO FIX ME : RequestTimeout
+  // fileStream.on('data', chunk => {
+  //   uploadedBytes += chunk.length
+  // })
+
+  await statusUploader.setStatus(EStatus.upProgress)
 
   const statusUpdateInterval = setInterval(async () => {
     if (!updateInProgress) {
       updateInProgress = true
-      const progress = ((uploadedBytes / totalSize) * 100).toFixed(2)
-      await statusUploader.setStatus(
-        generateProgressStatus(EStatus.upProgress, progress),
-      )
+      // TODO FIXME WHEN fileStream.on('data')...
+      // const progress = ((uploadedBytes / totalSize) * 100).toFixed(2)
+      // await statusUploader.setStatus(
+      //   generateProgressStatus(EStatus.upProgress, progress),
+      // )
       updateInProgress = false
     }
   }, conf.updateIntervalProgress)

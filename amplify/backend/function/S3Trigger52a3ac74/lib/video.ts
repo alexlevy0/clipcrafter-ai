@@ -77,6 +77,7 @@ export async function processVideo(
   const baseOut = _out.replace(reg, '')
   let ext = _out.match(reg)[0]
 
+  await statusUploader.setStatus(EStatus.ffmpegCmd)
   for (const [index, batchShots] of batches.entries()) {
     const progress = ((index / batches.length) * 100).toFixed(2)
     await statusUploader.setStatus(
@@ -94,8 +95,6 @@ export async function processVideo(
       isDebug,
     )
 
-    await statusUploader.setStatus(EStatus.ffmpegExec)
-
     try {
       await execPromise(ffmpegCommand)
     } catch (error) {
@@ -104,10 +103,10 @@ export async function processVideo(
     }
   }
 
-  const concatFile = await createConcatFile(baseOut, batches.length, ext)
-
-  const concatCommand = `ffmpeg -f concat -safe 0 -i "${concatFile}" -c copy "${_out}"`
   try {
+    await statusUploader.setStatus(`${EStatus.ffmpegExec}-${batches.length}`)
+    const concatFile = await createConcatFile(baseOut, batches.length, ext)
+    const concatCommand = `ffmpeg -f concat -safe 0 -i "${concatFile}" -c copy "${_out}"`
     await execPromise(concatCommand)
   } catch (error) {
     console.log('--ERROR concat execPromise :')
