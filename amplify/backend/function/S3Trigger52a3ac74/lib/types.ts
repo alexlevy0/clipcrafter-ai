@@ -28,6 +28,7 @@ export interface IShot {
 
 export enum EStatus {
   Init = 'init',
+  Succeded = 'succeded',
   dlStart = 'dl-start',
   dlProgress = 'dl-progress',
   dlEnded = 'dl-ended',

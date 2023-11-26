@@ -6,6 +6,7 @@ import { EStatus } from './types'
 
 class StatusUploader {
   private static instance: StatusUploader | null = null
+  private static _createStatusFile: boolean = false
   private _s3: S3
   private _bucket: string | null
   private _key: string | null
@@ -14,6 +15,9 @@ class StatusUploader {
   private _throttleInterval = conf.updateIntervalProgress
 
   private constructor(bucket: string, key: string) {
+    if (!StatusUploader._createStatusFile) {
+      return
+    }
     this._s3 = new S3({ region: conf.region })
     this._bucket = bucket
     this._key = key
@@ -29,8 +33,10 @@ class StatusUploader {
 
   public static getInstance(bucket?: string, key?: string): StatusUploader {
     if (!this.instance) {
-      if (!bucket || !key) {
-        throw new Error('Bucket and key must be provided for the first instantiation')
+      if (this._createStatusFile && (!bucket || !key)) {
+        throw new Error(
+          'Bucket and key must be provided for the first instantiation',
+        )
       }
       this.instance = new StatusUploader(bucket, key)
     }
@@ -40,12 +46,18 @@ class StatusUploader {
   public async setStatus(status: EStatus | string): Promise<void> {
     try {
       const now = Date.now()
-      if (now < this._lastUpdateTime + this._throttleInterval && status !== EStatus.Error) {
+      if (
+        now < this._lastUpdateTime + this._throttleInterval &&
+        status !== EStatus.Error
+      ) {
         return
       }
       let baseStatus = status
 
-      if (status.startsWith(EStatus.dlProgress) || status.startsWith(EStatus.upProgress)) {
+      if (
+        status.startsWith(EStatus.dlProgress) ||
+        status.startsWith(EStatus.upProgress)
+      ) {
         baseStatus = status.split('-').slice(0, 2).join('-')
       }
 
@@ -53,7 +65,7 @@ class StatusUploader {
         throw new Error(`Invalid status: ${status}`)
       }
 
-      if (!this._bucket || !this._key) {
+      if (StatusUploader._createStatusFile && (!this._bucket || !this._key)) {
         throw new Error('Bucket and key must be set')
       }
 
@@ -61,13 +73,15 @@ class StatusUploader {
 
       this.useStatus(status)
 
-      await this._s3.putObject({
-        Bucket: this._bucket,
-        Key: `${this._key}:status`,
-        Body: Buffer.from(''),
-        Metadata: { status },
-        Tagging: 'StatusTag=status',
-      })
+      if (StatusUploader._createStatusFile) {
+        await this._s3.putObject({
+          Bucket: this._bucket,
+          Key: `${this._key}:status`,
+          Body: Buffer.from(''),
+          Metadata: { status },
+          Tagging: 'StatusTag=status',
+        })
+      }
       this._lastUpdateTime = now
     } catch (error) {
       console.error('Error when defining status:', error)

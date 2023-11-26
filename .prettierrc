@@ -1,5 +1,5 @@
 {
-  "printWidth": 100,
+  "printWidth": 80,
   "singleAttributePerLine": true,
   "bracketSpacing": true,
   "arrowParens": "avoid",
