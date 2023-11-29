@@ -1,4 +1,20 @@
 {
+  "api": {
+    "apimembership": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "membershiplambda"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    }
+  },
   "auth": {
     "qlipappaada6b47": {
       "customAuth": false,
@@ -29,6 +45,20 @@
       "dependsOn": [],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
+    },
+    "membershiplambda": {
+      "build": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "qlipappaada6b47"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
     }
   },
   "parameters": {
@@ -45,6 +75,14 @@
         {
           "category": "function",
           "resourceName": "S3Trigger52a3ac74"
+        }
+      ]
+    },
+    "AMPLIFY_function_membershiplambda_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "membershiplambda"
         }
       ]
     }

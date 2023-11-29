@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "auth": {
+      "qlipappaada6b47": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "secretNames": [
+    "stripe_key"
+  ]
+}
