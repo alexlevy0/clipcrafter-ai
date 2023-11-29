@@ -64,8 +64,8 @@ body,
 }
 
 body {
-  background: rgb(255, 240, 246);
-  background: radial-gradient(circle, rgba(255, 240, 246, 1) 0%, rgba(249, 206, 224, 1) 35%, rgba(255, 163, 201, 1) 100%);
+  background: rgb(0, 0, 0);
+  /* background: radial-gradient(circle, rgba(13, 25, 38, 1) 0%, rgba(249, 206, 224, 1) 35%, rgba(255, 163, 201, 1) 100%); */
 }
 
 .content-container {
@@ -106,4 +106,18 @@ nav {
   display: flex;
   justify-content: center;
   margin-top: 2rem;
+}
+
+[data-amplify-authenticator] {
+  --amplify-components-authenticator-modal-background-color: rgb(0 0 0 / 50%);
+  /* --amplify-colors-background-primary: var(--amplify-colors-neutral-90);
+  --amplify-colors-background-secondary: var(--amplify-colors-neutral-100);
+  --amplify-colors-primary-10: var(--amplify-colors-teal-100);
+  --amplify-colors-primary-80: var(--amplify-colors-teal-40);
+  --amplify-colors-primary-90: var(--amplify-colors-teal-20);
+  --amplify-colors-primary-100: var(--amplify-colors-teal-10);
+  --amplify-colors-font-interactive: var(--amplify-colors-white);
+  --amplify-components-tabs-item-active-color: var(--amplify-colors-white);
+  --amplify-components-tabs-item-focus-color: var(--amplify-colors-white);
+  --amplify-components-tabs-item-hover-color: var(--amplify-colors-orange); */
 }

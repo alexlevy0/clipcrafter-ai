@@ -2,7 +2,9 @@
 import '@aws-amplify/ui-react/styles.css';
 import { Amplify } from 'aws-amplify';
 import awsconfig from '../aws-exports.js';
-import { withAuthenticator } from '@aws-amplify/ui-react';
+// import { withAuthenticator } from '@aws-amplify/ui-react';
+import { Authenticator } from '@aws-amplify/ui-react';
+
 import React, { useEffect, useRef, useState } from 'react';
 // // @ts-ignore:next-line
 // import dynamic from 'next/dynamic';
@@ -32,7 +34,12 @@ Amplify.configure({ ...awsconfig, ssr: true });
 // }
 
 const App = () => {
-  return <Main />
+
+  return (
+    <Authenticator.Provider >
+      <Main />
+    </Authenticator.Provider>
+  )
 
   // const container = useRef(null)
   // const domContent = useRef(null)
@@ -51,4 +58,5 @@ const App = () => {
   // )
 }
 
-export default withAuthenticator(App);
+// export default withAuthenticator(App);
+export default App;

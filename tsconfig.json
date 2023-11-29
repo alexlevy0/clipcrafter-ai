@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ESNext",
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
+    "allowSyntheticDefaultImports": true,
     "allowJs": true,
-    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": false,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
@@ -33,6 +35,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "@aws-amplify/ui-react/**/types/¨**/*.ts",
     ".next/types/**/*.ts"
   ],
   "exclude": [
