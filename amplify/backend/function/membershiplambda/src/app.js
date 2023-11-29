@@ -30,6 +30,7 @@ const getStripeKey = async () => {
 // post method
 app.post('/webhook', async function (req, res) {
   try {
+    console.log('---req', req)
     const stripeKey = await getStripeKey()
     console.log('stripeKey :', stripeKey)
     const stripe = require('stripe')(stripeKey)
