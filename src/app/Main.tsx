@@ -91,8 +91,8 @@ export const Main = () => {
       const error = await stripe?.redirectToCheckout({
         lineItems: [{ price: "price_1OHZaRHjC5oFez5B3xJk2zRS", quantity: 1 }],
         mode: "subscription",
-        successUrl: "http://localhost:3000",
-        cancelUrl: "http://localhost:3000/cancel",
+        successUrl: "https://main.d1dn1n1ry842dz.amplifyapp.com/",
+        cancelUrl: "https://main.d1dn1n1ry842dz.amplifyapp.com/cancel",
       });
       console.log({ error });
     } catch (error) {
