@@ -78,6 +78,22 @@
         }
       ]
     },
+    "AMPLIFY_function_membershiplambda_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "membershiplambda"
+        }
+      ]
+    },
+    "AMPLIFY_function_membershiplambda_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "membershiplambda"
+        }
+      ]
+    },
     "AMPLIFY_function_membershiplambda_secretsPathAmplifyAppId": {
       "usedBy": [
         {
