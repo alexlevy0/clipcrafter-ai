@@ -91,7 +91,7 @@ export const Main = () => {
       const error = await stripe?.redirectToCheckout({
         lineItems: [{ price: "price_1OHZaRHjC5oFez5B3xJk2zRS", quantity: 1 }],
         mode: "subscription",
-        successUrl: "http://localhost:3000/post",
+        successUrl: "http://localhost:3000",
         cancelUrl: "http://localhost:3000/cancel",
       });
       console.log({ error });
