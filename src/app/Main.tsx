@@ -18,7 +18,7 @@ import {
   AccountSettings,
   Divider,
   CheckboxField,
-  AuthenticatorProps
+  AuthenticatorProps,
 } from '@aws-amplify/ui-react'
 import { ThemeProvider } from '@aws-amplify/ui-react';
 import React, { useEffect, useRef, useState } from 'react';
@@ -46,12 +46,12 @@ const ReactPlayer: ReactPlayer = dynamic(() => import('react-player/lazy'), { ss
 
 
 
-
 export const Main = () => {
-  const { user, signOut } = useAuthenticator((context) => [context.user]);
-  const { authStatus } = useAuthenticator(context => [context.authStatus]);
-  const { route } = useAuthenticator(context => [context.route]);
+  const { tokens } = useTheme();
 
+  const { user } = useAuthenticator((context) => [context.user]);
+  const { authStatus } = useAuthenticator(context => [context.authStatus]);
+  const { route, toSignIn, toSignUp } = useAuthenticator(context => [context.route]);
   const [showAccountSettings, setShowAccountSettings] = useState(false)
   const [renderAuth, setRenderAuth] = useState<'signIn' | 'signUp' | undefined>(undefined)
 
@@ -61,13 +61,18 @@ export const Main = () => {
     }
   }, [route]);
 
+  const goSignIn = () => {
+    toSignIn()
+    setRenderAuth('signIn')
+  }
+
+  const goSignUp = () => {
+    toSignUp()
+    setRenderAuth('signUp')
+  }
 
   const displayAccountSettings = () => {
     setShowAccountSettings(!showAccountSettings)
-  }
-
-  const displayAuth = (initialState: "signIn" | "signUp") => {
-    setRenderAuth(initialState)
   }
 
   const renderConnectedDashboard = () => {
@@ -156,13 +161,13 @@ export const Main = () => {
                 <>
                   <Button
                     loadingText=""
-                    onClick={() => displayAuth('signIn')}
+                    onClick={goSignIn}
                   >
                     Login
                   </Button>
                   <Button
                     loadingText=""
-                    onClick={() => displayAuth('signUp')}
+                    onClick={goSignUp}
                   >
                     Sign Up
                   </Button>
@@ -182,8 +187,9 @@ export const Main = () => {
             columnEnd="-1"
             display="flex"
           >
+            {renderConnectedDashboard()}
             {
-              (renderAuth && authStatus !== 'authenticated') ? (
+              (!!renderAuth && authStatus !== 'authenticated') && (
                 <Authenticator
                   hideSignUp={renderAuth === "signIn"}
                   loginMechanisms={['email']}
@@ -195,7 +201,7 @@ export const Main = () => {
                   socialProviders={['apple', 'google']}
                   services={{
                     async validateCustomSignUp(formData) {
-                      if (!formData.acknowledgement) {
+                      if (Object.keys(formData).length >= 3 && !formData.acknowledgement) {
                         return {
                           acknowledgement: 'You must agree to the Terms & Conditions',
                         };
@@ -204,9 +210,26 @@ export const Main = () => {
                   }}
                   components={{
                     SignIn: {
-                      // FormFields() {
-                      //   return <Authenticator.SignIn.Footer />
-                      // },
+                      Footer() {
+                        return (
+                          <>
+                            <Flex
+                              paddingRight={tokens.components.authenticator.form.padding}
+                              paddingLeft={tokens.components.authenticator.form.padding}
+                              paddingBottom={tokens.components.button.paddingBlockEnd}
+                            >
+                              <Button
+                                isFullWidth
+                                variation="link"
+                                onClick={() => setRenderAuth(undefined)}
+                              >
+                                Cancel
+                              </Button>
+                            </Flex>
+                            <Authenticator.SignIn.Footer />
+                          </>
+                        )
+                      }
                     },
                     SignUp: {
                       FormFields() {
@@ -222,7 +245,6 @@ export const Main = () => {
                               label="I agree with the Terms & Conditions"
                             />
                             <Button
-                              name='cancel'
                               variation="link"
                               onClick={() => setRenderAuth(undefined)}
                             >
@@ -234,8 +256,6 @@ export const Main = () => {
                     },
                   }}
                 />
-              ) : (
-                renderConnectedDashboard()
               )
             }
           </Card>
