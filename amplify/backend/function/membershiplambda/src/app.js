@@ -29,41 +29,48 @@ const getStripeKey = async () => {
 }
 // post method
 app.post('/webhook', async function (req, res) {
-  const stripeKey = await getStripeKey()
-  const stripe = require('stripe')(stripeKey)
-  const customer = await stripe.customers.retrieve(
-    req.body.data.object.customer,
-  )
-  const userEmail = customer.email
-  const cognito = new aws.CognitoIdentityServiceProvider({
-    apiVersion: '2016-04-18',
-  })
-  cognito.adminCreateUser(
-    {
-      UserPoolId: process.env.AUTH_MEMBERSHIPWEBSITE_USERPOOLID,
-      Username: userEmail,
-      DesiredDeliveryMediums: ['EMAIL'],
-      UserAttributes: [
-        {
-          Name: 'email',
-          Value: userEmail,
-        },
-      ],
-      ValidationData: [
-        {
-          Name: 'email',
-          Value: userEmail,
-        },
-      ],
-    },
-    function (err, data) {
-      if (err) {
-        console.log(err)
-      } else {
-        console.log(data)
-      }
-    },
-  )
+  try {
+    const stripeKey = await getStripeKey()
+    console.log('stripeKey :', stripeKey)
+    const stripe = require('stripe')(stripeKey)
+    const customer = await stripe.customers.retrieve(
+      req.body.data.object.customer,
+    )
+    const userEmail = customer.email
+    console.log('userEmail :', userEmail)
+    const cognito = new aws.CognitoIdentityServiceProvider({
+      apiVersion: '2016-04-18',
+    })
+    cognito.adminCreateUser(
+      {
+        UserPoolId: process.env.AUTH_MEMBERSHIPWEBSITE_USERPOOLID,
+        Username: userEmail,
+        DesiredDeliveryMediums: ['EMAIL'],
+        UserAttributes: [
+          {
+            Name: 'email',
+            Value: userEmail,
+          },
+        ],
+        ValidationData: [
+          {
+            Name: 'email',
+            Value: userEmail,
+          },
+        ],
+      },
+      function (err, data) {
+        if (err) {
+          console.log('adminCreateUser err :', err)
+        } else {
+          console.log('adminCreateUser ok :', data)
+        }
+      },
+    )
+  } catch (error) {
+    console.log('CATCH ERROR', error)
+    console.error(error)
+  }
 })
 app.listen(3000, function () {
   console.log('App started')
