@@ -9,7 +9,7 @@
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
     "noFallthroughCasesInSwitch": true,
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
