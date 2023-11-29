@@ -1,6 +1,8 @@
 /* eslint-disable react/jsx-no-undef */
 "use client";
 import '@aws-amplify/ui-react/styles.css';
+import { loadStripe } from "@stripe/stripe-js";
+
 import { StorageManager } from '@aws-amplify/ui-react-storage'
 import {
   Text,
@@ -19,6 +21,10 @@ import {
   Divider,
   CheckboxField,
   AuthenticatorProps,
+  Menu,
+  MenuItem,
+  Input,
+  Label,
 } from '@aws-amplify/ui-react'
 import { ThemeProvider } from '@aws-amplify/ui-react';
 import React, { useEffect, useRef, useState } from 'react';
@@ -26,7 +32,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Auth, Storage } from 'aws-amplify';
 // @ts-ignore
-import { formFields } from './authFormFields.tsx';
+import { Features } from './Features.tsx';
 // @ts-ignore
 import { retry, noop, getData } from './utils.ts';
 
@@ -53,13 +59,14 @@ export const Main = () => {
   const { authStatus } = useAuthenticator(context => [context.authStatus]);
   const { route, toSignIn, toSignUp } = useAuthenticator(context => [context.route]);
   const [showAccountSettings, setShowAccountSettings] = useState(false)
+  const [showFeatures, setShowFeatures] = useState(false)
   const [renderAuth, setRenderAuth] = useState<'signIn' | 'signUp' | undefined>(undefined)
 
   useEffect(() => {
-    if (route === 'authenticated') {
+    if ([authStatus, route].includes('authenticated')) {
       setRenderAuth(undefined)
     }
-  }, [route]);
+  }, [route, authStatus]);
 
   const goSignIn = () => {
     toSignIn()
@@ -75,7 +82,29 @@ export const Main = () => {
     setShowAccountSettings(!showAccountSettings)
   }
 
-  const renderConnectedDashboard = () => {
+  const upgrade = async () => {
+    try {
+      const stripe = await loadStripe(
+        "pk_test_51OHZRzHjC5oFez5BiDFM3Up4nzlz0XkRwfHDXbxLjNqzJSLuBq0ZKwyrhVH26W1pVG18vHKPINzFoBhTPmy7EhGE00vtJ4cAF4"
+      );
+      console.log({ stripe });
+      const error = await stripe?.redirectToCheckout({
+        lineItems: [{ price: "price_1OHZaRHjC5oFez5B3xJk2zRS", quantity: 1 }],
+        mode: "subscription",
+        successUrl: "http://localhost:3000/",
+        cancelUrl: "http://localhost:3000/",
+      });
+      console.log({ error });
+    } catch (error) {
+      console.error(error);
+    }
+
+  }
+
+  const renderDashboard = () => {
+    if (showFeatures) {
+      return <Features />
+    }
     return showAccountSettings ?
       <Flex
         flex={1}
@@ -132,8 +161,12 @@ export const Main = () => {
               alignItems="center"
               justifyContent="flex-start"
             >
-              <Heading level={5}>
-                🎬 ClipCrafter AI 🌟
+              <Heading
+                color={"#e8e6e3"}
+                level={3}
+                fontWeight="bold"
+              >
+                ClipCrafter AI
               </Heading>
             </Flex>
             <Flex
@@ -146,22 +179,50 @@ export const Main = () => {
                 <>
                   <Button
                     loadingText=""
-                    onClick={displayAccountSettings}
+                    onClick={goSignIn}
+
                   >
-                    Account Settings
+                    Dashboard
                   </Button>
                   <Button
                     loadingText=""
-                    onClick={() => Auth.signOut()}
+                    onClick={upgrade}
+
                   >
-                    Logout
+                    Upgrade
                   </Button>
+                  <Menu
+                    size="large"
+                    menuAlign="end"
+                  >
+                    <MenuItem onClick={() => alert('Download')}>
+                      My Projects
+                    </MenuItem>
+                    <MenuItem isDisabled onClick={() => alert('Create a Copy')}>
+                      My Team
+                    </MenuItem>
+                    <MenuItem onClick={() => alert('Create a Copy')}>
+                      Usage
+                    </MenuItem>
+                    <MenuItem onClick={upgrade}>
+                      Upgrade
+                    </MenuItem>
+                    <Divider />
+                    <MenuItem onClick={displayAccountSettings}>
+                      Account Settings
+                    </MenuItem>
+                    <MenuItem onClick={() => Auth.signOut()}>
+                      Logout
+                    </MenuItem>
+                  </Menu>
+
                 </>
               ) : (
                 <>
                   <Button
                     loadingText=""
                     onClick={goSignIn}
+
                   >
                     Login
                   </Button>
@@ -171,6 +232,25 @@ export const Main = () => {
                   >
                     Sign Up
                   </Button>
+                  <Menu
+                    menuAlign="end"
+                    size="large"
+                  >
+                    <MenuItem onClick={() => setShowFeatures(true)}>
+                      Features
+                    </MenuItem>
+                    <MenuItem onClick={displayAccountSettings}>
+                      API
+                    </MenuItem>
+                    <MenuItem onClick={upgrade}>
+                      Upgrade
+                    </MenuItem>
+                    <Divider />
+                    <MenuItem onClick={() => alert('Create a Copy')}>
+                      Pricing
+                    </MenuItem>
+
+                  </Menu>
                 </>
               )}
             </Flex>
@@ -187,77 +267,75 @@ export const Main = () => {
             columnEnd="-1"
             display="flex"
           >
-            {renderConnectedDashboard()}
-            {
-              (!!renderAuth && authStatus !== 'authenticated') && (
-                <Authenticator
-                  hideSignUp={renderAuth === "signIn"}
-                  loginMechanisms={['email']}
-                  signUpAttributes={[
-                    "email"
-                  ]}
-                  variation="modal"
-                  initialState={renderAuth}
-                  socialProviders={['apple', 'google']}
-                  services={{
-                    async validateCustomSignUp(formData) {
-                      if (Object.keys(formData).length >= 3 && !formData.acknowledgement) {
-                        return {
-                          acknowledgement: 'You must agree to the Terms & Conditions',
-                        };
-                      }
-                    },
-                  }}
-                  components={{
-                    SignIn: {
-                      Footer() {
-                        return (
-                          <>
-                            <Flex
-                              paddingRight={tokens.components.authenticator.form.padding}
-                              paddingLeft={tokens.components.authenticator.form.padding}
-                              paddingBottom={tokens.components.button.paddingBlockEnd}
-                            >
-                              <Button
-                                isFullWidth
-                                variation="link"
-                                onClick={() => setRenderAuth(undefined)}
-                              >
-                                Cancel
-                              </Button>
-                            </Flex>
-                            <Authenticator.SignIn.Footer />
-                          </>
-                        )
-                      }
-                    },
-                    SignUp: {
-                      FormFields() {
-                        const { validationErrors } = useAuthenticator();
-                        return (
-                          <>
-                            <Authenticator.SignUp.FormFields />
-                            <CheckboxField
-                              errorMessage={validationErrors.acknowledgement as string}
-                              hasError={!!validationErrors.acknowledgement}
-                              name="acknowledgement"
-                              value="yes"
-                              label="I agree with the Terms & Conditions"
-                            />
+            {renderDashboard()}
+            {!!renderAuth && authStatus !== 'authenticated' && (
+              <Authenticator
+                hideSignUp={renderAuth === "signIn"}
+                loginMechanisms={['email']}
+                signUpAttributes={[
+                  "email"
+                ]}
+                variation="modal"
+                initialState={renderAuth}
+                socialProviders={['apple', 'google']}
+                services={{
+                  async validateCustomSignUp(formData) {
+                    if (Object.keys(formData).length >= 3 && !formData.acknowledgement) {
+                      return {
+                        acknowledgement: 'You must agree to the Terms & Conditions',
+                      };
+                    }
+                  },
+                }}
+                components={{
+                  SignIn: {
+                    Footer() {
+                      return (
+                        <>
+                          <Flex
+                            paddingRight={tokens.components.authenticator.form.padding}
+                            paddingLeft={tokens.components.authenticator.form.padding}
+                            paddingBottom={tokens.components.button.paddingBlockEnd}
+                          >
                             <Button
+                              isFullWidth
                               variation="link"
                               onClick={() => setRenderAuth(undefined)}
                             >
                               Cancel
                             </Button>
-                          </>
-                        );
-                      },
+                          </Flex>
+                          <Authenticator.SignIn.Footer />
+                        </>
+                      )
+                    }
+                  },
+                  SignUp: {
+                    FormFields() {
+                      const { validationErrors } = useAuthenticator();
+                      return (
+                        <>
+                          <Authenticator.SignUp.FormFields />
+                          <CheckboxField
+                            errorMessage={validationErrors.acknowledgement as string}
+                            hasError={!!validationErrors.acknowledgement}
+                            name="acknowledgement"
+                            value="yes"
+                            label="I agree with the Terms & Conditions"
+                          />
+                          <Button
+                            variation="link"
+                            onClick={() => setRenderAuth(undefined)}
+                          >
+                            Cancel
+                          </Button>
+                        </>
+                      );
                     },
-                  }}
-                />
-              )
-            }
+                  },
+                }}
+              />
+            )}
           </Card>
           <Card
             columnStart="1"
@@ -303,6 +381,12 @@ const Clip = () => {
       direction="column"
       flex={1}
     >
+      <Heading
+        level={4}
+        style={{ textAlign: "center" }}
+      >
+        Real-Time Collaborative AI Video Editing in the Cloud
+      </Heading>
       <StorageManager
         ref={ref}
         isResumable
@@ -315,31 +399,47 @@ const Clip = () => {
         onUploadStart={onResetVideoUrl}
         components={{ FilePicker({ onClick }) { return <Picker onClick={onClick} /> } }}
       />
-      <Flex
-        backgroundColor={'rgb(13, 25, 38)'}
-        paddingLeft={60}
-        paddingRight={60}
-        paddingTop={50}
-        direction="column"
-        justifyContent="space-around"
-      >
-        <Heading
-          level={6}
-        >
-          {status}
-        </Heading>
+      <Flex direction="column" gap="small">
+        <Input
+          size="small"
 
-        {status !== READY && status !== STANDBY && (
+          width="100%"
+          enterKeyHint="send"
+          placeholder="Paste YouTube link or drop a file"
+        />
+      </Flex>
+      {status !== READY && status !== STANDBY && (
+        <Flex
+          backgroundColor={'rgb(13, 25, 38)'}
+          direction="column"
+          gap="small"
+          justifyContent="space-around"
+        >
+          <Heading
+            level={6}
+          >
+            {status}
+          </Heading>
           <Loader
             emptyColor={'rgb(13, 25, 38)'}
             filledColor={'rgb(125, 214, 232)'}
             variation="linear"
           />
-        )}
+        </Flex>
+      )}
+      <Flex
+        backgroundColor={'black'}
+        alignContent="center"
+      >
+        <ReactPlayer
+          style={{ backgroundColor: 'black' }}
+          onReady={onReady}
+          playing={true}
+          controls={true}
+          url={url}
+          width={"100%"}
+        />
       </Flex>
-      <main style={{ backgroundColor: 'black' }} className="flex flex-col items-center justify-between p-0">
-        <ReactPlayer onReady={onReady} playing={true} controls={true} url={url} width={"100%"} />
-      </main>
     </Flex>
   );
 }
