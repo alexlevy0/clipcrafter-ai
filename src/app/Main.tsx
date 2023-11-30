@@ -137,7 +137,16 @@ export const Main = () => {
           </Button>
         </Grid>
       </Flex>
-      : <Clip />
+      // : <Clip />
+      : (
+        <Flex flex={1} width={"100%"}>
+          <iframe
+            style={{
+              width: "100%", height: "100%"
+            }}
+            src="https://clip-crafter-studio-web-service.onrender.com" frameborder="0" ></iframe>
+        </Flex >
+      )
   }
 
   return (
@@ -148,7 +157,7 @@ export const Main = () => {
           columnGap="0.5rem"
           rowGap="0.5rem"
           templateColumns=".5fr 1fr 1fr"
-          templateRows=".3fr 3.3fr .4fr"
+          templateRows=".3fr 3.6fr .1fr"
         >
           <Card
             columnStart="1"
@@ -160,6 +169,7 @@ export const Main = () => {
               alignContent="center"
               alignItems="center"
               justifyContent="flex-start"
+            // width={'100%'}
             >
               <Heading
                 color={"#e8e6e3"}
@@ -168,9 +178,17 @@ export const Main = () => {
               >
                 ClipCrafter AI
               </Heading>
+              <Heading
+                // width={'100%'}
+                color={"#e8e6e3"}
+                level={6}
+                fontWeight="bold"
+              >
+                Real-Time Collaborative AI Video Editing in the Cloud
+              </Heading>
             </Flex>
             <Flex
-              flex={1}
+              // flex={1}
               alignContent="center"
               alignItems="center"
               justifyContent="flex-end"
@@ -260,7 +278,7 @@ export const Main = () => {
             columnEnd="2"
             variation="elevated"
           >
-            Nav
+            <Clip />
           </Card>
           <Card
             columnStart="2"
@@ -380,13 +398,8 @@ const Clip = () => {
     <Flex
       direction="column"
       flex={1}
+
     >
-      <Heading
-        level={4}
-        style={{ textAlign: "center" }}
-      >
-        Real-Time Collaborative AI Video Editing in the Cloud
-      </Heading>
       <StorageManager
         ref={ref}
         isResumable
@@ -402,7 +415,6 @@ const Clip = () => {
       <Flex direction="column" gap="small">
         <Input
           size="small"
-
           width="100%"
           enterKeyHint="send"
           placeholder="Paste YouTube link or drop a file"
@@ -430,6 +442,7 @@ const Clip = () => {
       <Flex
         backgroundColor={'black'}
         alignContent="center"
+        justifyContent={'center'}
       >
         <ReactPlayer
           style={{ backgroundColor: 'black' }}
