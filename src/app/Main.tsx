@@ -144,7 +144,7 @@ export const Main = () => {
             style={{
               width: "100%", height: "100%"
             }}
-            src="https://clip-crafter-studio-web-service.onrender.com" frameborder="0" ></iframe>
+            src="https://clip-crafter-studio-web-service.onrender.com" frameBorder="0" ></iframe>
         </Flex >
       )
   }
