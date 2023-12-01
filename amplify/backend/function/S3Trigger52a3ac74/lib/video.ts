@@ -86,7 +86,7 @@ export async function processVideo(_in: string, _out: string) {
       const ffmpegCommand = getCmd(_in, batchOutput, batchShots)
       await execPromise(ffmpegCommand)
     } catch (error) {
-      console.log(`--ERROR execPromise : ${error}`)
+      console.log(`--ERROR execPromise at index ${index} : ${error}`)
       throw new Error(error)
     }
   }

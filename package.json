@@ -15,7 +15,8 @@
     "amplify:S3Trigger52a3ac74": "cd amplify/backend/function/S3Trigger52a3ac74 && tsc -p ./tsconfig.json && cd -",
     "---": "---",
     "invoke": "cd amplify/backend/function/S3Trigger52a3ac74 && sam local invoke 'LambdaFunction' -e lib/event.json -t S3Trigger52a3ac74-cloudformation-template.json",
-    "run:invoke": "npm run amplify:S3Trigger52a3ac74 && npm run invoke && cd -"
+    "run:invoke": "npm run amplify:S3Trigger52a3ac74 && npm run invoke && cd -",
+    "local:docker:fix": "sudo ln -sf '$HOME/.docker/run/docker.sock' /var/run/docker.sock"
   },
   "jest": {
     "preset": "ts-jest",
