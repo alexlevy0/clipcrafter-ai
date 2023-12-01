@@ -40,7 +40,14 @@ export async function download(Bucket: string, Key: string, filePath: string) {
       Bucket: _Bucket,
       Key: _key,
     })
+    console.log(`key :${Key}`)
+    console.log(`_key :${_key}`)
+    console.log(`Bucket :${Bucket}`)
+    console.log(`_Bucket :${_Bucket}`)
+
     const { Body } = await s3.getObject({ Bucket: _Bucket, Key: _key })
+
+    console.log(`Body :${Body}`)
 
     let downloadedBytes = 0
     let updateInProgress = false

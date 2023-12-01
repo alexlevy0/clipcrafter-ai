@@ -137,16 +137,21 @@ export const Main = () => {
           </Button>
         </Grid>
       </Flex>
-      // : <Clip />
-      : (
-        <Flex flex={1} width={"100%"}>
-          <iframe
-            style={{
-              width: "100%", height: "100%"
-            }}
-            src="https://clip-crafter-studio-web-service.onrender.com" frameBorder="0" ></iframe>
-        </Flex >
-      )
+      : <Clip />
+    // : (
+    //   <Flex flex={1} width={"100%"}>
+    //     <iframe
+    //       title="alexlevy0/ClipCrafterStudio/main"
+    //       allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+    //       sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+    //       frameBorder="0"
+    //       style={{ width: "100%", height: "100%" }}
+    //       // src="https://codesandbox.io/p/github/alexlevy0/ClipCrafterStudio/main?file=%2F.codesandbox%2Ftasks.json&embed=1"
+    //       src="https://clip-crafter-studio-web-service.onrender.com"
+    //     >
+    //     </iframe>
+    //   </Flex >
+    // )
   }
 
   return (
@@ -278,7 +283,7 @@ export const Main = () => {
             columnEnd="2"
             variation="elevated"
           >
-            <Clip />
+            {/* <Clip /> */}
           </Card>
           <Card
             columnStart="2"
@@ -375,6 +380,7 @@ const Clip = () => {
   const PROCESSING = 'Processing'
 
   const [url, setUrl] = useState('')
+  const [urlEdited, setUrlEdited] = useState('')
   const [status, setStatus] = useState(STANDBY)
 
   const onReady = () => {
@@ -385,9 +391,12 @@ const Clip = () => {
     if (!key) return
     setStatus(`${PROCESSING} : ${key}…`)
     // @ts-ignore
-    const url = await retry({ fn: async () => await getData(key) })
+    const url = await retry({ fn: async () => await getData(key, '') })
     console.log({ url });
     setUrl(url)
+    const urlEdited = await retry({ fn: async () => await getData(key) })
+    console.log({ urlEdited });
+    setUrlEdited(urlEdited)
   }
 
   const onResetVideoUrl = () => setUrl('')
@@ -412,14 +421,14 @@ const Clip = () => {
         onUploadStart={onResetVideoUrl}
         components={{ FilePicker({ onClick }) { return <Picker onClick={onClick} /> } }}
       />
-      <Flex direction="column" gap="small">
+      {/* <Flex direction="column" gap="small">
         <Input
           size="small"
           width="100%"
           enterKeyHint="send"
           placeholder="Paste YouTube link or drop a file"
         />
-      </Flex>
+      </Flex> */}
       {status !== READY && status !== STANDBY && (
         <Flex
           backgroundColor={'rgb(13, 25, 38)'}
@@ -440,9 +449,10 @@ const Clip = () => {
         </Flex>
       )}
       <Flex
-        backgroundColor={'black'}
+        // backgroundColor={'black'}
         alignContent="center"
         justifyContent={'center'}
+        gap="small"
       >
         <ReactPlayer
           style={{ backgroundColor: 'black' }}
@@ -450,6 +460,14 @@ const Clip = () => {
           playing={true}
           controls={true}
           url={url}
+          width={"100%"}
+        />
+        <ReactPlayer
+          style={{ backgroundColor: 'grey' }}
+          onReady={onReady}
+          playing={true}
+          controls={true}
+          url={urlEdited}
           width={"100%"}
         />
       </Flex>

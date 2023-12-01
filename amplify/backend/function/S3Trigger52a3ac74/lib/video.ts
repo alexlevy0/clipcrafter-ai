@@ -86,7 +86,7 @@ export async function processVideo(_in: string, _out: string) {
       const ffmpegCommand = getCmd(_in, batchOutput, batchShots)
       await execPromise(ffmpegCommand)
     } catch (error) {
-      console.log('--ERROR execPromise :')
+      console.log(`--ERROR execPromise : ${error}`)
       throw new Error(error)
     }
   }
@@ -97,7 +97,7 @@ export async function processVideo(_in: string, _out: string) {
     const concatCommand = `ffmpeg -f concat -safe 0 -i "${concatFile}" -c copy "${_out}"`
     await execPromise(concatCommand)
   } catch (error) {
-    console.log('--ERROR concat execPromise :')
+    console.log(`--ERROR concat execPromise : ${error}`)
     throw new Error(error)
   }
 
