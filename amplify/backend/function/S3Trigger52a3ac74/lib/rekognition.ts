@@ -13,14 +13,13 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const config = {
   highConfidenceThreshold: 90.0,
   // paddingFactorBase: 0.25,
-  paddingFactorBase: 0.75,
-  significantMovementThreshold: 0.5,
+  paddingFactorBase: 0.95,
+  significantMovementThreshold: 0.7,
   jobCheckDelay: 5000,
-  noCrop: true,
 }
 const MIN_SHOT_DURATION = 0.5
-const CONFIDENCE_THRESHOLD = 80.0;
-
+const CONFIDENCE_THRESHOLD = 80.0
+const CROP_CHANGE_TOLERANCE = 0.2 // Seuil de tolérance pour le changement de crop (20%)
 
 interface CropCoordinates {
   x: number
@@ -62,6 +61,7 @@ function calculateCropCoordinates(
   videoWidth: number,
   videoHeight: number,
   lastFacePosition: BoundingBox | null,
+  lastCrop: CropCoordinates | null,
 ): CropCoordinates {
   let paddingFactor = config.paddingFactorBase
 
@@ -97,7 +97,13 @@ function calculateCropCoordinates(
   if (y + cropHeight > videoHeight) {
     y = videoHeight - cropHeight
   }
-
+  if (
+    lastCrop &&
+    lastFacePosition &&
+    !isCropChangeSignificant({ x, y, w: cropWidth, h: cropHeight }, lastCrop)
+  ) {
+    return lastCrop // Renvoyer les anciennes coordonnées si le changement n'est pas significatif
+  }
   return {
     x: Math.round(x),
     y: Math.round(y),
@@ -141,6 +147,23 @@ function isSignificantEmotionChange(
   )
 }
 
+function isCropChangeSignificant(
+  newCrop: CropCoordinates,
+  lastCrop: CropCoordinates,
+): boolean {
+  const deltaX = Math.abs(newCrop.x - lastCrop.x)
+  const deltaY = Math.abs(newCrop.y - lastCrop.y)
+  const deltaW = Math.abs(newCrop.w - lastCrop.w)
+  const deltaH = Math.abs(newCrop.h - lastCrop.h)
+
+  return (
+    deltaX > CROP_CHANGE_TOLERANCE * lastCrop.w ||
+    deltaY > CROP_CHANGE_TOLERANCE * lastCrop.h ||
+    deltaW > CROP_CHANGE_TOLERANCE * lastCrop.w ||
+    deltaH > CROP_CHANGE_TOLERANCE * lastCrop.h
+  )
+}
+
 export async function analyzeVideo(
   Name: string,
   Bucket: string,
@@ -173,6 +196,7 @@ export async function analyzeVideo(
 
   const shots: VideoShot[] = []
   let lastTsEnd: number = 0
+  let lastCrop: CropCoordinates | null = null
   let lastFacePosition: BoundingBox | null = null
   let prevEmotions: Emotion[] = []
 
@@ -180,33 +204,41 @@ export async function analyzeVideo(
     const face = faceDetection.Face
     const timestamp = faceDetection.Timestamp / 1000 // Convertir en secondes
 
-    if (face) {
-      const crop = calculateCropCoordinates(
-        face.BoundingBox,
-        videoWidth,
-        videoHeight,
-        lastFacePosition,
-      )
-
-      if (
-        face.MouthOpen?.Value ||
+    const shouldCrop =
+      face &&
+      face.Confidence >= CONFIDENCE_THRESHOLD &&
+      (face.MouthOpen?.Value ||
         face.Smile?.Value ||
-        isSignificantEmotionChange(prevEmotions, face.Emotions)
-      ) {
-        if (shots.length === 0 || lastTsEnd !== timestamp) {
-          shots.push({
-            ts_start: shots.length === 0 ? 0 : lastTsEnd,
-            ts_end: timestamp,
-            crop: crop,
-            // crop: null,
-            label: 'Speaking/Smiling', // ou 'Emotion Change' selon le contexte
-          })
-          lastTsEnd = timestamp
-        } else {
-          shots[shots.length - 1].ts_end = timestamp
-        }
-      }
+        isSignificantEmotionChange(prevEmotions, face.Emotions))
 
+    let crop = shouldCrop
+      ? calculateCropCoordinates(
+          face.BoundingBox,
+          videoWidth,
+          videoHeight,
+          lastFacePosition,
+          lastCrop,
+        )
+      : null
+
+    lastCrop = crop
+    lastFacePosition = face.BoundingBox
+
+    // Si un visage est détecté ou si nous sommes au début d'un nouveau shot
+    if (shouldCrop || shots.length === 0 || lastTsEnd !== timestamp) {
+      shots.push({
+        ts_start: shots.length === 0 ? 0 : lastTsEnd,
+        ts_end: timestamp,
+        crop: crop,
+        label: shouldCrop ? 'Speaking/Smiling' : 'No Face', // Modifier le label selon le contexte
+      })
+      lastTsEnd = timestamp
+    } else if (shots.length > 0) {
+      // Mettre à jour le ts_end du dernier shot si le timestamp actuel est différent
+      shots[shots.length - 1].ts_end = timestamp
+    }
+
+    if (face) {
       prevEmotions = face.Emotions
       lastFacePosition = face.BoundingBox
     }
