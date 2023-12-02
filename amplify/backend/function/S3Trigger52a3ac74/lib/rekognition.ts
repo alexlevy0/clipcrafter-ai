@@ -33,9 +33,7 @@ async function waitForJobCompletion(
 ): Promise<GetFaceDetectionCommandOutput> {
   let jobStatus: string = 'IN_PROGRESS'
   while (jobStatus === 'IN_PROGRESS') {
-    const response = await client.send(
-      new GetFaceDetectionCommand({ JobId: jobId }),
-    )
+    const response = await client.send(new GetFaceDetectionCommand({ JobId: jobId }))
     jobStatus = response.JobStatus || 'FAILED'
     if (jobStatus === 'SUCCEEDED') {
       return response
@@ -48,6 +46,12 @@ async function waitForJobCompletion(
   throw new Error('Job did not complete successfully')
 }
 
+function calculateEuclideanDistance(x1: Number, y1: Number, x2: Number, y2: Number) {
+  const diffX = Number(x2) - Number(x1)
+  const diffY = Number(y2) - Number(y1)
+  return Math.sqrt(diffX * diffX + diffY * diffY)
+}
+
 function calculateCropCoordinates(
   box: BoundingBox,
   videoWidth: number,
@@ -58,13 +62,21 @@ function calculateCropCoordinates(
   let paddingFactor = paddingFactorBase
 
   if (lastFacePosition) {
-    const movementX = Math.abs(box.Left - lastFacePosition.Left)
-    const movementY = Math.abs(box.Top - lastFacePosition.Top)
+    const lastCenterX =
+      lastFacePosition.Left * videoWidth + (lastFacePosition.Width * videoWidth) / 2
+    const lastCenterY =
+      lastFacePosition.Top * videoHeight + (lastFacePosition.Height * videoHeight) / 2
+    const currentCenterX = box.Left * videoWidth + (box.Width * videoWidth) / 2
+    const currentCenterY = box.Top * videoHeight + (box.Height * videoHeight) / 2
 
-    if (
-      movementX > significantMovementThreshold ||
-      movementY > significantMovementThreshold
-    ) {
+    const movementDistance = calculateEuclideanDistance(
+      lastCenterX,
+      lastCenterY,
+      currentCenterX,
+      currentCenterY,
+    )
+
+    if (movementDistance > significantMovementThreshold) {
       paddingFactor = paddingFactor + 0.1
     }
   }
@@ -102,16 +114,8 @@ function calculateCropCoordinates(
   return { crop: newCrop, newFacePosition: box }
 }
 
-function isEmotionChange(
-  prevEmotions: Emotion[],
-  newEmotions: Emotion[],
-): boolean {
-  if (
-    !prevEmotions ||
-    !newEmotions ||
-    prevEmotions.length === 0 ||
-    newEmotions.length === 0
-  ) {
+function isEmotionChange(prevEmotions: Emotion[], newEmotions: Emotion[]): boolean {
+  if (!prevEmotions || !newEmotions || prevEmotions.length === 0 || newEmotions.length === 0) {
     return false
   }
 
@@ -124,10 +128,8 @@ function isEmotionChange(
     newEmotions[0],
   )
 
-  const isPrevEmotionHighConfidence =
-    prevPrimaryEmotion.Confidence >= highConfidenceThreshold
-  const isNewEmotionHighConfidence =
-    newPrimaryEmotion.Confidence >= highConfidenceThreshold
+  const isPrevEmotionHighConfidence = prevPrimaryEmotion.Confidence >= highConfidenceThreshold
+  const isNewEmotionHighConfidence = newPrimaryEmotion.Confidence >= highConfidenceThreshold
 
   return (
     isPrevEmotionHighConfidence &&
@@ -165,11 +167,9 @@ export async function analyzeVideo(
     const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
     return cropData.shots
   }
-
   console.log('analyzeVideo : rekognition enabled, Starting FaceDetection')
 
   const client = new RekognitionClient({ region })
-
   const startCommand = new StartFaceDetectionCommand({
     Video: {
       S3Object: {
@@ -179,12 +179,10 @@ export async function analyzeVideo(
     },
     FaceAttributes: 'ALL',
   })
-
   const startResponse = await client.send(startCommand)
   if (!startResponse.JobId) {
     throw new Error('Video analysis failed to start')
   }
-
   const getResponse = await waitForJobCompletion(client, startResponse.JobId)
 
   const shots: VideoShot[] = []
@@ -192,18 +190,21 @@ export async function analyzeVideo(
   let prevEmotions: Emotion[] = []
 
   getResponse.Faces?.forEach((faceDetection: FaceDetection) => {
-    const face = faceDetection.Face
     const timestamp = faceDetection.Timestamp / 1000 // secondes
+    const face = faceDetection.Face
+    const { MouthOpen, Smile, BoundingBox, Emotions } = face
 
-    const emotionChanged = isEmotionChange(prevEmotions, face.Emotions)
-    const shouldCrop =
-      face && confidenceThreshold && (face.Smile?.Value || emotionChanged)
+    const emotionChanged = isEmotionChange(prevEmotions, Emotions)
+    const mouthOpen = MouthOpen.Value && MouthOpen.Confidence > confidenceThreshold
+    const smiling = Smile.Value && Smile.Confidence > confidenceThreshold
+
+    const shouldCrop = face && (mouthOpen || smiling || emotionChanged)
 
     let crop, lastCrop
 
     if (shouldCrop) {
       const cropResult = calculateCropCoordinates(
-        face.BoundingBox,
+        BoundingBox,
         videoWidth,
         videoHeight,
         lastFacePosition,
@@ -242,8 +243,8 @@ export async function analyzeVideo(
       })
     }
 
-    lastFacePosition = face ? face.BoundingBox : lastFacePosition
-    prevEmotions = face ? face.Emotions : prevEmotions
+    lastFacePosition = face ? BoundingBox : lastFacePosition
+    prevEmotions = face ? Emotions : prevEmotions
   })
   // Assurer que le dernier shot a une durée minimale de minShotDuration
   if (shots.length > 0) {
