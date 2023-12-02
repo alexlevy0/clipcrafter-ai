@@ -31,9 +31,7 @@ class StatusUploader {
   public static getInstance(bucket?: string, key?: string): StatusUploader {
     if (!this.instance) {
       if (this._createStatusFile && (!bucket || !key)) {
-        throw new Error(
-          'Bucket and key must be provided for the first instantiation',
-        )
+        throw new Error('Bucket and key must be provided for the first instantiation')
       }
       this.instance = new StatusUploader(bucket, key)
     }
@@ -43,10 +41,7 @@ class StatusUploader {
   public async setStatus(status: EStatus | string): Promise<void> {
     try {
       const now = Date.now()
-      if (
-        now < this._lastUpdateTime + this._throttleInterval &&
-        status !== EStatus.Error
-      ) {
+      if (now < this._lastUpdateTime + this._throttleInterval && status !== EStatus.Error) {
         return
       }
       let baseStatus = status

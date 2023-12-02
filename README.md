@@ -62,9 +62,13 @@ Unleash the power of AI to detect and highlight the most engaging parts of your 
    - [ ] Block S3 Public Access
    - [ ] Use protected/private accessLevel
 
-1. **🎥 MediaConvert**
+2. **🎥 MediaConvert**
 
    - [ ] Move from FFmpeg to MediaConvert Jobs
+
+3. **🐾 Rekognition**
+
+   - [ ] Handle identity-based policy
 
 
 

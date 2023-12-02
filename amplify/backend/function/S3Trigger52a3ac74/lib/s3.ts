@@ -26,7 +26,7 @@ export async function download(Bucket: string, Key: string, filePath: string) {
   const statusUploader = StatusUploader.getInstance()
   await statusUploader.setStatus(EStatus.dlStart)
   try {
-    if (conf.debug) {
+    if (conf.useLocalVideo) {
       const name = filePath.split('/').pop()
       const oldPath = `/var/task/${name}`
       await moveLocalFile(oldPath, filePath)

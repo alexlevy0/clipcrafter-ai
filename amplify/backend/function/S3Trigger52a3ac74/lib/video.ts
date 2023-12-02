@@ -1,13 +1,7 @@
 import * as fs from 'fs/promises'
 import { exec } from 'child_process'
 import { promisify } from 'util'
-import {
-  IShot,
-  EQuality,
-  EStatus,
-  generateProgressStatus,
-  getProgress,
-} from './types'
+import { IShot, EQuality, EStatus, generateProgressStatus, getProgress } from './types'
 import { conf } from './config'
 import StatusUploader from './StatusUploader'
 
@@ -49,7 +43,7 @@ export function getCmd(_in: string, _out: string, shots: IShot[]) {
   const debugCmds = '-loglevel debug -v verbose'
 
   return `ffmpeg -i "${_in}" -filter_complex "${fullFilter}" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac ${quality} "${_out}" ${
-    conf.debug ? debugCmds : ''
+    conf.ffmpegDebug ? debugCmds : ''
   }`
 }
 
@@ -77,10 +71,7 @@ export async function processVideo(_in: string, _out: string, clip: IShot[]) {
   for (const [index, batchShots] of batches.entries()) {
     try {
       await statusUploader.setStatus(
-        generateProgressStatus(
-          EStatus.ffmpegCmd,
-          getProgress(index, batches.length),
-        ),
+        generateProgressStatus(EStatus.ffmpegCmd, getProgress(index, batches.length)),
       )
       const batchOutput = `${baseOut}${conf.batchModifier}${index}${ext}`
       const ffmpegCommand = getCmd(_in, batchOutput, batchShots)

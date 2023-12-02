@@ -1,7 +1,4 @@
-export const log = (
-  data: string | { data: string; err?: boolean },
-  err: boolean = false,
-) => {
+export const log = (data: string | { data: string; err?: boolean }, err: boolean = false) => {
   let message = ''
   let isError = false
 
@@ -14,9 +11,9 @@ export const log = (
   }
 
   if (!isError) {
-    console.log(message);
+    console.log(message)
   } else {
-    console.log(message);
+    console.log(message)
     throw new Error(message)
   }
 }

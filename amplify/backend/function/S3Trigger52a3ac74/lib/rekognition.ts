@@ -23,8 +23,6 @@ const {
   region,
   bucketSufix,
   minShotDuration,
-  height,
-  width,
   labelNoCrop,
   labelCrop,
 } = conf.rekognitionConf
@@ -196,12 +194,7 @@ function createOrUpdateShots(shots, timestamp, crop, label, minShotDuration) {
   return shots
 }
 
-export async function analyzeVideo(
-  Name: string,
-  Bucket: string,
-  videoWidth: number = width,
-  videoHeight: number = height,
-): Promise<VideoShot[]> {
+export async function analyzeVideo(Name: string, Bucket: string): Promise<VideoShot[]> {
   if (!enabled) {
     console.log('analyzeVideo : rekognition disabled')
     const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
@@ -223,14 +216,17 @@ export async function analyzeVideo(
   if (!startResponse.JobId) {
     throw new Error('Video analysis failed to start')
   }
-  const getResponse = await waitForJobCompletion(client, startResponse.JobId)
+  const faceDetection = await waitForJobCompletion(client, startResponse.JobId)
 
   let shots: VideoShot[] = []
   let lastFacePosition: BoundingBox | null = null
   let lastCrop: CropCoordinates | null = null
   let prevEmotions: Emotion[] = []
 
-  getResponse.Faces?.forEach((faceDetection: FaceDetection) => {
+  const { FrameWidth, FrameHeight } = faceDetection.VideoMetadata
+  console.log({ FrameWidth, FrameHeight })
+
+  faceDetection.Faces?.forEach((faceDetection: FaceDetection) => {
     const timestamp = faceDetection.Timestamp / 1000 // secondes
     const face = faceDetection.Face
     const { MouthOpen, Smile, BoundingBox, Emotions } = face
@@ -246,8 +242,8 @@ export async function analyzeVideo(
     if (shouldCrop) {
       const cropResult = calculateCropCoordinates(
         BoundingBox,
-        videoWidth,
-        videoHeight,
+        FrameWidth,
+        FrameHeight,
         lastFacePosition,
         lastCrop,
       )
