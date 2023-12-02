@@ -38,7 +38,7 @@ async function waitForJobCompletion(
     if (jobStatus === 'SUCCEEDED') {
       return response
     } else if (jobStatus === 'FAILED') {
-      throw new Error('Job failed')
+      throw new Error(`Job failed : ${response.StatusMessage}`)
     }
 
     await sleep(jobCheckDelay)
