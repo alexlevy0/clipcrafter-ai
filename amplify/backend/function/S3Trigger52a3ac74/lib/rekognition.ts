@@ -17,8 +17,8 @@ const config = {
   significantMovementThreshold: 0.7,
   jobCheckDelay: 5000,
 }
-const MIN_SHOT_DURATION = 0.5
-const CONFIDENCE_THRESHOLD = 80.0
+const MIN_SHOT_DURATION = 0.8
+const CONFIDENCE_THRESHOLD = 85.0
 const CROP_CHANGE_TOLERANCE = 0.2 // Seuil de tolérance pour le changement de crop (20%)
 
 interface CropCoordinates {
@@ -73,7 +73,7 @@ function calculateCropCoordinates(
       movementX > config.significantMovementThreshold ||
       movementY > config.significantMovementThreshold
     ) {
-      paddingFactor = paddingFactor + 0.1
+      paddingFactor = paddingFactor + 0.5
     }
   }
 
@@ -211,7 +211,7 @@ export async function analyzeVideo(
         face.Smile?.Value ||
         isSignificantEmotionChange(prevEmotions, face.Emotions))
 
-    let crop = shouldCrop
+    const crop = shouldCrop
       ? calculateCropCoordinates(
           face.BoundingBox,
           videoWidth,
@@ -221,31 +221,34 @@ export async function analyzeVideo(
         )
       : null
 
-    lastCrop = crop
-    lastFacePosition = face.BoundingBox
+    const isFirst = shots.length === 0
+    if (shouldCrop || isFirst || lastTsEnd !== timestamp) {
+      const ts_start = isFirst ? 0 : lastTsEnd
+      const ts_end = Math.max(ts_start + MIN_SHOT_DURATION, timestamp)
 
-    // Si un visage est détecté ou si nous sommes au début d'un nouveau shot
-    if (shouldCrop || shots.length === 0 || lastTsEnd !== timestamp) {
       shots.push({
-        ts_start: shots.length === 0 ? 0 : lastTsEnd,
-        ts_end: timestamp,
-        crop: crop,
-        label: shouldCrop ? 'Speaking/Smiling' : 'No Face', // Modifier le label selon le contexte
+        ts_start,
+        ts_end,
+        crop,
+        label: shouldCrop ? 'Speaking/Smiling' : 'No Face',
       })
-      lastTsEnd = timestamp
+      lastTsEnd = ts_end
     } else if (shots.length > 0) {
-      // Mettre à jour le ts_end du dernier shot si le timestamp actuel est différent
-      shots[shots.length - 1].ts_end = timestamp
+      const lastShot = shots[shots.length - 1]
+      lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
     }
 
-    if (face) {
-      prevEmotions = face.Emotions
-      lastFacePosition = face.BoundingBox
-    }
+    lastCrop = crop
+    lastFacePosition = face ? face.BoundingBox : lastFacePosition
+    prevEmotions = face ? face.Emotions : prevEmotions
   })
 
-  if (shots.length > 0 && shots[shots.length - 1].ts_end === lastTsEnd) {
-    shots[shots.length - 1].ts_end = lastTsEnd + MIN_SHOT_DURATION
+  // Vérifier le dernier shot après la boucle
+  if (shots.length > 0) {
+    let lastShot = shots[shots.length - 1]
+    if (lastShot.ts_end - lastShot.ts_start < MIN_SHOT_DURATION) {
+      lastShot.ts_end = lastShot.ts_start + MIN_SHOT_DURATION
+    }
   }
 
   return shots
