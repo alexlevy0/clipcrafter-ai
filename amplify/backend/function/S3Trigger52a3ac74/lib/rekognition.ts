@@ -25,6 +25,8 @@ const {
   minShotDuration,
   height,
   width,
+  labelNoCrop,
+  labelCrop
 } = conf.rekognitionConf
 
 async function waitForJobCompletion(
@@ -161,15 +163,19 @@ function isCropChangeSignificant(
 function createOrUpdateShots(shots, timestamp, crop, label, minShotDuration) {
   if (shots.length > 0) {
     let lastShot = shots[shots.length - 1]
-    // Check if the current shot is similar to the last one
-    if (
+
+    // Vérifier si les deux shots ont labelNoCrop comme label
+    if (lastShot.label === labelNoCrop && label === labelNoCrop) {
+      // Mettre à jour le timestamp de fin si les deux shots consécutifs n'ont pas de visage
+      lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
+    } else if (
       lastShot.label === label &&
       (crop === null || JSON.stringify(lastShot.crop) === JSON.stringify(crop))
     ) {
-      // Update end timestamp if the current shot is similar to the last one
+      // Mettre à jour le timestamp de fin si le shot actuel est similaire au dernier
       lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
     } else {
-      // Create a new shot if the current shot is different from the last one
+      // Créer un nouveau shot si le shot actuel est différent du dernier
       const newTsStart = Math.max(lastShot.ts_end, timestamp - minShotDuration)
       shots.push({
         ts_start: newTsStart,
@@ -179,7 +185,7 @@ function createOrUpdateShots(shots, timestamp, crop, label, minShotDuration) {
       })
     }
   } else {
-    // Create the first shot
+    // Créer le premier shot
     shots.push({
       ts_start: 0,
       ts_end: timestamp,
@@ -251,7 +257,7 @@ export async function analyzeVideo(
       crop = null
     }
 
-    const label = shouldCrop ? 'Speaking/Smiling' : 'No Face'
+    const label = shouldCrop ? labelCrop : labelNoCrop
     shots = createOrUpdateShots(shots, timestamp, crop, label, minShotDuration)
 
     lastFacePosition = face ? BoundingBox : lastFacePosition

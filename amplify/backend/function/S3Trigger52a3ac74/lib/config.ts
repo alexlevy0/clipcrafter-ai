@@ -14,6 +14,8 @@ export const conf = {
     minShotDuration: 0.5,
     confidenceThreshold: 85.0,
     cropChangeTolerance: 0.5,
+    labelCrop: 'Speaking/Smiling',
+    labelNoCrop: 'No Face',
   },
   debug: false,
   quality: EQuality.LOW,
