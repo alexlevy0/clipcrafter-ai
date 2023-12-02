@@ -1,6 +1,9 @@
 import { EQuality } from './types'
 
 export const conf = {
+  rekognitionWidth: 1920,
+  rekognitionHeight: 1080,
+  rekognition: true,
   region: 'eu-west-3',
   nameModifier: '_edited',
   batchModifier: '_batch_',

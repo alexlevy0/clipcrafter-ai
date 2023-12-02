@@ -1,10 +1,13 @@
 import { Handler } from 'aws-lambda'
+import * as fs from 'fs/promises'
 import { processVideo } from './video'
 import { download, upload } from './s3'
 import { getData } from './getData'
 import StatusUploader from './StatusUploader'
-import { EStatus, LambdaS3Event } from './types'
+import { EStatus, LambdaS3Event, IShot } from './types'
 import { cleanTempFiles } from './utils'
+import { conf } from './config'
+import { analyzeVideo } from './rekognition'
 
 export const handler: Handler = async (event: LambdaS3Event) => {
   const statusUploader = StatusUploader.getInstance()
@@ -18,8 +21,31 @@ export const handler: Handler = async (event: LambdaS3Event) => {
       processedObjectKey: newKey,
       objectKey: objKey,
     } = await getData(event)
+
+    let shots: IShot[]
+
+    if (conf.rekognition) {
+      try {
+        const _shots = await analyzeVideo(
+          objKey,
+          bK,
+          conf.rekognitionWidth,
+          conf.rekognitionHeight,
+        )
+        console.log({ _shots })
+        if (shots) {
+          shots = _shots
+        }
+      } catch (error) {
+        console.log(`analyzeVideo ERROR : ${error}`);
+      }
+    } else {
+      const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
+      shots = cropData.shots
+    }
+
     await download(bK, objKey, tmpFP)
-    await processVideo(tmpFP, outputFP)
+    await processVideo(tmpFP, outputFP, shots)
     await upload(outputFP, bK, newKey)
     await cleanTempFiles(tmpFP, outputFP)
     await statusUploader.setStatus(EStatus.Succeded)

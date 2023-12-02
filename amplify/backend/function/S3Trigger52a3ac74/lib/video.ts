@@ -53,12 +53,11 @@ export function getCmd(_in: string, _out: string, shots: IShot[]) {
   }`
 }
 
-export async function processVideo(_in: string, _out: string) {
+export async function processVideo(_in: string, _out: string, _clip: IShot[]) {
   const statusUploader = StatusUploader.getInstance()
   await statusUploader.setStatus(EStatus.ffmpegParse)
 
-  const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
-  const clip: IShot[] = cropData.shots
+  const clip: IShot[] = _clip
 
   const batchSize: number = conf.batchSize
   const batchStartIndices = Array.from(
