@@ -14,6 +14,21 @@ export interface S3Record {
   }
 }
 
+
+export interface CropCoordinates {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+export interface VideoShot {
+  ts_start: number
+  ts_end: number
+  crop: CropCoordinates
+  label: string | null
+}
+
 export enum EQuality {
   HIGH,
   LOW,

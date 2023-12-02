@@ -7,3 +7,6 @@ export async function cleanTempFiles(tmpFP: string, outputFP: string) {
 
 export const decodeS3Key = (key: string) =>
   decodeURIComponent(key.replace(/\+/g, ' '))
+
+export const sleep = (ms: number) =>
+  new Promise(resolve => setTimeout(resolve, ms))
