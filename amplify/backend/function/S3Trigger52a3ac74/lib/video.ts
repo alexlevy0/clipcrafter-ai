@@ -7,7 +7,8 @@ import StatusUploader from './StatusUploader'
 
 const execPromise = promisify(exec)
 
-const blurFilter = `boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1`
+const blurFilter =
+  'boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1'
 
 export function getCmd(_in: string, _out: string, shots: IShot[]) {
   const filterComplex = shots
@@ -20,7 +21,7 @@ export function getCmd(_in: string, _out: string, shots: IShot[]) {
         const scale = `,scale=${conf.targetWidth}:${conf.targetHeight}`
         filter += `${crop}${scale}`
       } else {
-        const scaleAndCrop_Bg = `scale=-2:640,crop=360:640`
+        const scaleAndCrop_Bg = 'scale=-2:640,crop=360:640'
         filter += `,${blurFilter},${scaleAndCrop_Bg}[bg${i}v];`
         filter += trim
         const scale_Fg = `,scale=360:-2[fg${i}v];`
@@ -36,8 +37,9 @@ export function getCmd(_in: string, _out: string, shots: IShot[]) {
   const concatAudio = shots.map((_, i) => `[clip${i}a]`).join('')
   const fullFilter = `${filterComplex}${concatVideo}concat=n=${shots.length}:v=1:a=0[outv];${concatAudio}concat=n=${shots.length}:v=0:a=1[outa]`
 
-  const high = `-preset slow -crf 18 -profile:v high`
-  const bad = `-preset ultrafast -crf 35 -profile:v baseline -tune zerolatency -threads 1 -bufsize 500k -maxrate 500k`
+  const high = '-preset slow -crf 18 -profile:v high'
+  const bad =
+    '-preset ultrafast -crf 35 -profile:v baseline -tune zerolatency -threads 1 -bufsize 500k -maxrate 500k'
 
   const quality = conf.quality === EQuality.HIGH ? high : bad
   const debugCmds = '-loglevel debug -v verbose'
@@ -66,7 +68,7 @@ export async function processVideo(_in: string, _out: string, clip: IShot[]) {
 
   const reg = /\.[^/.]+$/
   const baseOut = _out.replace(reg, '')
-  let ext = _out.match(reg)[0]
+  const ext = _out.match(reg)[0]
 
   for (const [index, batchShots] of batches.entries()) {
     try {

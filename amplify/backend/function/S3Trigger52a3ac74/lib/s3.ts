@@ -51,10 +51,7 @@ export async function download(Bucket: string, Key: string, filePath: string) {
         if (!updateInProgress) {
           updateInProgress = true
           await statusUploader.setStatus(
-            generateProgressStatus(
-              EStatus.dlProgress,
-              getProgress(downloadedBytes, ContentLength),
-            ),
+            generateProgressStatus(EStatus.dlProgress, getProgress(downloadedBytes, ContentLength)),
           )
           updateInProgress = false
         }

@@ -46,7 +46,7 @@ async function waitForJobCompletion(
   throw new Error('Job did not complete successfully')
 }
 
-function calculateEuclideanDistance(x1: Number, y1: Number, x2: Number, y2: Number) {
+function calculateEuclideanDistance(x1: number, y1: number, x2: number, y2: number) {
   const diffX = Number(x2) - Number(x1)
   const diffY = Number(y2) - Number(y1)
   return Math.sqrt(diffX * diffX + diffY * diffY)
@@ -100,7 +100,7 @@ function calculateCropCoordinates(
     y = videoHeight - cropHeight
   }
 
-  let newCrop = {
+  const newCrop = {
     x: Math.round(x),
     y: Math.round(y),
     w: Math.round(cropWidth),
@@ -175,7 +175,7 @@ export function mergeConsecutiveNullCrops(shots) {
 
 function createOrUpdateShots(shots, timestamp, crop, label, minShotDuration) {
   if (shots.length > 0) {
-    let lastShot = shots[shots.length - 1]
+    const lastShot = shots[shots.length - 1]
     const newTsStart = Math.max(lastShot.ts_end, timestamp - minShotDuration)
     shots.push({
       ts_start: newTsStart,
@@ -263,7 +263,7 @@ export async function analyzeVideo(Name: string, Bucket: string): Promise<VideoS
 
   // Assurer que le dernier shot a une durée minimale de minShotDuration
   if (shots.length > 0) {
-    let lastShot = shots[shots.length - 1]
+    const lastShot = shots[shots.length - 1]
     if (lastShot.ts_end - lastShot.ts_start < minShotDuration) {
       lastShot.ts_end = lastShot.ts_start + minShotDuration
     }

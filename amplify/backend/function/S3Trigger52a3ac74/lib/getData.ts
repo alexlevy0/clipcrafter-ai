@@ -1,8 +1,9 @@
 import { conf } from './config'
 import { log } from './logger'
 import { decodeS3Key } from './utils'
+import { LambdaS3Event } from './types'
 
-export async function getData(event: any) {
+export async function getData(event: LambdaS3Event) {
   log(`getData start : ${JSON.stringify(event, null, 2)}`)
   log(`config : ${JSON.stringify(conf, null, 2)}`)
   const { bucket: { name: bucketName = '' } = {}, object: { key: objectKey = '' } = {} } =
@@ -13,7 +14,7 @@ export async function getData(event: any) {
   if (!folderName || !fileName || !objectKey || !bucketName)
     throw new Error(`Error in event records : ${event}`)
 
-  if (fileName?.includes(conf.nameModifier)) throw new Error(`Prevent double processing`)
+  if (fileName?.includes(conf.nameModifier)) throw new Error('Prevent double processing')
 
   const extension = fileName.split('.').pop()
   const name = fileName.substring(0, fileName.lastIndexOf('.'))

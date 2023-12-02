@@ -54,7 +54,7 @@ class StatusUploader {
         baseStatus = status.split('-').slice(0, 2).join('-')
       }
 
-      if (!Object.values(EStatus).includes(baseStatus as any)) {
+      if (!Object.values(EStatus).includes(baseStatus as EStatus)) {
         throw new Error(`Invalid status: ${status}`)
       }
 
