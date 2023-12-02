@@ -1,4 +1,4 @@
-# 🎬 ClipCrafter AI 🌟 (fka Qlip App)
+# 🎬 ClipCrafter AI 🌟
 
 🚀 Elevate Your Content with ClipCrafter AI 🎥 - Unleash creativity and AI power in every clip! 🌟
 
@@ -70,11 +70,9 @@ Unleash the power of AI to detect and highlight the most engaging parts of your 
 
 ## Contact
 
-For any inquiries or feedback, please contact [Your Name](mailto:alexlevy0@gmail.com).
+For any inquiries or feedback, please contact [Alex Lévy](mailto:alexlevy0@gmail.com).
 
-Thank you for checking out Qlip App!
-
-I wasn't able to find specific features for "dumme.com" as the search results did not align with your query. However, I was able to gather the features of the other sites you mentioned:
+Thank you for checking out ClipCrafter AI!
 
 ## Alternatives
 
