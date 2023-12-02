@@ -12,11 +12,15 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 const config = {
   highConfidenceThreshold: 90.0,
-  paddingFactorBase: 0.25,
+  // paddingFactorBase: 0.25,
+  paddingFactorBase: 0.75,
   significantMovementThreshold: 0.5,
   jobCheckDelay: 5000,
-  MIN_SHOT_DURATION: 0.5,
+  noCrop: true,
 }
+const MIN_SHOT_DURATION = 0.5
+const CONFIDENCE_THRESHOLD = 80.0;
+
 
 interface CropCoordinates {
   x: number
@@ -168,13 +172,13 @@ export async function analyzeVideo(
   console.log({ getResponse })
 
   const shots: VideoShot[] = []
-  let currentShot: VideoShot | null = null
+  let lastTsEnd: number = 0
   let lastFacePosition: BoundingBox | null = null
   let prevEmotions: Emotion[] = []
 
   getResponse.Faces?.forEach((faceDetection: FaceDetection) => {
     const face = faceDetection.Face
-    const timestamp = faceDetection.Timestamp / 1000
+    const timestamp = faceDetection.Timestamp / 1000 // Convertir en secondes
 
     if (face) {
       const crop = calculateCropCoordinates(
@@ -184,41 +188,32 @@ export async function analyzeVideo(
         lastFacePosition,
       )
 
-      if (face.MouthOpen?.Value || face.Smile?.Value) {
-        if (!currentShot) {
-          currentShot = {
-            ts_start: timestamp,
+      if (
+        face.MouthOpen?.Value ||
+        face.Smile?.Value ||
+        isSignificantEmotionChange(prevEmotions, face.Emotions)
+      ) {
+        if (shots.length === 0 || lastTsEnd !== timestamp) {
+          shots.push({
+            ts_start: shots.length === 0 ? 0 : lastTsEnd,
             ts_end: timestamp,
             crop: crop,
-            label: 'Speaking/Smiling',
-          }
+            // crop: null,
+            label: 'Speaking/Smiling', // ou 'Emotion Change' selon le contexte
+          })
+          lastTsEnd = timestamp
         } else {
-          currentShot.ts_end = timestamp
-        }
-      } else if (isSignificantEmotionChange(prevEmotions, face.Emotions)) {
-        if (currentShot) {
-          shots.push(currentShot)
-        }
-        currentShot = {
-          ts_start: timestamp,
-          ts_end: timestamp,
-          crop: crop,
-          label: 'Emotion Change',
+          shots[shots.length - 1].ts_end = timestamp
         }
       }
 
       prevEmotions = face.Emotions
       lastFacePosition = face.BoundingBox
     }
-
-    if (!face.MouthOpen?.Value && currentShot) {
-      shots.push(currentShot)
-      currentShot = null
-    }
   })
 
-  if (currentShot) {
-    shots.push(currentShot)
+  if (shots.length > 0 && shots[shots.length - 1].ts_end === lastTsEnd) {
+    shots[shots.length - 1].ts_end = lastTsEnd + MIN_SHOT_DURATION
   }
 
   return shots
