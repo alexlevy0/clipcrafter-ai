@@ -167,19 +167,11 @@ function createOrUpdateShots(shots, timestamp, crop, label, minShotDuration) {
   if (shots.length > 0) {
     let lastShot = shots[shots.length - 1]
 
-    // Vérifier si les deux shots consécutifs doivent être fusionnés
+    // Fusionner si le label est le même et que les deux crops sont null
     if (lastShot.label === label && lastShot.crop === null && crop === null) {
-      // Mettre à jour le timestamp de fin si les deux shots consécutifs avec 'No Face' doivent être fusionnés
       lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
-    } else if (
-      lastShot.label === label &&
-      crop !== null &&
-      JSON.stringify(lastShot.crop) === JSON.stringify(crop)
-    ) {
-      // Mettre à jour le timestamp de fin si le shot actuel est similaire au dernier
-      lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
-    } else {
-      // Créer un nouveau shot si le shot actuel est différent du dernier
+    } else if (lastShot.label !== label || lastShot.crop !== null || crop !== null) {
+      // Créer un nouveau shot si le label est différent ou si l'un des crops n'est pas null
       const newTsStart = Math.max(lastShot.ts_end, timestamp - minShotDuration)
       shots.push({
         ts_start: newTsStart,
@@ -231,6 +223,7 @@ export async function analyzeVideo(
 
   let shots: VideoShot[] = []
   let lastFacePosition: BoundingBox | null = null
+  let lastCrop: CropCoordinates | null = null
   let prevEmotions: Emotion[] = []
 
   getResponse.Faces?.forEach((faceDetection: FaceDetection) => {
@@ -244,7 +237,7 @@ export async function analyzeVideo(
 
     const shouldCrop = face && (mouthOpen || smiling || emotionChanged)
 
-    let crop, lastCrop
+    let crop
 
     if (shouldCrop) {
       const cropResult = calculateCropCoordinates(
@@ -256,7 +249,7 @@ export async function analyzeVideo(
       )
       crop = cropResult.crop
       lastFacePosition = cropResult.newFacePosition
-      lastCrop = crop // Update the lastCrop with the new crop
+      lastCrop = crop
     } else {
       crop = null
     }
