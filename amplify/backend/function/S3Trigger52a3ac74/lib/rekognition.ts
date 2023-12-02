@@ -11,14 +11,14 @@ import {
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 const config = {
-  highConfidenceThreshold: 90.0,
+  highConfidenceThreshold: 95.0,
   paddingFactorBase: 1,
   significantMovementThreshold: 0.7,
   jobCheckDelay: 5000,
 }
-const MIN_SHOT_DURATION = 0.8
+const MIN_SHOT_DURATION = 0.6
 const CONFIDENCE_THRESHOLD = 85.0
-const CROP_CHANGE_TOLERANCE = 0.4 // Seuil de tolérance pour le changement de crop (20%)
+const CROP_CHANGE_TOLERANCE = 0.6 // Seuil de tolérance pour le changement de crop (20%)
 
 interface CropCoordinates {
   x: number
@@ -224,11 +224,13 @@ export async function analyzeVideo(
         lastShot.label === (shouldCrop ? 'Speaking/Smiling' : 'No Face') &&
         lastShot.crop === crop
       ) {
-        lastShot.ts_end = timestamp
+        lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
       } else {
+        let newTsStart = lastShot.ts_end
+        let newTsEnd = Math.max(newTsStart + MIN_SHOT_DURATION, timestamp)
         shots.push({
-          ts_start: lastShot.ts_end,
-          ts_end: timestamp,
+          ts_start: newTsStart,
+          ts_end: newTsEnd,
           crop,
           label: shouldCrop ? 'Speaking/Smiling' : 'No Face',
         })
@@ -237,7 +239,7 @@ export async function analyzeVideo(
       // Premier shot
       shots.push({
         ts_start: 0,
-        ts_end: timestamp,
+        ts_end: Math.max(MIN_SHOT_DURATION, timestamp),
         crop,
         label: shouldCrop ? 'Speaking/Smiling' : 'No Face',
       })
@@ -246,6 +248,12 @@ export async function analyzeVideo(
     lastFacePosition = face ? face.BoundingBox : lastFacePosition
     prevEmotions = face ? face.Emotions : prevEmotions
   })
-
+  // Assurer que le dernier shot a une durée minimale de MIN_SHOT_DURATION
+  if (shots.length > 0) {
+    let lastShot = shots[shots.length - 1]
+    if (lastShot.ts_end - lastShot.ts_start < MIN_SHOT_DURATION) {
+      lastShot.ts_end = lastShot.ts_start + MIN_SHOT_DURATION
+    }
+  }
   return shots
 }
