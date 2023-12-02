@@ -2,7 +2,7 @@ import { EQuality } from './types'
 
 export const conf = {
   rekognitionConf: {
-    enabled: false,
+    enabled: true,
     region: 'eu-west-2',
     bucketSufix: '-london',
     width: 1920,

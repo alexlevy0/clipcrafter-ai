@@ -1,6 +1,7 @@
 {
   "include": [
     "lib",
+    "lib/test",
     "lib/qlip-crop-model-out.json"
   ],
   "compilerOptions": {

@@ -150,6 +150,7 @@ export async function analyzeVideo(
   videoHeight: number = conf.rekognitionConf.height,
 ): Promise<VideoShot[]> {
   if (!conf.rekognitionConf.enabled) {
+    console.log('analyzeVideo : rekognition disabled')
     const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
     return cropData.shots
   }
@@ -168,15 +169,16 @@ export async function analyzeVideo(
     FaceAttributes: 'ALL',
   })
 
-  console.log('StartFaceDetectionCommand')
+  console.log('analyzeVideo : rekognition enabled, Starting FaceDetection')
+
   const startResponse = await client.send(startCommand)
 
   if (!startResponse.JobId) {
-    throw new Error("Échec de démarrage de l'analyse de la vidéo")
+    throw new Error("Video analysis failed to start")
   }
 
   const getResponse = await waitForJobCompletion(client, startResponse.JobId)
-  console.log({ getResponse })
+
   const shots: VideoShot[] = []
   let lastFacePosition: BoundingBox | null = null
   let prevEmotions: Emotion[] = []

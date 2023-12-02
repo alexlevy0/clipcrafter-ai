@@ -23,11 +23,11 @@ export async function getData(event: any) {
   const editedFileName = `${name}${conf.nameModifier}.${extension}`
 
   const data = {
-    processedObjectKey: `${folderName}/${editedFileName}`,
-    bucketName,
-    objectKey,
-    tmpFilePath: `/tmp/${fileName}`,
-    outputFilePath: `/tmp/processed_${editedFileName}`,
+    newKey: `${folderName}/${editedFileName}`,
+    bucket: bucketName,
+    key: objectKey,
+    tmpPath: `/tmp/${fileName}`,
+    outputPath: `/tmp/processed_${editedFileName}`,
   }
   log(`getData output : ${JSON.stringify(data, null, 2)}`)
   return data

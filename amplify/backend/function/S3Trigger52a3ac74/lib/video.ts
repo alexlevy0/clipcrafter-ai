@@ -53,11 +53,9 @@ export function getCmd(_in: string, _out: string, shots: IShot[]) {
   }`
 }
 
-export async function processVideo(_in: string, _out: string, _clip: IShot[]) {
+export async function processVideo(_in: string, _out: string, clip: IShot[]) {
   const statusUploader = StatusUploader.getInstance()
   await statusUploader.setStatus(EStatus.ffmpegParse)
-
-  const clip: IShot[] = _clip
 
   const batchSize: number = conf.batchSize
   const batchStartIndices = Array.from(
@@ -65,9 +63,8 @@ export async function processVideo(_in: string, _out: string, _clip: IShot[]) {
     (_, i) => i * batchSize,
   )
 
-  console.log('clip.length : ', clip.length)
-  console.log({ clip })
-  console.log('batchStartIndices.length : ', batchStartIndices.length)
+  console.log('processVideo : clip.length : ', clip.length)
+  console.log('processVideo : batch.length : ', batchStartIndices.length)
 
   const batches = batchStartIndices.map(startIndex =>
     clip.slice(startIndex, startIndex + batchSize),

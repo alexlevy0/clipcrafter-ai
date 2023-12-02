@@ -12,19 +12,12 @@ export const handler: Handler = async (event: LambdaS3Event) => {
 
   try {
     await statusUploader.setStatus(EStatus.Init)
-    const {
-      tmpFilePath: tmpFP,
-      outputFilePath: outputFP,
-      bucketName: bK,
-      processedObjectKey: newKey,
-      objectKey: objKey,
-    } = await getData(event)
-
-    const shotsData = await analyzeVideo(objKey, bK)
-    await download(bK, objKey, tmpFP)
-    await processVideo(tmpFP, outputFP, shotsData)
-    await upload(outputFP, bK, newKey)
-    await cleanTempFiles(tmpFP, outputFP)
+    const { tmpPath, outputPath, newKey, key, bucket } = await getData(event)
+    await download(bucket, key, tmpPath)
+    const shots = await analyzeVideo(key, bucket)
+    await processVideo(tmpPath, outputPath, shots)
+    await upload(outputPath, bucket, newKey)
+    await cleanTempFiles(tmpPath, outputPath)
     await statusUploader.setStatus(EStatus.Succeded)
     return { statusCode: 200 }
   } catch (error) {

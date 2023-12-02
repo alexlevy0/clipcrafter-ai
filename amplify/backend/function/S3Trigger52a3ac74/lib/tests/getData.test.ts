@@ -1,5 +1,5 @@
-import { getData } from './getData' // Assurez-vous que le chemin est correct
-import { conf } from './config'
+import { getData } from '../getData' // Assurez-vous que le chemin est correct
+import { conf } from '../config'
 // import { log } from './logger'
 
 jest.mock('./logger')
@@ -17,8 +17,8 @@ describe('getData Function Tests', () => {
       ],
     }
     const data = await getData(event)
-    expect(data.bucketName).toBe('test-bucket')
-    expect(data.objectKey).toBe('folder/test-file.mp4')
+    expect(data.bucket).toBe('test-bucket')
+    expect(data.key).toBe('folder/test-file.mp4')
   })
 
   test('should generate correct file paths', async () => {
@@ -33,8 +33,8 @@ describe('getData Function Tests', () => {
       ],
     }
     const data = await getData(event)
-    expect(data.tmpFilePath).toBe('/tmp/test-file.mp4')
-    expect(data.outputFilePath).toBe(
+    expect(data.tmpPath).toBe('/tmp/test-file.mp4')
+    expect(data.outputPath).toBe(
       `/tmp/processed_test-file${conf.nameModifier}.mp4`,
     )
   })
