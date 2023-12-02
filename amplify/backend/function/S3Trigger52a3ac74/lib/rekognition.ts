@@ -161,7 +161,11 @@ function isCropChangeSignificant(
 function createOrUpdateShots(shots, timestamp, crop, label, minShotDuration) {
   if (shots.length > 0) {
     let lastShot = shots[shots.length - 1]
-    if (lastShot.label === label && JSON.stringify(lastShot.crop) === JSON.stringify(crop)) {
+    // Check if the current shot is similar to the last one
+    if (
+      lastShot.label === label &&
+      (crop === null || JSON.stringify(lastShot.crop) === JSON.stringify(crop))
+    ) {
       // Update end timestamp if the current shot is similar to the last one
       lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
     } else {

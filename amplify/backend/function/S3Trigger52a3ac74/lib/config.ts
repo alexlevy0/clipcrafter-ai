@@ -13,7 +13,7 @@ export const conf = {
     jobCheckDelay: 5000,
     minShotDuration: 0.5,
     confidenceThreshold: 85.0,
-    cropChangeTolerance: 0.3,
+    cropChangeTolerance: 0.5,
   },
   debug: false,
   quality: EQuality.LOW,
