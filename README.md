@@ -70,8 +70,6 @@ Unleash the power of AI to detect and highlight the most engaging parts of your 
 
    - [ ] Handle identity-based policy
 
-
-
 ## Contact
 
 For any inquiries or feedback, please contact [Alex Lévy](mailto:alexlevy0@gmail.com).
@@ -82,33 +80,33 @@ Thank you for checking out ClipCrafter AI!
 
 ### Klap.app
 
-- **AI-driven Video Generation:** Creates engaging snippets from videos, potentially viral【8†source】.
-- **AI-powered Video Editing:** Automatically generates TikToks, Reels, and Shorts from long-form YouTube content【9†source】.
-- **YouTube Link Conversion:** Converts YouTube videos into short-form videos for social platforms【12†source】.
+- **AI-driven Video Generation:** Creates engaging snippets from videos, potentially viral
+- **AI-powered Video Editing:** Automatically generates TikToks, Reels, and Shorts from long-form YouTube content
+- **YouTube Link Conversion:** Converts YouTube videos into short-form videos for social platforms
 
 ### Qlip.ai
 
-- **Punchline Score:** AI detects compelling punchlines within the video【16†source】.
-- **AI Feedback Loop:** Improves highlight recommendations over time【16†source】.
-- **AI-Powered Clipping:** Extracts short clips from long videos【17†source】.
+- **Punchline Score:** AI detects compelling punchlines within the video
+- **AI Feedback Loop:** Improves highlight recommendations over time
+- **AI-Powered Clipping:** Extracts short clips from long videos
 
 ### Vizard.ai
 
-- **Transcription and Editing:** Streamlines video content creation and repurposing【24†source】.
-- **Automated Video Editing:** Simplifies the video editing process【28†source】.
-- **Audio Editing and Sync:** Advanced audio editing features and seamless syncing with visuals【29†source】.
+- **Transcription and Editing:** Streamlines video content creation and repurposing
+- **Automated Video Editing:** Simplifies the video editing process
+- **Audio Editing and Sync:** Advanced audio editing features and seamless syncing with visuals
 
 ### 2short.ai
 
-- **Captivating Facial Tracking:** Keeps the subject at the center with facial tracking【33†source】.
-- **Effortless Animated Subtitles:** Adds animated subtitles to videos【33†source】.
-- **Automated Clip Generation:** Extracts engaging segments from longer videos【35†source】.
+- **Captivating Facial Tracking:** Keeps the subject at the center with facial tracking
+- **Effortless Animated Subtitles:** Adds animated subtitles to videos
+- **Automated Clip Generation:** Extracts engaging segments from longer videos
 
 ### Opus.pro
 
-- **Generative AI for Video Repurposing:** Converts long videos into shorts【43†source】.
-- **Dynamic Captions and AI-Relayout:** Offers features like dynamic captions for enhanced viewer engagement【45†source】.
-- **Multi-Platform Streaming:** Facilitates streaming to various platforms with custom branding and audience participation【44†source】.
+- **Generative AI for Video Repurposing:** Converts long videos into shorts
+- **Dynamic Captions and AI-Relayout:** Offers features like dynamic captions for enhanced viewer engagement
+- **Multi-Platform Streaming:** Facilitates streaming to various platforms with custom branding and audience participation
 
 ## License
 

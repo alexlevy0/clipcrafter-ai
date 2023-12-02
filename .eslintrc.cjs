@@ -22,10 +22,12 @@ module.exports = {
       },
     },
   ],
+  ignorePatterns: ['node_modules', 'dist', 'amplify'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
+    project: './tsconfig.json',
   },
   plugins: ['@typescript-eslint', 'react', 'prettier'],
   rules: {
