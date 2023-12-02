@@ -11,7 +11,7 @@ export const conf = {
     paddingFactorBase: 1,
     significantMovementThreshold: 0.7,
     jobCheckDelay: 5000,
-    minShotDuration: 0.6,
+    minShotDuration: 0.8,
     confidenceThreshold: 85.0,
     cropChangeTolerance: 0.6,
   },

@@ -12,6 +12,21 @@ import { conf } from './config'
 import { sleep } from './utils'
 import { CropCoordinates, VideoShot } from './types'
 
+const {
+  jobCheckDelay,
+  paddingFactorBase,
+  significantMovementThreshold,
+  highConfidenceThreshold,
+  cropChangeTolerance,
+  confidenceThreshold,
+  enabled,
+  region,
+  bucketSufix,
+  minShotDuration,
+  height,
+  width,
+} = conf.rekognitionConf
+
 async function waitForJobCompletion(
   client: RekognitionClient,
   jobId: string,
@@ -28,7 +43,7 @@ async function waitForJobCompletion(
       throw new Error('Job failed')
     }
 
-    await sleep(conf.rekognitionConf.jobCheckDelay)
+    await sleep(jobCheckDelay)
   }
   throw new Error('Job did not complete successfully')
 }
@@ -40,15 +55,15 @@ function calculateCropCoordinates(
   lastFacePosition: BoundingBox | null,
   lastCrop: CropCoordinates | null,
 ): CropCoordinates {
-  let paddingFactor = conf.rekognitionConf.paddingFactorBase
+  let paddingFactor = paddingFactorBase
 
   if (lastFacePosition) {
     const movementX = Math.abs(box.Left - lastFacePosition.Left)
     const movementY = Math.abs(box.Top - lastFacePosition.Top)
 
     if (
-      movementX > conf.rekognitionConf.significantMovementThreshold ||
-      movementY > conf.rekognitionConf.significantMovementThreshold
+      movementX > significantMovementThreshold ||
+      movementY > significantMovementThreshold
     ) {
       paddingFactor = paddingFactor + 0.5
     }
@@ -92,8 +107,6 @@ function calculateCropCoordinates(
 function isSignificantEmotionChange(
   prevEmotions: Emotion[],
   newEmotions: Emotion[],
-  highConfidenceThreshold: number = conf.rekognitionConf
-    .highConfidenceThreshold,
 ): boolean {
   if (
     !prevEmotions ||
@@ -128,7 +141,7 @@ function isSignificantEmotionChange(
 function isCropChangeSignificant(
   newCrop: CropCoordinates,
   lastCrop: CropCoordinates,
-  tolerance: number = conf.rekognitionConf.cropChangeTolerance,
+  tolerance: number = cropChangeTolerance,
 ): boolean {
   const deltaX = Math.abs(newCrop.x - lastCrop.x)
   const deltaY = Math.abs(newCrop.y - lastCrop.y)
@@ -146,23 +159,21 @@ function isCropChangeSignificant(
 export async function analyzeVideo(
   Name: string,
   Bucket: string,
-  videoWidth: number = conf.rekognitionConf.width,
-  videoHeight: number = conf.rekognitionConf.height,
+  videoWidth: number = width,
+  videoHeight: number = height,
 ): Promise<VideoShot[]> {
-  if (!conf.rekognitionConf.enabled) {
+  if (!enabled) {
     console.log('analyzeVideo : rekognition disabled')
     const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
     return cropData.shots
   }
 
-  const client = new RekognitionClient({
-    region: conf.rekognitionConf.region,
-  })
+  const client = new RekognitionClient({ region })
 
   const startCommand = new StartFaceDetectionCommand({
     Video: {
       S3Object: {
-        Bucket: `${Bucket}${conf.rekognitionConf.bucketSufix}`,
+        Bucket: `${Bucket}${bucketSufix}`,
         Name,
       },
     },
@@ -174,7 +185,7 @@ export async function analyzeVideo(
   const startResponse = await client.send(startCommand)
 
   if (!startResponse.JobId) {
-    throw new Error("Video analysis failed to start")
+    throw new Error('Video analysis failed to start')
   }
 
   const getResponse = await waitForJobCompletion(client, startResponse.JobId)
@@ -185,13 +196,12 @@ export async function analyzeVideo(
 
   getResponse.Faces?.forEach((faceDetection: FaceDetection) => {
     const face = faceDetection.Face
-    const timestamp = faceDetection.Timestamp / 1000 // Convertir en secondes
+    const timestamp = faceDetection.Timestamp / 1000 // secondes
 
     const shouldCrop =
       face &&
-      conf.rekognitionConf.confidenceThreshold &&
-      (face.MouthOpen?.Value ||
-        face.Smile?.Value ||
+      confidenceThreshold &&
+      (face.Smile?.Value ||
         isSignificantEmotionChange(prevEmotions, face.Emotions))
 
     let crop = shouldCrop
@@ -204,48 +214,40 @@ export async function analyzeVideo(
         )
       : null
 
+    const label = shouldCrop ? 'Speaking/Smiling' : 'No Face'
     if (shots.length > 0) {
       let lastShot = shots[shots.length - 1]
       // Fusionner si le shot actuel est similaire au précédent
-      if (
-        lastShot.label === (shouldCrop ? 'Speaking/Smiling' : 'No Face') &&
-        lastShot.crop === crop
-      ) {
+      if (lastShot.label === label && lastShot.crop === crop) {
         lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
       } else {
         let newTsStart = lastShot.ts_end
-        let newTsEnd = Math.max(
-          newTsStart + conf.rekognitionConf.minShotDuration,
-          timestamp,
-        )
+        let newTsEnd = Math.max(newTsStart + minShotDuration, timestamp)
         shots.push({
           ts_start: newTsStart,
           ts_end: newTsEnd,
           crop,
-          label: shouldCrop ? 'Speaking/Smiling' : 'No Face',
+          label,
         })
       }
     } else {
       // Premier shot
       shots.push({
         ts_start: 0,
-        ts_end: Math.max(conf.rekognitionConf.minShotDuration, timestamp),
+        ts_end: Math.max(minShotDuration, timestamp),
         crop,
-        label: shouldCrop ? 'Speaking/Smiling' : 'No Face',
+        label,
       })
     }
 
     lastFacePosition = face ? face.BoundingBox : lastFacePosition
     prevEmotions = face ? face.Emotions : prevEmotions
   })
-  // Assurer que le dernier shot a une durée minimale de conf.rekognitionConf.minShotDuration
+  // Assurer que le dernier shot a une durée minimale de minShotDuration
   if (shots.length > 0) {
     let lastShot = shots[shots.length - 1]
-    if (
-      lastShot.ts_end - lastShot.ts_start <
-      conf.rekognitionConf.minShotDuration
-    ) {
-      lastShot.ts_end = lastShot.ts_start + conf.rekognitionConf.minShotDuration
+    if (lastShot.ts_end - lastShot.ts_start < minShotDuration) {
+      lastShot.ts_end = lastShot.ts_start + minShotDuration
     }
   }
   return shots.filter(s => s.ts_end !== s.ts_start)
