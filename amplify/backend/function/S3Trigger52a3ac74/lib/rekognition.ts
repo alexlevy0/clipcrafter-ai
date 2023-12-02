@@ -104,7 +104,7 @@ function calculateCropCoordinates(
   }
 }
 
-function isSignificantEmotionChange(
+function isEmotionChange(
   prevEmotions: Emotion[],
   newEmotions: Emotion[],
 ): boolean {
@@ -168,6 +168,8 @@ export async function analyzeVideo(
     return cropData.shots
   }
 
+  console.log('analyzeVideo : rekognition enabled, Starting FaceDetection')
+
   const client = new RekognitionClient({ region })
 
   const startCommand = new StartFaceDetectionCommand({
@@ -180,10 +182,7 @@ export async function analyzeVideo(
     FaceAttributes: 'ALL',
   })
 
-  console.log('analyzeVideo : rekognition enabled, Starting FaceDetection')
-
   const startResponse = await client.send(startCommand)
-
   if (!startResponse.JobId) {
     throw new Error('Video analysis failed to start')
   }
@@ -198,11 +197,9 @@ export async function analyzeVideo(
     const face = faceDetection.Face
     const timestamp = faceDetection.Timestamp / 1000 // secondes
 
+    const emotionChanged = isEmotionChange(prevEmotions, face.Emotions)
     const shouldCrop =
-      face &&
-      confidenceThreshold &&
-      (face.Smile?.Value ||
-        isSignificantEmotionChange(prevEmotions, face.Emotions))
+      face && confidenceThreshold && (face.Smile?.Value || emotionChanged)
 
     let crop = shouldCrop
       ? calculateCropCoordinates(
