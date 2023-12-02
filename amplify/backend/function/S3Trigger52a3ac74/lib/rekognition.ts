@@ -12,14 +12,13 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 const config = {
   highConfidenceThreshold: 90.0,
-  // paddingFactorBase: 0.25,
-  paddingFactorBase: 0.95,
+  paddingFactorBase: 1,
   significantMovementThreshold: 0.7,
   jobCheckDelay: 5000,
 }
 const MIN_SHOT_DURATION = 0.8
 const CONFIDENCE_THRESHOLD = 85.0
-const CROP_CHANGE_TOLERANCE = 0.2 // Seuil de tolérance pour le changement de crop (20%)
+const CROP_CHANGE_TOLERANCE = 0.4 // Seuil de tolérance pour le changement de crop (20%)
 
 interface CropCoordinates {
   x: number
