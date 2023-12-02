@@ -9,8 +9,8 @@ export const sleep = (ms: number) =>
 
 export const retry = async ({
   fn = noop,
-  retries = 120,
-  delay = 4000,
+  retries = 60 * 5 * 3,
+  delay = 333,
   err = '',
 }) => {
   const attempt = async (
@@ -40,9 +40,15 @@ export const getData = async (key: string, prefix = '_edited') => {
     }
     const [name, format] = key.split('.')
     const newKey = `${name}${prefix}.${format}`
-    console.log({ newKey })
     return await Storage.get(newKey, config)
   } catch (error) {
     throw new Error('No data yet')
   }
+}
+
+export async function measurePromise(fn: () => Promise<any>): Promise<number> {
+  const start = performance.now()
+  await fn()
+  const durationInMilliseconds = performance.now() - start
+  return parseFloat((durationInMilliseconds / 1000).toFixed(2))
 }

@@ -34,7 +34,7 @@ import { Auth, Storage } from 'aws-amplify';
 // @ts-ignore
 import { Features } from './Features.tsx';
 // @ts-ignore
-import { retry, noop, getData } from './utils.ts';
+import { retry, noop, getData, measurePromise } from './utils.ts';
 
 const Picker = (props: { onClick: any }) => {
   return (
@@ -381,6 +381,7 @@ const Clip = () => {
 
   const [url, setUrl] = useState('')
   const [urlEdited, setUrlEdited] = useState('')
+  const [processDurationSecond, setProcessDurationSecond] = useState('')
   const [status, setStatus] = useState(STANDBY)
 
   const onReady = () => {
@@ -388,15 +389,21 @@ const Clip = () => {
   }
 
   const onSuccess = async ({ key = '' }) => {
-    if (!key) return
-    setStatus(`${PROCESSING} : ${key}…`)
-    // @ts-ignore
-    const url = await retry({ fn: async () => await getData(key, '') })
-    console.log({ url });
-    setUrl(url)
-    const urlEdited = await retry({ fn: async () => await getData(key) })
-    console.log({ urlEdited });
-    setUrlEdited(urlEdited)
+    try {
+      if (!key) return
+      setStatus(`${PROCESSING} : ${key}…`)
+      // @ts-ignore
+      const url = await retry({ fn: async () => await getData(key, '') })
+      setUrl(url)
+
+      const durationSecond = await measurePromise(async () => {
+        const urlEdited = await retry({ fn: async () => await getData(key) })
+        setUrlEdited(urlEdited)
+      })
+      setProcessDurationSecond(`⏱️ ${durationSecond}s `)
+    } catch (error) {
+      console.error(`onSuccess ERROR : ${error}`);
+    }
   }
 
   const onResetVideoUrl = () => setUrl('')
@@ -429,18 +436,18 @@ const Clip = () => {
           placeholder="Paste YouTube link or drop a file"
         />
       </Flex> */}
-      {status !== READY && status !== STANDBY && (
+      <Heading
+        level={5}
+      >
+        {status}
+      </Heading>
+      {!!url && processDurationSecond === '' && (
         <Flex
           backgroundColor={'rgb(13, 25, 38)'}
           direction="column"
           gap="small"
           justifyContent="space-around"
         >
-          <Heading
-            level={6}
-          >
-            {status}
-          </Heading>
           <Loader
             emptyColor={'rgb(13, 25, 38)'}
             filledColor={'rgb(125, 214, 232)'}
@@ -448,15 +455,27 @@ const Clip = () => {
           />
         </Flex>
       )}
+      {processDurationSecond !== '' && (
+        <Flex
+          backgroundColor={'rgb(13, 25, 38)'}
+          direction="column"
+          gap="small"
+          justifyContent="space-around"
+        >
+          <Heading
+            level={5}
+          >
+            {processDurationSecond}
+          </Heading>
+        </Flex>
+      )}
       <Flex
-        // backgroundColor={'black'}
         alignContent="center"
         justifyContent={'center'}
         gap="small"
       >
         <ReactPlayer
           style={{ backgroundColor: 'black' }}
-          onReady={onReady}
           playing={true}
           controls={true}
           url={url}
