@@ -422,6 +422,7 @@ const Clip = () => {
 
     >
       <StorageManager
+        // maxFileSize={''} // TODO
         ref={ref}
         isResumable
         accessLevel='public'

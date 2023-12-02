@@ -2,13 +2,13 @@ import { EQuality } from './types'
 
 export const conf = {
   rekognitionConf: {
-    enabled: true,
+    enabled: false,
     region: 'eu-west-2',
     bucketSufix: '-london',
     width: 1920,
     height: 1080,
     highConfidenceThreshold: 90.0,
-    paddingFactorBase: 0.3, // de 0.1 à 0.3 ?
+    paddingFactorBase: 0.4, // de 0.1 à 0.4 ?
     significantMovementThreshold: 0.8,
     jobCheckDelay: 5000,
     minShotDuration: 0.5,
