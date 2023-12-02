@@ -157,15 +157,26 @@ function isCropChangeSignificant(
   // Comparing the distance with the tolerance (adjusted for the size of the last crop)
   const adjustedTolerance = Math.sqrt((tolerance * lastCrop.w) ** 2 + (tolerance * lastCrop.h) ** 2)
 
+  console.log(`isCropChangeSignificant : ${distance > adjustedTolerance}`)
+  console.log({ distance }, { adjustedTolerance })
+
   return distance > adjustedTolerance
 }
+
 function createOrUpdateShots(shots, timestamp, crop, label, minShotDuration) {
   if (shots.length > 0) {
     let lastShot = shots[shots.length - 1]
 
     // Vérifier si les deux shots consécutifs doivent être fusionnés
-    if (shouldMergeShots(lastShot, { ts_start: timestamp, crop, label })) {
-      // Mettre à jour le timestamp de fin si les deux shots consécutifs doivent être fusionnés
+    if (lastShot.label === label && lastShot.crop === null && crop === null) {
+      // Mettre à jour le timestamp de fin si les deux shots consécutifs avec 'No Face' doivent être fusionnés
+      lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
+    } else if (
+      lastShot.label === label &&
+      crop !== null &&
+      JSON.stringify(lastShot.crop) === JSON.stringify(crop)
+    ) {
+      // Mettre à jour le timestamp de fin si le shot actuel est similaire au dernier
       lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
     } else {
       // Créer un nouveau shot si le shot actuel est différent du dernier
@@ -187,14 +198,6 @@ function createOrUpdateShots(shots, timestamp, crop, label, minShotDuration) {
     })
   }
   return shots
-}
-
-function shouldMergeShots(lastShot, currentShot) {
-  return (
-    lastShot.label === currentShot.label &&
-    ((lastShot.crop === null && currentShot.crop === null) ||
-      JSON.stringify(lastShot.crop) === JSON.stringify(currentShot.crop))
-  )
 }
 
 export async function analyzeVideo(
