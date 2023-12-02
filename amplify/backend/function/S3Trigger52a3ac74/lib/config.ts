@@ -9,7 +9,7 @@ export const conf = {
     height: 1080,
     highConfidenceThreshold: 90.0,
     paddingFactorBase: 0.8,
-    significantMovementThreshold: 0.6,
+    significantMovementThreshold: 0.8,
     jobCheckDelay: 5000,
     minShotDuration: 0.5,
     confidenceThreshold: 85.0,

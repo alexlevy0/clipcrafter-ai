@@ -143,17 +143,47 @@ function isCropChangeSignificant(
   lastCrop: CropCoordinates,
   tolerance: number = cropChangeTolerance,
 ): boolean {
-  const deltaX = Math.abs(newCrop.x - lastCrop.x)
-  const deltaY = Math.abs(newCrop.y - lastCrop.y)
-  const deltaW = Math.abs(newCrop.w - lastCrop.w)
-  const deltaH = Math.abs(newCrop.h - lastCrop.h)
+  // Calculating the center points of both crops
+  const centerXNew = newCrop.x + newCrop.w / 2
+  const centerYNew = newCrop.y + newCrop.h / 2
+  const centerXLast = lastCrop.x + lastCrop.w / 2
+  const centerYLast = lastCrop.y + lastCrop.h / 2
 
-  return (
-    deltaX > tolerance * lastCrop.w ||
-    deltaY > tolerance * lastCrop.h ||
-    deltaW > tolerance * lastCrop.w ||
-    deltaH > tolerance * lastCrop.h
-  )
+  // Calculating Euclidean distance between the centers of the new and last crops
+  const distance = calculateEuclideanDistance(centerXNew, centerYNew, centerXLast, centerYLast)
+
+  // Comparing the distance with the tolerance (adjusted for the size of the last crop)
+  const adjustedTolerance = Math.sqrt((tolerance * lastCrop.w) ** 2 + (tolerance * lastCrop.h) ** 2)
+
+  return distance > adjustedTolerance
+}
+
+function createOrUpdateShots(shots, timestamp, crop, label, minShotDuration) {
+  if (shots.length > 0) {
+    let lastShot = shots[shots.length - 1]
+    if (lastShot.label === label && JSON.stringify(lastShot.crop) === JSON.stringify(crop)) {
+      // Update end timestamp if the current shot is similar to the last one
+      lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
+    } else {
+      // Create a new shot if the current shot is different from the last one
+      const newTsStart = Math.max(lastShot.ts_end, timestamp - minShotDuration)
+      shots.push({
+        ts_start: newTsStart,
+        ts_end: timestamp,
+        crop,
+        label,
+      })
+    }
+  } else {
+    // Create the first shot
+    shots.push({
+      ts_start: 0,
+      ts_end: timestamp,
+      crop,
+      label,
+    })
+  }
+  return shots
 }
 
 export async function analyzeVideo(
@@ -185,7 +215,7 @@ export async function analyzeVideo(
   }
   const getResponse = await waitForJobCompletion(client, startResponse.JobId)
 
-  const shots: VideoShot[] = []
+  let shots: VideoShot[] = []
   let lastFacePosition: BoundingBox | null = null
   let prevEmotions: Emotion[] = []
 
@@ -218,30 +248,7 @@ export async function analyzeVideo(
     }
 
     const label = shouldCrop ? 'Speaking/Smiling' : 'No Face'
-    if (shots.length > 0) {
-      let lastShot = shots[shots.length - 1]
-      // Fusionner si le shot actuel est similaire au précédent
-      if (lastShot.label === label && lastShot.crop === crop) {
-        lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
-      } else {
-        let newTsStart = lastShot.ts_end
-        let newTsEnd = Math.max(newTsStart + minShotDuration, timestamp)
-        shots.push({
-          ts_start: newTsStart,
-          ts_end: newTsEnd,
-          crop,
-          label,
-        })
-      }
-    } else {
-      // Premier shot
-      shots.push({
-        ts_start: 0,
-        ts_end: Math.max(minShotDuration, timestamp),
-        crop,
-        label,
-      })
-    }
+    shots = createOrUpdateShots(shots, timestamp, crop, label, minShotDuration)
 
     lastFacePosition = face ? BoundingBox : lastFacePosition
     prevEmotions = face ? Emotions : prevEmotions
