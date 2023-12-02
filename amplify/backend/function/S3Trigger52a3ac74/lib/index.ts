@@ -15,7 +15,7 @@ export const handler: Handler = async (event: LambdaS3Event) => {
     const { tmpPath, outputPath, newKey, key, bucket } = await getData(event)
     await download(bucket, key, tmpPath)
     const shots = await analyzeVideo(key, bucket)
-    console.log({ shots })
+    // console.log({ shots })
     await processVideo(tmpPath, outputPath, shots)
     await upload(outputPath, bucket, newKey)
     await cleanTempFiles(tmpPath, outputPath)

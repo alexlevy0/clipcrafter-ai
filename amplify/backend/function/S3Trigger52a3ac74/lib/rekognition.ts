@@ -157,31 +157,35 @@ function isCropChangeSignificant(
   // Comparing the distance with the tolerance (adjusted for the size of the last crop)
   const adjustedTolerance = Math.sqrt((tolerance * lastCrop.w) ** 2 + (tolerance * lastCrop.h) ** 2)
 
-  console.log(`isCropChangeSignificant : ${distance > adjustedTolerance}`)
-  console.log({ distance }, { adjustedTolerance })
-
   return distance > adjustedTolerance
+}
+
+export function mergeConsecutiveNullCrops(shots) {
+  return shots.reduce((acc, shot) => {
+    if (shot.crop === null) {
+      if (acc.length > 0 && acc[acc.length - 1].crop === null) {
+        acc[acc.length - 1].ts_end = shot.ts_end
+      } else {
+        acc.push({ ...shot })
+      }
+    } else {
+      acc.push(shot)
+    }
+    return acc
+  }, [])
 }
 
 function createOrUpdateShots(shots, timestamp, crop, label, minShotDuration) {
   if (shots.length > 0) {
     let lastShot = shots[shots.length - 1]
-
-    // Fusionner si le label est le même et que les deux crops sont null
-    if (lastShot.label === label && lastShot.crop === null && crop === null) {
-      lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
-    } else if (lastShot.label !== label || lastShot.crop !== null || crop !== null) {
-      // Créer un nouveau shot si le label est différent ou si l'un des crops n'est pas null
-      const newTsStart = Math.max(lastShot.ts_end, timestamp - minShotDuration)
-      shots.push({
-        ts_start: newTsStart,
-        ts_end: timestamp,
-        crop,
-        label,
-      })
-    }
+    const newTsStart = Math.max(lastShot.ts_end, timestamp - minShotDuration)
+    shots.push({
+      ts_start: newTsStart,
+      ts_end: timestamp,
+      crop,
+      label,
+    })
   } else {
-    // Créer le premier shot
     shots.push({
       ts_start: 0,
       ts_end: timestamp,
@@ -260,6 +264,7 @@ export async function analyzeVideo(
     lastFacePosition = face ? BoundingBox : lastFacePosition
     prevEmotions = face ? Emotions : prevEmotions
   })
+
   // Assurer que le dernier shot a une durée minimale de minShotDuration
   if (shots.length > 0) {
     let lastShot = shots[shots.length - 1]
@@ -267,5 +272,12 @@ export async function analyzeVideo(
       lastShot.ts_end = lastShot.ts_start + minShotDuration
     }
   }
-  return shots.filter(s => s.ts_end !== s.ts_start)
+  const rawShots = shots
+  console.log('rawShots ->', rawShots.length)
+  const filteredShots = rawShots.filter(s => s.ts_end !== s.ts_start)
+  console.log('filteredShots ->', filteredShots.length)
+  const mergedShots = mergeConsecutiveNullCrops(filteredShots)
+  console.log('mergedShots ->', mergedShots.length)
+  console.log({ mergedShots })
+  return mergedShots
 }
