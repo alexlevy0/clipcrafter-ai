@@ -54,7 +54,7 @@ function calculateCropCoordinates(
   videoHeight: number,
   lastFacePosition: BoundingBox | null,
   lastCrop: CropCoordinates | null,
-): CropCoordinates {
+): { crop: CropCoordinates; newFacePosition: BoundingBox } {
   let paddingFactor = paddingFactorBase
 
   if (lastFacePosition) {
@@ -65,11 +65,9 @@ function calculateCropCoordinates(
       movementX > significantMovementThreshold ||
       movementY > significantMovementThreshold
     ) {
-      paddingFactor = paddingFactor + 0.5
+      paddingFactor = paddingFactor + 0.1
     }
   }
-
-  lastFacePosition = box
 
   const faceWidth = box.Width * videoWidth
   const faceHeight = box.Height * videoHeight
@@ -89,19 +87,19 @@ function calculateCropCoordinates(
   if (y + cropHeight > videoHeight) {
     y = videoHeight - cropHeight
   }
-  if (
-    lastCrop &&
-    lastFacePosition &&
-    !isCropChangeSignificant({ x, y, w: cropWidth, h: cropHeight }, lastCrop)
-  ) {
-    return lastCrop // Renvoyer les anciennes coordonnées si le changement n'est pas significatif
-  }
-  return {
+
+  let newCrop = {
     x: Math.round(x),
     y: Math.round(y),
     w: Math.round(cropWidth),
     h: Math.round(cropHeight),
   }
+
+  if (lastCrop && !isCropChangeSignificant(newCrop, lastCrop)) {
+    return { crop: lastCrop, newFacePosition: box }
+  }
+
+  return { crop: newCrop, newFacePosition: box }
 }
 
 function isEmotionChange(
@@ -201,15 +199,22 @@ export async function analyzeVideo(
     const shouldCrop =
       face && confidenceThreshold && (face.Smile?.Value || emotionChanged)
 
-    let crop = shouldCrop
-      ? calculateCropCoordinates(
-          face.BoundingBox,
-          videoWidth,
-          videoHeight,
-          lastFacePosition,
-          null,
-        )
-      : null
+    let crop, lastCrop
+
+    if (shouldCrop) {
+      const cropResult = calculateCropCoordinates(
+        face.BoundingBox,
+        videoWidth,
+        videoHeight,
+        lastFacePosition,
+        lastCrop,
+      )
+      crop = cropResult.crop
+      lastFacePosition = cropResult.newFacePosition
+      lastCrop = crop // Update the lastCrop with the new crop
+    } else {
+      crop = null
+    }
 
     const label = shouldCrop ? 'Speaking/Smiling' : 'No Face'
     if (shots.length > 0) {
