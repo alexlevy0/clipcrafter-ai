@@ -384,6 +384,10 @@ const Clip = () => {
   const [processDurationSecond, setProcessDurationSecond] = useState('')
   const [status, setStatus] = useState(STANDBY)
 
+  useEffect(() => {
+    Notification.requestPermission()
+  }, []);
+
   const onReady = () => {
     setStatus(READY)
   }
@@ -400,7 +404,8 @@ const Clip = () => {
         const urlEdited = await retry({ fn: async () => await getData(key) })
         setUrlEdited(urlEdited)
       })
-      setProcessDurationSecond(`⏱️ ${durationSecond}s `)
+      setProcessDurationSecond(`⏱️ ${durationSecond}`)
+      new Notification(`⏱️ ${durationSecond}`)
     } catch (error) {
       console.error(`onSuccess ERROR : ${error}`);
     }
@@ -476,7 +481,7 @@ const Clip = () => {
       >
         <ReactPlayer
           style={{ backgroundColor: 'black' }}
-          playing={true}
+          playing={false}
           controls={true}
           url={url}
           width={"100%"}
@@ -484,7 +489,7 @@ const Clip = () => {
         <ReactPlayer
           style={{ backgroundColor: 'grey' }}
           onReady={onReady}
-          playing={true}
+          playing={false}
           controls={true}
           url={urlEdited}
           width={"100%"}

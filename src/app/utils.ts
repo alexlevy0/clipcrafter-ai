@@ -46,9 +46,12 @@ export const getData = async (key: string, prefix = '_edited') => {
   }
 }
 
-export async function measurePromise(fn: () => Promise<any>): Promise<number> {
+export async function measurePromise(fn: () => Promise<any>): Promise<string> {
   const start = performance.now()
   await fn()
-  const durationInMilliseconds = performance.now() - start
-  return parseFloat((durationInMilliseconds / 1000).toFixed(2))
+  const durationInMinutes = (performance.now() - start) / 60000
+  const wholeMinutes = Math.floor(durationInMinutes)
+  const seconds = Math.round((durationInMinutes - wholeMinutes) * 60)
+  const formattedSeconds = seconds.toString().padStart(2, '0');
+  return `${wholeMinutes}mn ${formattedSeconds}s`
 }
