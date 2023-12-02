@@ -193,10 +193,7 @@ export async function analyzeVideo(
 
   const getResponse = await waitForJobCompletion(client, startResponse.JobId)
   console.log({ getResponse })
-
   const shots: VideoShot[] = []
-  let lastTsEnd: number = 0
-  let lastCrop: CropCoordinates | null = null
   let lastFacePosition: BoundingBox | null = null
   let prevEmotions: Emotion[] = []
 
@@ -211,45 +208,45 @@ export async function analyzeVideo(
         face.Smile?.Value ||
         isSignificantEmotionChange(prevEmotions, face.Emotions))
 
-    const crop = shouldCrop
+    let crop = shouldCrop
       ? calculateCropCoordinates(
           face.BoundingBox,
           videoWidth,
           videoHeight,
           lastFacePosition,
-          lastCrop,
+          null,
         )
       : null
 
-    const isFirst = shots.length === 0
-    if (shouldCrop || isFirst || lastTsEnd !== timestamp) {
-      const ts_start = isFirst ? 0 : lastTsEnd
-      const ts_end = Math.max(ts_start + MIN_SHOT_DURATION, timestamp)
-
+    if (shots.length > 0) {
+      let lastShot = shots[shots.length - 1]
+      // Fusionner si le shot actuel est similaire au précédent
+      if (
+        lastShot.label === (shouldCrop ? 'Speaking/Smiling' : 'No Face') &&
+        lastShot.crop === crop
+      ) {
+        lastShot.ts_end = timestamp
+      } else {
+        shots.push({
+          ts_start: lastShot.ts_end,
+          ts_end: timestamp,
+          crop,
+          label: shouldCrop ? 'Speaking/Smiling' : 'No Face',
+        })
+      }
+    } else {
+      // Premier shot
       shots.push({
-        ts_start,
-        ts_end,
+        ts_start: 0,
+        ts_end: timestamp,
         crop,
         label: shouldCrop ? 'Speaking/Smiling' : 'No Face',
       })
-      lastTsEnd = ts_end
-    } else if (shots.length > 0) {
-      const lastShot = shots[shots.length - 1]
-      lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
     }
 
-    lastCrop = crop
     lastFacePosition = face ? face.BoundingBox : lastFacePosition
     prevEmotions = face ? face.Emotions : prevEmotions
   })
-
-  // Vérifier le dernier shot après la boucle
-  if (shots.length > 0) {
-    let lastShot = shots[shots.length - 1]
-    if (lastShot.ts_end - lastShot.ts_start < MIN_SHOT_DURATION) {
-      lastShot.ts_end = lastShot.ts_start + MIN_SHOT_DURATION
-    }
-  }
 
   return shots
 }
