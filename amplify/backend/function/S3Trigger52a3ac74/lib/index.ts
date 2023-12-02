@@ -25,20 +25,15 @@ export const handler: Handler = async (event: LambdaS3Event) => {
     let shots: IShot[]
 
     if (conf.rekognition) {
-      try {
-        const _shots = await analyzeVideo(
-          objKey,
-          bK,
-          conf.rekognitionWidth,
-          conf.rekognitionHeight,
-        )
-        console.log({ _shots })
-        if (shots) {
-          shots = _shots
-        }
-      } catch (error) {
-        console.log(`analyzeVideo ERROR : ${error}`);
-      }
+      const _shots = await analyzeVideo(
+        objKey,
+        `${bK}-london`,
+        conf.rekognitionWidth,
+        conf.rekognitionHeight,
+      )
+      console.log('_shots before', _shots.length);
+      shots = _shots.filter(s => s.ts_end !== s.ts_start)
+      console.log('shots after', shots.length);
     } else {
       const cropData = JSON.parse(await fs.readFile(conf.cropFile, 'utf-8'))
       shots = cropData.shots

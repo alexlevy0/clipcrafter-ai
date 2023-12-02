@@ -65,6 +65,10 @@ export async function processVideo(_in: string, _out: string, _clip: IShot[]) {
     (_, i) => i * batchSize,
   )
 
+  console.log('clip.length : ', clip.length)
+  console.log({ clip })
+  console.log('batchStartIndices.length : ', batchStartIndices.length)
+
   const batches = batchStartIndices.map(startIndex =>
     clip.slice(startIndex, startIndex + batchSize),
   )

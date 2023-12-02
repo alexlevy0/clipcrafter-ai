@@ -7,21 +7,15 @@ import {
   BoundingBox,
   Emotion,
 } from '@aws-sdk/client-rekognition'
-// import { fromIni } from '@aws-sdk/credential-provider-ini'
-import { conf } from './config'
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 const config = {
-  videoUri: 'TODO',
-  awsProfile: 'AddProfilAWS',
-  awsRegion: 'eu-west-4',
-  videoWidth: 1920,
-  videoHeight: 1080,
   highConfidenceThreshold: 90.0,
   paddingFactorBase: 0.25,
-  significantMovementThreshold: 0.1,
+  significantMovementThreshold: 0.5,
   jobCheckDelay: 5000,
+  MIN_SHOT_DURATION: 0.5,
 }
 
 interface CropCoordinates {
@@ -150,11 +144,8 @@ export async function analyzeVideo(
   videoHeight: number,
 ): Promise<VideoShot[]> {
   const client = new RekognitionClient({
-    // credentials: fromIni({ profile: config.awsProfile }),
-    region: conf.region,
+    region: 'eu-west-2',
   })
-
-  console.log({ client })
 
   const startCommand = new StartFaceDetectionCommand({
     Video: {
@@ -165,11 +156,9 @@ export async function analyzeVideo(
     },
     FaceAttributes: 'ALL',
   })
-  console.log({ startCommand })
 
+  console.log('StartFaceDetectionCommand')
   const startResponse = await client.send(startCommand)
-
-  console.log({ startResponse })
 
   if (!startResponse.JobId) {
     throw new Error("Échec de démarrage de l'analyse de la vidéo")
@@ -185,7 +174,7 @@ export async function analyzeVideo(
 
   getResponse.Faces?.forEach((faceDetection: FaceDetection) => {
     const face = faceDetection.Face
-    const timestamp = faceDetection.Timestamp
+    const timestamp = faceDetection.Timestamp / 1000
 
     if (face) {
       const crop = calculateCropCoordinates(
