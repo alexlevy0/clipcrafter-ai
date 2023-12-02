@@ -28,5 +28,5 @@ export const conf = {
   batchSize: 5,
   // batchSize: 2,
   cropFile: 'qlip-crop-model-out.json',
-  updateIntervalProgress: 100,
+  updateIntervalProgress: 500,
 }

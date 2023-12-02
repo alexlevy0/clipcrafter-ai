@@ -26,7 +26,7 @@ const {
   height,
   width,
   labelNoCrop,
-  labelCrop
+  labelCrop,
 } = conf.rekognitionConf
 
 async function waitForJobCompletion(
@@ -159,20 +159,13 @@ function isCropChangeSignificant(
 
   return distance > adjustedTolerance
 }
-
 function createOrUpdateShots(shots, timestamp, crop, label, minShotDuration) {
   if (shots.length > 0) {
     let lastShot = shots[shots.length - 1]
 
-    // Vérifier si les deux shots ont labelNoCrop comme label
-    if (lastShot.label === labelNoCrop && label === labelNoCrop) {
-      // Mettre à jour le timestamp de fin si les deux shots consécutifs n'ont pas de visage
-      lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
-    } else if (
-      lastShot.label === label &&
-      (crop === null || JSON.stringify(lastShot.crop) === JSON.stringify(crop))
-    ) {
-      // Mettre à jour le timestamp de fin si le shot actuel est similaire au dernier
+    // Vérifier si les deux shots consécutifs doivent être fusionnés
+    if (shouldMergeShots(lastShot, { ts_start: timestamp, crop, label })) {
+      // Mettre à jour le timestamp de fin si les deux shots consécutifs doivent être fusionnés
       lastShot.ts_end = Math.max(lastShot.ts_end, timestamp)
     } else {
       // Créer un nouveau shot si le shot actuel est différent du dernier
@@ -194,6 +187,14 @@ function createOrUpdateShots(shots, timestamp, crop, label, minShotDuration) {
     })
   }
   return shots
+}
+
+function shouldMergeShots(lastShot, currentShot) {
+  return (
+    lastShot.label === currentShot.label &&
+    ((lastShot.crop === null && currentShot.crop === null) ||
+      JSON.stringify(lastShot.crop) === JSON.stringify(currentShot.crop))
+  )
 }
 
 export async function analyzeVideo(
