@@ -129,13 +129,6 @@ This list now includes a core for each feature, providing insight into the compl
 
 ## 🛣️ Roadmap & milestones
 
-<details>
-<summary>
-
-### Diagram
-
-</summary>
-
 ```mermaid
 gantt
     title ClipCrafter AI Development Schedule
@@ -161,7 +154,12 @@ gantt
     User Feedback and Improvements    :         des12, after des11, 20d
 ```
 
----
+<details>
+<summary>
+
+### Sequence Diagram
+
+</summary>
 
 ```mermaid
 sequenceDiagram
@@ -419,7 +417,7 @@ This list includes the tasks necessary to develop the new AI-driven video editin
 
 </details>
 
-## ClipCrafter AI Alternatives
+## 👀 ClipCrafter AI Alternatives
 
 <details>
 <summary>
