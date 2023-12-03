@@ -38,7 +38,7 @@
     "@react-three/drei": "9.31.1",
     "@react-three/fiber": "8.7.4",
     "@splinetool/loader": "0.9.73",
-    "@splinetool/r3f-spline": "1.0.1",
+    "@splinetool/r3f-spline": "1.0.2",
     "@stripe/stripe-js": "^2.2.0",
     "@types/three": "^0.158.3",
     "aws-amplify": "^5.3.12",
