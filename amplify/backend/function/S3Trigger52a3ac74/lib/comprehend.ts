@@ -39,7 +39,6 @@ export async function getKeyMoments(transcriptText: string): Promise<any[]> {
       ...processSegment({ segment, entities, sentiment, keyPhrases, chatGPTResponse }),
     )
   }
-
   return keyMoments
 }
 
