@@ -127,12 +127,12 @@ This list now includes a core for each feature, providing insight into the compl
 
 ---
 
-## Diagram
+## 🛣️ Roadmap & milestones
 
 <details>
 <summary>
 
-### Diagram WIP
+### Diagram
 
 </summary>
 
@@ -183,7 +183,7 @@ sequenceDiagram
 
 </details>
 
-## Task lists
+## 📋 Task lists
 
 <details>
 <summary>
@@ -387,7 +387,7 @@ This list includes the tasks necessary to develop the new AI-driven video editin
 
 </details>
 
-## Cloud Service Providers Free Tier Overview
+## 🆓 Cloud Service Providers Free Tier Overview
 
 <details>
 <summary>
@@ -460,7 +460,7 @@ This list includes the tasks necessary to develop the new AI-driven video editin
 
 </details>
 
-## Contact
+## 📇 Contact
 
 For any inquiries or feedback, contact me [Alex Lévy](mailto:alexlevy0@gmail.com).
 Thank you for checking out ClipCrafter AI!
