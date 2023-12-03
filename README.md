@@ -13,6 +13,36 @@
 
 ---
 
+## 🛣️ Roadmap & milestones
+
+```mermaid
+gantt
+    title ClipCrafter AI Development Schedule
+    dateFormat  YYYY-MM-DD
+    axisFormat  %m-%Y
+    todayMarker 2023-12-5
+    section Setup & Dev Tools
+    Set up Next.js, TypeScript, ESLint, GitHub Workflows :done, des1, 2023-11-13, 10d
+    section Amplify / Infra
+    Configure AWS Amplify, Backend Resources, S3 Replication :done, des2, 2023-11-13, 20d
+    section Lambda Dev & S3 Integration
+    Implement Lambda, Develop S3 Functions, FFmpeg Commands :done, des3, 2023-11-20, 14d
+    section Front-End
+    Dev Main Application, Auth, Video Upload :done, des4, 2023-11-20, 20d
+    section Facial Tracking
+    Integrate AWS Rekognition, Video Processing with FFmpeg :done, des5, 2023-12-01, 5d
+    section Automated Captions
+    Set up AWS Transcribe, Comprehend, MediaConvert :active, des6, after 2023-12-15, 10d
+    section AI-Driven Video Generation and Editing
+    Develop AI Algorithms, Short Clips Functionality :des7, after des6, 15d
+    section AI-Powered Clip Extraction
+    Implement AI Techniques for Clip Extraction :des8, after des7, 5d
+    section Testing, Deployment, and Monitoring
+    Testing, Deployment, Monitoring :des15, after des8, 10d
+
+```
+
+
 ## 🎯 Targeted high-value features
 
 1. 🎥 **AI-Driven Video Editing (20%)** [8]
@@ -127,34 +157,6 @@ This list now includes a core for each feature, providing insight into the compl
 
 ---
 
-## 🛣️ Roadmap & milestones
-
-```mermaid
-gantt
-    title ClipCrafter AI Development Schedule
-    dateFormat  YYYY-MM-DD
-    axisFormat  %m-%Y
-    todayMarker 2023-12-5
-    section Setup & Dev Tools
-    Set up Next.js, TypeScript, ESLint, GitHub Workflows :done, des1, 2023-11-13, 10d
-    section Amplify / Infra
-    Configure AWS Amplify, Backend Resources, S3 Replication :done, des2, 2023-11-13, 20d
-    section Lambda Dev & S3 Integration
-    Implement Lambda, Develop S3 Functions, FFmpeg Commands :done, des3, 2023-11-20, 14d
-    section Front-End
-    Dev Main Application, Auth, Video Upload :done, des4, 2023-11-20, 20d
-    section Facial Tracking
-    Integrate AWS Rekognition, Video Processing with FFmpeg :done, des5, 2023-12-01, 5d
-    section Automated Captions
-    Set up AWS Transcribe, Comprehend, MediaConvert :active, des6, after 2023-12-15, 10d
-    section AI-Driven Video Generation and Editing
-    Develop AI Algorithms, Short Clips Functionality :des7, after des6, 15d
-    section AI-Powered Clip Extraction
-    Implement AI Techniques for Clip Extraction :des8, after des7, 5d
-    section Testing, Deployment, and Monitoring
-    Testing, Deployment, Monitoring :des15, after des8, 10d
-
-```
 
 
 ## 📋 Task lists
