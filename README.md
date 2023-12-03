@@ -4,52 +4,48 @@
 
 ## Introduction
 
----
-
 > [!NOTE]
 > 👋 Welcome to 🎬 ClipCrafter AI 🌟, where cutting-edge technology 💻 meets creativity 🎨 in video editing.
 >
 > Our AI-driven platform is designed to revolutionize the way you create and share content. With ClipCrafter AI, transform long videos into captivating, short-form masterpieces with just a few clicks. Whether you're a content creator, marketer, or social media enthusiast, our intuitive tools make it easy to craft viral-worthy clips, perfect for platforms like TikTok, Instagram Reels, and YouTube Shorts.
-
-Unleash the power of AI to detect and highlight the most engaging parts of your videos, ensuring every clip starts with a punch. Our advanced facial tracking technology keeps your subjects in sharp focus, while our automated subtitles and captions add a new layer of engagement to your content. With ClipCrafter AI, tedious editing tasks are a thing of the past. Dive into a world where video creation is not only simple but also a delightful experience. It's time to craft, clip, and captivate with ClipCrafter AI!
-
----
+>
+> Unleash the power of AI to detect and highlight the most engaging parts of your videos, ensuring every clip starts with a punch. Our advanced facial tracking technology keeps your subjects in sharp focus, while our automated subtitles and captions add a new layer of engagement to your content. With ClipCrafter AI, tedious editing tasks are a thing of the past. Dive into a world where video creation is not only simple but also a delightful experience. It's time to craft, clip, and captivate with ClipCrafter AI!
 
 ---
 
 ## Targeted high-value features
 
-1. 🎥 **AI-Driven Video Editing (20%)** [Difficulty: 8]
+1. 🎥 **AI-Driven Video Editing (20%)** [8]
 
    - Auto-generate short-form videos (10%) [7]
    - Edit videos for enhanced engagement (10%) [8]
 
-2. 🔍 **AI Clip Selection (18%)** [Difficulty: 7]
+2. 🔍 **AI Clip Selection (18%)** [7]
 
    - AI identifies key segments in videos (9%) [7]
    - Continuous learning for clip selection improvement (9%) [7]
 
-3. 🧔 **Facial Focus Technology (15%)** [Difficulty: 6]
+3. 🧔 **Facial Focus Technology (15%)** [6]
 
    - Advanced facial tracking for focused content (7.5%) [6]
    - Ideal for speaker/influencer-centric videos (7.5%) [6]
 
-4. 📹 **AI-driven Video Generation (15%)** [Difficulty: 8]
+4. 📹 **AI-driven Video Generation (15%)** [8]
 
    - Generate engaging video snippets (7.5%) [8]
    - Potential for viral content creation (7.5%) [8]
 
-5. 🎬 **Generative AI for Video Repurposing (14%)** [Difficulty: 7]
+5. 🎬 **Generative AI for Video Repurposing (14%)** [7]
 
    - Convert long videos into engaging shorts (7%) [7]
    - AI-driven content adaptation for various formats (7%) [7]
 
-6. 📝 **Smart Subtitles & Captions (12%)** [Difficulty: 5]
+6. 📝 **Smart Subtitles & Captions (12%)** [5]
 
    - Automated subtitle generation (6%) [5]
    - Animated captions for increased engagement (6%) [5]
 
-7. 🎯 **Punchline Score (10%)** [Difficulty: 6]
+7. 🎯 **Punchline Score (10%)** [6]
 
    - AI detects compelling punchlines (5%) [6]
    - Enhances viewer engagement and content value (5%) [6]
@@ -61,71 +57,71 @@ Unleash the power of AI to detect and highlight the most engaging parts of your 
 
 </summary>
 
-8. 🔄 **AI Feedback Loop (9%)** [Difficulty: 7]
+8. 🔄 **AI Feedback Loop (9%)** [7]
 
    - AI improves highlight recommendations (4.5%) [7]
    - Adapts to viewer preferences and trends (4.5%) [7]
 
-9. 🎧 **Enhanced Audio-Video Sync (10%)** [Difficulty: 5]
+9. 🎧 **Enhanced Audio-Video Sync (10%)** [5]
 
    - Advanced audio editing features (5%) [5]
    - Seamless synchronization with video (5%) [5]
 
-10. 💬 **Responsive Captions & Layout (8%)** [Difficulty: 6]
+10. 💬 **Responsive Captions & Layout (8%)** [6]
 
     - Dynamic captions for diverse content (4%) [6]
     - AI-driven layout for optimal viewing (4%) [6]
 
-11. 🔄 **YouTube Link Conversion (8%)** [Difficulty: 6]
+11. 🔄 **YouTube Link Conversion (8%)** [6]
 
     - Converts YouTube content for social media (4%) [6]
     - Streamlines content sharing across platforms (4%) [6]
 
-12. 📊 **Content Performance Analytics (10%)** [Difficulty: 7]
+12. 📊 **Content Performance Analytics (10%)** [7]
 
     - Track viewer engagement and metrics (5%) [7]
     - Optimize content based on analytics insights (5%) [7]
 
-13. 🌍 **Global Audience Reach (9%)** [Difficulty: 7]
+13. 🌍 **Global Audience Reach (9%)** [7]
 
     - Localization features for global audience (4.5%) [7]
     - Multi-language support for wider accessibility (4.5%) [7]
 
-14. 🔄 **Cross-Platform Sharing (7%)** [Difficulty: 5]
+14. 🔄 **Cross-Platform Sharing (7%)** [5]
 
     - Easy sharing on social media platforms (3.5%) [5]
     - Supports multiple video formats and aspect ratios (3.5%) [5]
 
-15. 🤖 **Automated Content Moderation (8%)** [Difficulty: 7]
+15. 🤖 **Automated Content Moderation (8%)** [7]
 
     - AI-driven moderation for content quality (4%) [7]
     - Ensure compliance with platform guidelines (4%) [7]
 
-16. 🎨 **Creative Editing Tools (7%)** [Difficulty: 6]
+16. 🎨 **Creative Editing Tools (7%)** [6]
 
     - Wide range of creative editing options (3.5%) [6]
     - User-friendly interface for non-professionals (3.5%) [6]
 
-17. 🌐 **Multi-Platform Streaming (6%)** [Difficulty: 6]
+17. 🌐 **Multi-Platform Streaming (6%)** [6]
 
     - Stream to various platforms with custom branding (3%) [6]
     - Audience participation and interaction features (3%) [6]
 
-18. 📈 **SEO Optimization for Videos (6%)** [Difficulty: 6]
+18. 📈 **SEO Optimization for Videos (6%)** [6]
 
     - Enhance video discoverability on search engines (3%) [6]
     - Tools for optimizing video titles, descriptions, and tags (3%) [6]
 
-19. 📝 **Video Transcription Tools (5%)** [Difficulty: 4]
+19. 📝 **Video Transcription Tools (5%)** [4]
 
     - Transcribe video content for repurposing (2.5%) [4]
     - Convert content into different formats (2.5%) [4]
 
-20. 🌟 **Unlimited High-Quality Exports (5%)** [Difficulty: 4]
+20. 🌟 **Unlimited High-Quality Exports (5%)** [4]
     - High-quality video exports (2.5%) [4]
     - No limit on the number of exports (2.5%) [4]
 
-This list now includes a difficulty score for each feature, providing insight into the complexity of implementation for each aspect of the product.
+This list now includes a core for each feature, providing insight into the complexity of implementation for each aspect of the product.
 
 ## </details>
 
