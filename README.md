@@ -331,12 +331,30 @@ This list includes the tasks necessary to develop the new AI-driven video editin
 <details>
 <summary>
   
-### Free Tier
+### AWS Free Tier
 
 </summary>
 
-AWS Transcribe : 60 min / monthly
-... TODO
+- **Transcribe**: 60 minutes per month for 12 months.
+- **Amplify**: 1,000 build & deploy minutes per month; 5GB hosting, and 15GB outbound data transfer per month.
+- **Rekognition**: 5,000 images per month or 1,000 minutes of video processed per month for 12 months.
+- **MediaConvert**: 20 minutes of video conversion per month.
+- **Comprehend**: 50K units of text (5M characters) for text analysis per month for 12 months.
+- **Lambda**: 1 million free requests and 400,000 GB-seconds of compute time per month.
+- **S3**: 5GB of standard storage, 20,000 GET requests, and 2,000 PUT requests per month for 12 months.
+- **AMPLIFY STUDIO**: Included in the Amplify Free Tier.
+- **AMPLIFY CLI**: Free to use, costs depend on the AWS resources used.
+- **AMPLIFY LIBRARIES**: Free to use, costs depend on the AWS resources used.
+- **API Gateway**: 1 million API calls per month for 12 months.
+- **AppSync**: 250K queries per month and 250K real-time data records per month for 12 months.
+- **CloudFront**: 50GB data out and 2,000,000 HTTP or HTTPS requests per month for 12 months.
+- **Cognito**: 50,000 active users per month for Amazon Cognito User Pools.
+- **DynamoDB**: 25GB of storage, 25 read capacity units, and 25 write capacity units; 2.5 million stream read requests per month for 12 months.
+- **Elasticsearch**: 750 hours of t2.small.elasticsearch instance per month for 12 months.
+- **Kinesis**: 1 shard of Kinesis Data Stream for 12 months.
+- **Lex**: 10,000 text requests or 5,000 voice requests per month for 12 months.
+- **Location Service**: 25,000 map requests per month and 25,000 positioning requests per month for 12 months.
+- **Pinpoint**: 5,000 targeted users per month; 1M push notifications.
 
 </details>
 
