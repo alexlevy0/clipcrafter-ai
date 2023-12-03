@@ -8,12 +8,11 @@
 
 Unleash the power of AI to detect and highlight the most engaging parts of your videos, ensuring every clip starts with a punch 🥊. Our advanced facial tracking technology 👀 keeps your subjects in sharp focus, while our automated subtitles and captions 🗨️ add a new layer of engagement to your content. With ClipCrafter AI, tedious editing tasks are a thing of the past. Dive into a world where video creation is not only simple but also a delightful experience 🌈. It's time to craft, clip, and captivate with ClipCrafter AI!
 
-<details>
-<summary>
+---
 
-## High-level Targeted features
+---
 
-</summary>
+## Targeted high-value features
 
 1. 🎥 **AI-Driven Video Editing (20%)** [Difficulty: 8]
 
@@ -49,6 +48,13 @@ Unleash the power of AI to detect and highlight the most engaging parts of your 
 
    - AI detects compelling punchlines (5%) [6]
    - Enhances viewer engagement and content value (5%) [6]
+
+<details>
+<summary>
+
+### Low-value features
+
+</summary>
 
 8. 🔄 **AI Feedback Loop (9%)** [Difficulty: 7]
 
@@ -116,7 +122,9 @@ Unleash the power of AI to detect and highlight the most engaging parts of your 
 
 This list now includes a difficulty score for each feature, providing insight into the complexity of implementation for each aspect of the product.
 
-</details>
+## </details>
+
+---
 
 <details>
 <summary>
