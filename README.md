@@ -11,7 +11,7 @@ Unleash the power of AI to detect and highlight the most engaging parts of your 
 <details>
 <summary>
 
-## Features
+## High-level Product Roadmap / Targeted features
 
 </summary>
 
@@ -60,7 +60,7 @@ Unleash the power of AI to detect and highlight the most engaging parts of your 
 <details>
 <summary>
 
-## Todo List
+## Global task list 
 
 </summary>
 
@@ -159,6 +159,11 @@ Unleash the power of AI to detect and highlight the most engaging parts of your 
     - [ ] (In progress) Integrate Stripe for payments.
     - [ ] (To do) Create documentation for the system and its components.
     - [ ] (To do) Train team members or end-users on how to use the system effectively.
+    - [ ] Integrate AWS Rekognition's segment detection API into your video processing pipeline.
+    - [ ] Develop a system to parse and interpret the output from Rekognition for identifying key video segments.
+    - [ ] Automate the video editing process based on the segments identified by Rekognition.
+    - [ ] Test and optimize the integration for accuracy and efficiency.
+
 
 This list includes the tasks necessary to develop the new AI-driven video editing features, ensuring a comprehensive approach to building a versatile and user-friendly video editing platform.
 
@@ -167,7 +172,7 @@ This list includes the tasks necessary to develop the new AI-driven video editin
 <details>
 <summary>
   
-## Lambda TODO
+## Backend-specific task list
 
 </summary>
 
@@ -258,7 +263,7 @@ This list includes the tasks necessary to develop the new AI-driven video editin
 <details>
 <summary>
   
-## AWS Free Tier Info
+## Free Tier
 
 </summary>
 
@@ -266,12 +271,6 @@ AWS Transcribe : 60 min / monthly
 ... TODO
 
 </details>
-
-## Contact
-
-For any inquiries or feedback, please contact [Alex Lévy](mailto:alexlevy0@gmail.com).
-
-Thank you for checking out ClipCrafter AI!
 
 <details>
 <summary>
@@ -312,6 +311,7 @@ Thank you for checking out ClipCrafter AI!
 
 </details>
 
-## License
+## Contact
 
-This project is licensed under the [MIT License](LINK_TO_LICENSE).
+For any inquiries or feedback, contact me [Alex Lévy](mailto:alexlevy0@gmail.com).
+Thank you for checking out ClipCrafter AI!
