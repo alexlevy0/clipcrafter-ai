@@ -134,70 +134,28 @@ gantt
     title ClipCrafter AI Development Schedule
     dateFormat  YYYY-MM-DD
     axisFormat  %m-%Y
-    todayMarker 2023-12-31
-    section Initial Setup and Development Tools
-    Set up Next.js, TypeScript, ESLint, GitHub Workflows :done, des1, 2023-06-13, 30d
-    section AWS Amplify and Infrastructure
-    Configure AWS Amplify, Backend Resources, S3 Replication :done, des2, after des1, 40d
-    section Lambda Development and S3 Integration
-    Implement Lambda, Develop S3 Functions, FFmpeg Commands :done, des3, after des2, 45d
-    section Front-End Development
-    Develop Main Application, Styles, Feature Components :done, des4, after des3, 50d
-    section AWS Services Integration
-    Integrate AWS Rekognition, Video Processing with FFmpeg :done, des5, after des4, 35d
-    section Specific Feature Development
-    Set up AWS Transcribe, Comprehend, MediaConvert :active, des6, after des5, 2023-12-31
+    todayMarker 2023-12-5
+    section Setup & Dev Tools
+    Set up Next.js, TypeScript, ESLint, GitHub Workflows :done, des1, 2023-11-13, 10d
+    section Amplify / Infra
+    Configure AWS Amplify, Backend Resources, S3 Replication :done, des2, 2023-11-13, 20d
+    section Lambda Dev & S3 Integration
+    Implement Lambda, Develop S3 Functions, FFmpeg Commands :done, des3, 2023-11-20, 14d
+    section Front-End
+    Dev Main Application, Auth, Video Upload :done, des4, 2023-11-20, 20d
+    section Facial Tracking
+    Integrate AWS Rekognition, Video Processing with FFmpeg :done, des5, 2023-12-01, 5d
+    section Automated Captions
+    Set up AWS Transcribe, Comprehend, MediaConvert :active, des6, after 2023-12-15, 10d
     section AI-Driven Video Generation and Editing
-    Develop AI Algorithms, Short Clips Functionality :des7, after des6, 70d
+    Develop AI Algorithms, Short Clips Functionality :des7, after des6, 15d
     section AI-Powered Clip Extraction
-    Implement AI Techniques for Clip Extraction :des8, after des7, 65d
-    section Facial Tracking and Center Stage Focus
-    Develop Facial Tracking Technology :des9, after des8, 60d
-    section Automated Subtitles and Captions
-    Integrate Subtitles and Captions :des10, after des9, 55d
-    section Advanced Audio and Video Editing Features
-    Implement Audio Editing, Video Trimming :des11, after des10, 50d
-    section Dynamic Captions and AI-Relayout
-    Create Dynamic Captions, AI-Relayout :des12, after des11, 50d
-    section Multi-Platform Compatibility and Sharing
-    Ensure Sharing Across Platforms :des13, after des12, 45d
-    section Transcription and Repurposing Tools
-    Develop Transcription and Repurposing Tools :des14, after des13, 45d
+    Implement AI Techniques for Clip Extraction :des8, after des7, 5d
     section Testing, Deployment, and Monitoring
-    Testing, Deployment, Monitoring :des15, after des14, 60d
-    section Improvements and Maintenance
-    Analytics Implementation, Continuous Improvement :des16, after des15, 70d
-    section Ongoing and Upcoming Developments
-    Integrate Stripe, Documentation, Training, Optimize Rekognition Integration :des17, after des16, 75d
+    Testing, Deployment, Monitoring :des15, after des8, 10d
+
 ```
 
-
-<details>
-<summary>
-
-### Sequence Diagram
-
-</summary>
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant FrontEnd
-    participant AWSAmplify
-    participant Lambda
-    participant S3
-    participant Rekognition
-    User->>FrontEnd: Access Application
-    FrontEnd->>AWSAmplify: Request Services
-    AWSAmplify->>Lambda: Trigger Functions
-    Lambda->>S3: Access Video Data
-    S3->>Rekognition: Send Video for Analysis
-    Rekognition->>Lambda: Return Analysis Results
-    Lambda->>FrontEnd: Send Processed Data
-    FrontEnd->>User: Display Results
-```
-
-</details>
 
 ## 📋 Task lists
 
