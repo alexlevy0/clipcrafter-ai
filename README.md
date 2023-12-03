@@ -126,7 +126,12 @@ This list now includes a core for each feature, providing insight into the compl
 
 ---
 
-## Diagram
+<details>
+<summary>
+
+### Diagram WIP
+
+</summary>
 
 ```mermaid
 gantt
@@ -172,8 +177,7 @@ sequenceDiagram
     FrontEnd->>User: Display Results
 ```
 
----
-
+</details>
 
 <details>
 <summary>
