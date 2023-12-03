@@ -11,56 +11,117 @@ Unleash the power of AI to detect and highlight the most engaging parts of your 
 <details>
 <summary>
 
-## High-level Product Roadmap / Targeted features
+## High-level Targeted features
 
 </summary>
 
-1. 🎥 **AI-Driven Video Generation and Editing:**
+1. 🎥 **AI-Driven Video Editing (20%)** [Difficulty: 8]
 
-   - Automatically generate and edit videos for short-form content.
-   - Transform long-form videos into engaging short clips for platforms like TikTok, Instagram Reels, and YouTube Shorts.
+   - Auto-generate short-form videos (10%) [7]
+   - Edit videos for enhanced engagement (10%) [8]
 
-2. 🔍 **AI-Powered Clip Extraction:**
+2. 🔍 **AI Clip Selection (18%)** [Difficulty: 7]
 
-   - Identify and extract compelling segments or punchlines from longer videos using AI.
-   - Continual improvement through an AI feedback loop for better clip selection.
+   - AI identifies key segments in videos (9%) [7]
+   - Continuous learning for clip selection improvement (9%) [7]
 
-3. 🧔 **Facial Tracking and Center Stage Focus:**
+3. 🧔 **Facial Focus Technology (15%)** [Difficulty: 6]
 
-   - Develop precise facial tracking to keep subjects in focus, ideal for content with speakers or influencers.
+   - Advanced facial tracking for focused content (7.5%) [6]
+   - Ideal for speaker/influencer-centric videos (7.5%) [6]
 
-4. 📝 **Automated Subtitles and Captions:**
+4. 📹 **AI-driven Video Generation (15%)** [Difficulty: 8]
 
-   - Offer automated and possibly animated subtitles and captions to enhance accessibility and engagement.
+   - Generate engaging video snippets (7.5%) [8]
+   - Potential for viral content creation (7.5%) [8]
 
-5. 🎧 **Advanced Audio and Video Editing Features:**
+5. 🎬 **Generative AI for Video Repurposing (14%)** [Difficulty: 7]
 
-   - Features for advanced audio editing and synchronization with video.
-   - Easy video trimming, clipping, and editing with an intuitive interface.
+   - Convert long videos into engaging shorts (7%) [7]
+   - AI-driven content adaptation for various formats (7%) [7]
 
-6. 💬 **Dynamic Captions and AI-Relayout:**
+6. 📝 **Smart Subtitles & Captions (12%)** [Difficulty: 5]
 
-   - Implement dynamic captions responsive to video content.
-   - AI-relayout for optimal viewing on different platforms and devices.
+   - Automated subtitle generation (6%) [5]
+   - Animated captions for increased engagement (6%) [5]
 
-7. 🔄 **Multi-Platform Compatibility and Sharing:**
+7. 🎯 **Punchline Score (10%)** [Difficulty: 6]
 
-   - Ensure videos are easily shareable across various social media platforms.
-   - Support for multiple formats and aspect ratios.
+   - AI detects compelling punchlines (5%) [6]
+   - Enhances viewer engagement and content value (5%) [6]
 
-8. 📝 **Transcription and Repurposing Tools:**
+8. 🔄 **AI Feedback Loop (9%)** [Difficulty: 7]
 
-   - Tools for transcribing video content and repurposing it in different formats.
+   - AI improves highlight recommendations (4.5%) [7]
+   - Adapts to viewer preferences and trends (4.5%) [7]
 
-9. 🌟 **High-Quality Exports Without Limitation:**
-   - Allow users to export videos in high quality with no limits on the number of exports.
+9. 🎧 **Enhanced Audio-Video Sync (10%)** [Difficulty: 5]
+
+   - Advanced audio editing features (5%) [5]
+   - Seamless synchronization with video (5%) [5]
+
+10. 💬 **Responsive Captions & Layout (8%)** [Difficulty: 6]
+
+    - Dynamic captions for diverse content (4%) [6]
+    - AI-driven layout for optimal viewing (4%) [6]
+
+11. 🔄 **YouTube Link Conversion (8%)** [Difficulty: 6]
+
+    - Converts YouTube content for social media (4%) [6]
+    - Streamlines content sharing across platforms (4%) [6]
+
+12. 📊 **Content Performance Analytics (10%)** [Difficulty: 7]
+
+    - Track viewer engagement and metrics (5%) [7]
+    - Optimize content based on analytics insights (5%) [7]
+
+13. 🌍 **Global Audience Reach (9%)** [Difficulty: 7]
+
+    - Localization features for global audience (4.5%) [7]
+    - Multi-language support for wider accessibility (4.5%) [7]
+
+14. 🔄 **Cross-Platform Sharing (7%)** [Difficulty: 5]
+
+    - Easy sharing on social media platforms (3.5%) [5]
+    - Supports multiple video formats and aspect ratios (3.5%) [5]
+
+15. 🤖 **Automated Content Moderation (8%)** [Difficulty: 7]
+
+    - AI-driven moderation for content quality (4%) [7]
+    - Ensure compliance with platform guidelines (4%) [7]
+
+16. 🎨 **Creative Editing Tools (7%)** [Difficulty: 6]
+
+    - Wide range of creative editing options (3.5%) [6]
+    - User-friendly interface for non-professionals (3.5%) [6]
+
+17. 🌐 **Multi-Platform Streaming (6%)** [Difficulty: 6]
+
+    - Stream to various platforms with custom branding (3%) [6]
+    - Audience participation and interaction features (3%) [6]
+
+18. 📈 **SEO Optimization for Videos (6%)** [Difficulty: 6]
+
+    - Enhance video discoverability on search engines (3%) [6]
+    - Tools for optimizing video titles, descriptions, and tags (3%) [6]
+
+19. 📝 **Video Transcription Tools (5%)** [Difficulty: 4]
+
+    - Transcribe video content for repurposing (2.5%) [4]
+    - Convert content into different formats (2.5%) [4]
+
+20. 🌟 **Unlimited High-Quality Exports (5%)** [Difficulty: 4]
+    - High-quality video exports (2.5%) [4]
+    - No limit on the number of exports (2.5%) [4]
+
+This list now includes a difficulty score for each feature, providing insight into the complexity of implementation for each aspect of the product.
 
 </details>
 
 <details>
 <summary>
 
-## Global task list 
+### Global task list
 
 </summary>
 
@@ -164,7 +225,6 @@ Unleash the power of AI to detect and highlight the most engaging parts of your 
     - [ ] Automate the video editing process based on the segments identified by Rekognition.
     - [ ] Test and optimize the integration for accuracy and efficiency.
 
-
 This list includes the tasks necessary to develop the new AI-driven video editing features, ensuring a comprehensive approach to building a versatile and user-friendly video editing platform.
 
 </details>
@@ -172,7 +232,7 @@ This list includes the tasks necessary to develop the new AI-driven video editin
 <details>
 <summary>
   
-## Backend-specific task list
+### Backend-specific task list
 
 </summary>
 
@@ -263,7 +323,7 @@ This list includes the tasks necessary to develop the new AI-driven video editin
 <details>
 <summary>
   
-## Free Tier
+### Free Tier
 
 </summary>
 
@@ -275,7 +335,7 @@ AWS Transcribe : 60 min / monthly
 <details>
 <summary>
   
-## Alternatives
+### Alternatives
 
 </summary>
 
