@@ -92,6 +92,7 @@ async function analyzeWithChatGPT(text) {
     return ''
   }
 }
+
 function processSegment({ segment, entities, sentiment, keyPhrases, chatGPTResponse }): any[] {
   // Associate entities, sentiment, and key phrases with the text segment
   const segmentInfo = {
