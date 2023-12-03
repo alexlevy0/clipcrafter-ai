@@ -42,7 +42,6 @@ gantt
 
 ```
 
-
 ## 🎯 Targeted high-value features
 
 1. 🎥 **AI-Driven Video Editing (20%)** [8]
@@ -156,8 +155,6 @@ This list now includes a core for each feature, providing insight into the compl
 </details>
 
 ---
-
-
 
 ## 📋 Task lists
 
