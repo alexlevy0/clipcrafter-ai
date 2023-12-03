@@ -6,7 +6,7 @@ import { conf } from './config'
 import { log } from './logger'
 import StatusUploader from './StatusUploader'
 import { EStatus, generateProgressStatus, getProgress } from './types'
-import { decodeS3Key } from './utils'
+import { decodeS3Key, sleep } from './utils'
 
 const s3 = new S3({ region: conf.region })
 
@@ -115,4 +115,36 @@ export async function addLifecyclePolicy(bucketName: string) {
     console.error('Error setting lifecycle policy:', error)
     throw new Error(error)
   }
+}
+
+enum EReplicationStatus {
+  COMPLETED = 'COMPLETED',
+  PENDING = 'PENDING',
+  FAILED = 'FAILED',
+  REPLICA = 'REPLICA',
+}
+
+export async function waitForS3Replication(
+  Bucket: string,
+  Key: string,
+  timeout = 300000,
+  interval = 3000,
+) {
+  const startTime = Date.now()
+  while (Date.now() - startTime < timeout) {
+    try {
+      const { ReplicationStatus: status } = await s3.headObject({
+        Bucket: decodeS3Key(Bucket),
+        Key: decodeS3Key(Key),
+      })
+      if (status === EReplicationStatus.COMPLETED) {
+        log('S3 Replication COMPLETED')
+        return true
+      }
+    } catch (error) {
+      console.error('Error in waitForS3Replication:', error)
+    }
+    await sleep(interval)
+  }
+  throw new Error(`Replication timeout for ${Key} in bucket ${Bucket}`)
 }

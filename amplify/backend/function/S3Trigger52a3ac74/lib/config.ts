@@ -1,6 +1,14 @@
 import { EQuality } from './types'
 
 export const conf = {
+  openAIConf: {
+    apiKey: process?.env?.OPENAI_API_KEY,
+    model: 'gpt-4', // 'gpt-3.5-turbo', // 'text-davinci-003',
+    maxTokens: 1000,
+  },
+  comprehendConf: {
+    region: 'eu-west-2',
+  },
   rekognitionConf: {
     enabled: false,
     region: 'eu-west-2',
@@ -14,6 +22,11 @@ export const conf = {
     cropChangeTolerance: 0.5,
     labelCrop: 'Speaking/Smiling',
     labelNoCrop: 'No Face',
+  },
+  transcribeConf: {
+    enabled: false,
+    transcribeJobCheckDelay: 5000,
+    transcribeRegion: 'eu-west-3',
   },
   env: process?.env?.ENV,
   samLocal: process?.env?.AWS_SAM_LOCAL,
