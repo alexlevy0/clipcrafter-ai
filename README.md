@@ -133,26 +133,44 @@ This list now includes a core for each feature, providing insight into the compl
 gantt
     title ClipCrafter AI Development Schedule
     dateFormat  YYYY-MM-DD
-    section Initial Setup
-    Development Tools Setup           :done, des1, 2023-01-01, 2023-01-10
-    section AWS Amplify & Infrastructure
-    AWS Amplify Configuration         :active, des2, after des1, 14d
-    Backend Resources Setup           :         des3, after des2, 20d
-    section Lambda Development
-    Lambda Trigger Implementation     :         des4, after des3, 18d
-    S3 Integration                    :         des5, after des4, 24d
+    axisFormat  %m-%Y
+    todayMarker 2023-12-31
+    section Initial Setup and Development Tools
+    Set up Next.js, TypeScript, ESLint, GitHub Workflows :done, des1, 2023-06-13, 30d
+    section AWS Amplify and Infrastructure
+    Configure AWS Amplify, Backend Resources, S3 Replication :done, des2, after des1, 40d
+    section Lambda Development and S3 Integration
+    Implement Lambda, Develop S3 Functions, FFmpeg Commands :done, des3, after des2, 45d
     section Front-End Development
-    Main Application Structure        :         des6, after des4, 30d
-    Feature Components                :         des7, after des6, 40d
+    Develop Main Application, Styles, Feature Components :done, des4, after des3, 50d
     section AWS Services Integration
-    AWS Rekognition Integration       :         des8, after des5, 30d
-    section AI Features
-    AI Algorithms Development         :         des9, after des7, 40d
-    AI-Powered Clip Extraction        :         des10, after des9, 36d
-    section Final Stages
-    Testing & Deployment              :         des11, after des10, 30d
-    User Feedback and Improvements    :         des12, after des11, 20d
+    Integrate AWS Rekognition, Video Processing with FFmpeg :done, des5, after des4, 35d
+    section Specific Feature Development
+    Set up AWS Transcribe, Comprehend, MediaConvert :active, des6, after des5, 2023-12-31
+    section AI-Driven Video Generation and Editing
+    Develop AI Algorithms, Short Clips Functionality :des7, after des6, 70d
+    section AI-Powered Clip Extraction
+    Implement AI Techniques for Clip Extraction :des8, after des7, 65d
+    section Facial Tracking and Center Stage Focus
+    Develop Facial Tracking Technology :des9, after des8, 60d
+    section Automated Subtitles and Captions
+    Integrate Subtitles and Captions :des10, after des9, 55d
+    section Advanced Audio and Video Editing Features
+    Implement Audio Editing, Video Trimming :des11, after des10, 50d
+    section Dynamic Captions and AI-Relayout
+    Create Dynamic Captions, AI-Relayout :des12, after des11, 50d
+    section Multi-Platform Compatibility and Sharing
+    Ensure Sharing Across Platforms :des13, after des12, 45d
+    section Transcription and Repurposing Tools
+    Develop Transcription and Repurposing Tools :des14, after des13, 45d
+    section Testing, Deployment, and Monitoring
+    Testing, Deployment, Monitoring :des15, after des14, 60d
+    section Improvements and Maintenance
+    Analytics Implementation, Continuous Improvement :des16, after des15, 70d
+    section Ongoing and Upcoming Developments
+    Integrate Stripe, Documentation, Training, Optimize Rekognition Integration :des17, after des16, 75d
 ```
+
 
 <details>
 <summary>
