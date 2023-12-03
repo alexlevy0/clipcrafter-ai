@@ -2,10 +2,10 @@
 
 > _Unleash creativity and AI power in every clip!_
 
-## Introduction
+## 🏁 Introduction
 
-> [!NOTE]
-> 👋 Welcome to 🎬 ClipCrafter AI 🌟, where cutting-edge technology 💻 meets creativity 🎨 in video editing.
+> [!TIP]
+> 👋 Welcome to ClipCrafter AI, where cutting-edge technology meets creativity in video editing.
 >
 > Our AI-driven platform is designed to revolutionize the way you create and share content. With ClipCrafter AI, transform long videos into captivating, short-form masterpieces with just a few clicks. Whether you're a content creator, marketer, or social media enthusiast, our intuitive tools make it easy to craft viral-worthy clips, perfect for platforms like TikTok, Instagram Reels, and YouTube Shorts.
 >
@@ -13,7 +13,7 @@
 
 ---
 
-## Targeted high-value features
+## 🎯 Targeted high-value features
 
 1. 🎥 **AI-Driven Video Editing (20%)** [8]
 
