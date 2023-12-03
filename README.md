@@ -122,9 +122,12 @@
     - No limit on the number of exports (2.5%) [4]
 
 This list now includes a core for each feature, providing insight into the complexity of implementation for each aspect of the product.
+
 </details>
 
 ---
+
+## Diagram
 
 <details>
 <summary>
@@ -159,6 +162,7 @@ gantt
 ```
 
 ---
+
 ```mermaid
 sequenceDiagram
     participant User
@@ -178,6 +182,8 @@ sequenceDiagram
 ```
 
 </details>
+
+## Task lists
 
 <details>
 <summary>
@@ -381,9 +387,11 @@ This list includes the tasks necessary to develop the new AI-driven video editin
 
 </details>
 
+## Cloud Service Providers Free Tier Overview
+
 <details>
 <summary>
-  
+
 ### AWS Free Tier
 
 </summary>
@@ -410,6 +418,8 @@ This list includes the tasks necessary to develop the new AI-driven video editin
 - **Pinpoint**: 5,000 targeted users per month; 1M push notifications.
 
 </details>
+
+## ClipCrafter AI Alternatives
 
 <details>
 <summary>
