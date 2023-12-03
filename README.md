@@ -122,10 +122,58 @@
     - No limit on the number of exports (2.5%) [4]
 
 This list now includes a core for each feature, providing insight into the complexity of implementation for each aspect of the product.
-
-## </details>
+</details>
 
 ---
+
+## Diagram
+
+```mermaid
+gantt
+    title ClipCrafter AI Development Schedule
+    dateFormat  YYYY-MM-DD
+    section Initial Setup
+    Development Tools Setup           :done, des1, 2023-01-01, 2023-01-10
+    section AWS Amplify & Infrastructure
+    AWS Amplify Configuration         :active, des2, after des1, 14d
+    Backend Resources Setup           :         des3, after des2, 20d
+    section Lambda Development
+    Lambda Trigger Implementation     :         des4, after des3, 18d
+    S3 Integration                    :         des5, after des4, 24d
+    section Front-End Development
+    Main Application Structure        :         des6, after des4, 30d
+    Feature Components                :         des7, after des6, 40d
+    section AWS Services Integration
+    AWS Rekognition Integration       :         des8, after des5, 30d
+    section AI Features
+    AI Algorithms Development         :         des9, after des7, 40d
+    AI-Powered Clip Extraction        :         des10, after des9, 36d
+    section Final Stages
+    Testing & Deployment              :         des11, after des10, 30d
+    User Feedback and Improvements    :         des12, after des11, 20d
+```
+
+---
+```mermaid
+sequenceDiagram
+    participant User
+    participant FrontEnd
+    participant AWSAmplify
+    participant Lambda
+    participant S3
+    participant Rekognition
+    User->>FrontEnd: Access Application
+    FrontEnd->>AWSAmplify: Request Services
+    AWSAmplify->>Lambda: Trigger Functions
+    Lambda->>S3: Access Video Data
+    S3->>Rekognition: Send Video for Analysis
+    Rekognition->>Lambda: Return Analysis Results
+    Lambda->>FrontEnd: Send Processed Data
+    FrontEnd->>User: Display Results
+```
+
+---
+
 
 <details>
 <summary>
