@@ -1,25 +1,24 @@
-"use client";
-import '@aws-amplify/ui-react/styles.css';
-import { Amplify } from 'aws-amplify';
-import awsconfig from '../aws-exports.js';
+'use client'
+import '@aws-amplify/ui-react/styles.css'
+import { Amplify } from 'aws-amplify'
+import awsconfig from '../aws-exports.js'
 // import { withAuthenticator } from '@aws-amplify/ui-react';
-import { Authenticator } from '@aws-amplify/ui-react';
+import { Authenticator } from '@aws-amplify/ui-react'
 
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react'
 // // @ts-ignore:next-line
 // import dynamic from 'next/dynamic';
 // import { Canvas } from '@react-three/fiber'
 // import { OrthographicCamera } from '@react-three/drei';
 // // @ts-ignore
 // import getSpline from '@splinetool/r3f-spline'
-// @ts-ignore
+// @ts-expect-error:next-line
 import { Main } from './Main.tsx'
 
-Amplify.configure({ ...awsconfig, ssr: true });
+Amplify.configure({ ...awsconfig, ssr: true })
 
 // // @ts-ignore
 // const MyComponentWithSpline = dynamic(() => import('./CmpWithSpline.tsx'), { ssr: false });
-
 
 // const Scene = ({ portal, position }: any) => {
 //   if (typeof window === 'undefined') {
@@ -34,9 +33,8 @@ Amplify.configure({ ...awsconfig, ssr: true });
 // }
 
 const App = () => {
-
   return (
-    <Authenticator.Provider >
+    <Authenticator.Provider>
       <Main />
     </Authenticator.Provider>
   )
@@ -59,4 +57,4 @@ const App = () => {
 }
 
 // export default withAuthenticator(App);
-export default App;
+export default App

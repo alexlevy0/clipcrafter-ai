@@ -1,18 +1,16 @@
 /* eslint-disable react/jsx-no-undef */
-"use client";
-import '@aws-amplify/ui-react/styles.css';
-import { loadStripe } from "@stripe/stripe-js";
+'use client'
+import '@aws-amplify/ui-react/styles.css'
+import { loadStripe } from '@stripe/stripe-js'
 
 import { StorageManager } from '@aws-amplify/ui-react-storage'
 import {
-  Text,
   Flex,
   Button,
   defaultDarkModeOverride,
   Loader,
   useTheme,
   Grid,
-  View,
   Card,
   Heading,
   Authenticator,
@@ -20,44 +18,46 @@ import {
   AccountSettings,
   Divider,
   CheckboxField,
-  AuthenticatorProps,
   Menu,
   MenuItem,
-  Input,
-  Label,
 } from '@aws-amplify/ui-react'
-import { ThemeProvider } from '@aws-amplify/ui-react';
-import React, { useEffect, useRef, useState } from 'react';
-// @ts-ignore:next-line
-import dynamic from 'next/dynamic';
-import { Auth, Storage } from 'aws-amplify';
-// @ts-ignore
-import { Features } from './Features.tsx';
-// @ts-ignore
-import { retry, noop, getData, measurePromise } from './utils.ts';
+import { ThemeProvider } from '@aws-amplify/ui-react'
+import React, { useEffect, useRef, useState } from 'react'
+// @ts-expect-error:next-line
+import dynamic from 'next/dynamic'
+import { Auth } from 'aws-amplify'
+// @ts-expect-error:next-line
+import { Features } from './Features.tsx'
+// @ts-expect-error:next-line
+import { retry, noop, getData, measurePromise } from './utils.ts'
 
-const Picker = (props: { onClick: any }) => {
+const Picker = (props: { onClick: React.MouseEventHandler<HTMLButtonElement> | undefined }) => {
   return (
-    <Flex direction="column" justifyContent="space-around">
-      <Button size="large" variation="primary" isFullWidth={true} onClick={props.onClick}>
+    <Flex
+      direction="column"
+      justifyContent="space-around"
+    >
+      <Button
+        size="large"
+        variation="primary"
+        isFullWidth={true}
+        onClick={props.onClick}
+      >
         Browse Files
       </Button>
     </Flex>
   )
 }
 
-// @ts-ignore:next-line
-const ReactPlayer: ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false });
-
-
-
+// @ts-expect-error:next-line
+const ReactPlayer: ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false })
 
 export const Main = () => {
-  const { tokens } = useTheme();
+  const { tokens } = useTheme()
 
-  const { user } = useAuthenticator((context) => [context.user]);
-  const { authStatus } = useAuthenticator(context => [context.authStatus]);
-  const { route, toSignIn, toSignUp } = useAuthenticator(context => [context.route]);
+  // const { user } = useAuthenticator(context => [context.user])
+  const { authStatus } = useAuthenticator(context => [context.authStatus])
+  const { route, toSignIn, toSignUp } = useAuthenticator(context => [context.route])
   const [showAccountSettings, setShowAccountSettings] = useState(false)
   const [showFeatures, setShowFeatures] = useState(false)
   const [renderAuth, setRenderAuth] = useState<'signIn' | 'signUp' | undefined>(undefined)
@@ -66,7 +66,7 @@ export const Main = () => {
     if ([authStatus, route].includes('authenticated')) {
       setRenderAuth(undefined)
     }
-  }, [route, authStatus]);
+  }, [route, authStatus])
 
   const goSignIn = () => {
     toSignIn()
@@ -85,27 +85,26 @@ export const Main = () => {
   const upgrade = async () => {
     try {
       const stripe = await loadStripe(
-        "pk_test_51OHZRzHjC5oFez5BiDFM3Up4nzlz0XkRwfHDXbxLjNqzJSLuBq0ZKwyrhVH26W1pVG18vHKPINzFoBhTPmy7EhGE00vtJ4cAF4"
-      );
-      console.log({ stripe });
+        'pk_test_51OHZRzHjC5oFez5BiDFM3Up4nzlz0XkRwfHDXbxLjNqzJSLuBq0ZKwyrhVH26W1pVG18vHKPINzFoBhTPmy7EhGE00vtJ4cAF4',
+      )
+      console.log({ stripe })
       const error = await stripe?.redirectToCheckout({
-        lineItems: [{ price: "price_1OHZaRHjC5oFez5B3xJk2zRS", quantity: 1 }],
-        mode: "subscription",
-        successUrl: "https://main.d1dn1n1ry842dz.amplifyapp.com/",
-        cancelUrl: "https://main.d1dn1n1ry842dz.amplifyapp.com/cancel",
-      });
-      console.log({ error });
+        lineItems: [{ price: 'price_1OHZaRHjC5oFez5B3xJk2zRS', quantity: 1 }],
+        mode: 'subscription',
+        successUrl: 'https://main.d1dn1n1ry842dz.amplifyapp.com/',
+        cancelUrl: 'https://main.d1dn1n1ry842dz.amplifyapp.com/cancel',
+      })
+      console.log({ error })
     } catch (error) {
-      console.error(error);
+      console.error(error)
     }
-
   }
 
   const renderDashboard = () => {
     if (showFeatures) {
       return <Features />
     }
-    return showAccountSettings ?
+    return showAccountSettings ? (
       <Flex
         flex={1}
         direction="column"
@@ -137,7 +136,9 @@ export const Main = () => {
           </Button>
         </Grid>
       </Flex>
-      : <Clip />
+    ) : (
+      <Clip />
+    )
     // : (
     //   <Flex flex={1} width={"100%"}>
     //     <iframe
@@ -155,13 +156,16 @@ export const Main = () => {
   }
 
   return (
-    <ThemeProvider theme={{ name: 'my-theme', overrides: [defaultDarkModeOverride] }} colorMode={'dark'}>
-      <Authenticator.Provider >
+    <ThemeProvider
+      theme={{ name: 'my-theme', overrides: [defaultDarkModeOverride] }}
+      colorMode={'dark'}
+    >
+      <Authenticator.Provider>
         <Grid
           style={{ height: '100vh' }}
-          columnGap="0.5rem"
+          columnGap={{ base: '0rem', large: '0.5rem' }}
           rowGap="0.5rem"
-          templateColumns=".5fr 1fr 1fr"
+          templateColumns={{ base: '0fr 1fr', large: '.2fr 1fr' }}
           templateRows=".3fr 3.6fr .1fr"
         >
           <Card
@@ -174,18 +178,18 @@ export const Main = () => {
               alignContent="center"
               alignItems="center"
               justifyContent="flex-start"
-            // width={'100%'}
             >
               <Heading
-                color={"#e8e6e3"}
+                color={'#e8e6e3'}
                 level={3}
                 fontWeight="bold"
               >
                 ClipCrafter AI
               </Heading>
               <Heading
+                display={{ base: 'none', large: 'block' }}
                 // width={'100%'}
-                color={"#e8e6e3"}
+                color={'#e8e6e3'}
                 level={6}
                 fontWeight="bold"
               >
@@ -203,14 +207,12 @@ export const Main = () => {
                   <Button
                     loadingText=""
                     onClick={goSignIn}
-
                   >
                     Dashboard
                   </Button>
                   <Button
                     loadingText=""
                     onClick={upgrade}
-
                   >
                     Upgrade
                   </Button>
@@ -218,38 +220,31 @@ export const Main = () => {
                     size="large"
                     menuAlign="end"
                   >
-                    <MenuItem onClick={() => alert('Download')}>
-                      My Projects
-                    </MenuItem>
-                    <MenuItem isDisabled onClick={() => alert('Create a Copy')}>
+                    <MenuItem onClick={() => alert('Download')}>My Projects</MenuItem>
+                    <MenuItem
+                      isDisabled
+                      onClick={() => alert('Create a Copy')}
+                    >
                       My Team
                     </MenuItem>
-                    <MenuItem onClick={() => alert('Create a Copy')}>
-                      Usage
-                    </MenuItem>
-                    <MenuItem onClick={upgrade}>
-                      Upgrade
-                    </MenuItem>
+                    <MenuItem onClick={() => alert('Create a Copy')}>Usage</MenuItem>
+                    <MenuItem onClick={upgrade}>Upgrade</MenuItem>
                     <Divider />
-                    <MenuItem onClick={displayAccountSettings}>
-                      Account Settings
-                    </MenuItem>
-                    <MenuItem onClick={() => Auth.signOut()}>
-                      Logout
-                    </MenuItem>
+                    <MenuItem onClick={displayAccountSettings}>Account Settings</MenuItem>
+                    <MenuItem onClick={() => Auth.signOut()}>Logout</MenuItem>
                   </Menu>
-
                 </>
               ) : (
                 <>
                   <Button
                     loadingText=""
                     onClick={goSignIn}
-
+                    display={{ base: 'none', large: 'flex' }}
                   >
                     Login
                   </Button>
                   <Button
+                    display={{ base: 'none', large: 'flex' }}
                     loadingText=""
                     onClick={goSignUp}
                   >
@@ -259,20 +254,12 @@ export const Main = () => {
                     menuAlign="end"
                     size="large"
                   >
-                    <MenuItem onClick={() => setShowFeatures(true)}>
-                      Features
-                    </MenuItem>
-                    <MenuItem onClick={displayAccountSettings}>
-                      API
-                    </MenuItem>
-                    <MenuItem onClick={upgrade}>
-                      Upgrade
-                    </MenuItem>
+                    <MenuItem onClick={() => setShowFeatures(true)}>Features</MenuItem>
+                    <MenuItem onClick={displayAccountSettings}>API</MenuItem>
+                    <MenuItem onClick={upgrade}>Upgrade</MenuItem>
                     <Divider />
-                    <MenuItem onClick={() => alert('Create a Copy')}>
-                      Pricing
-                    </MenuItem>
-
+                    <MenuItem onClick={goSignUp}>Login</MenuItem>
+                    <MenuItem onClick={goSignUp}>Sign Up</MenuItem>
                   </Menu>
                 </>
               )}
@@ -282,10 +269,13 @@ export const Main = () => {
             columnStart="1"
             columnEnd="2"
             variation="elevated"
+            display={{ base: 'none', large: 'block' }}
           >
             {/* <Clip /> */}
           </Card>
           <Card
+            borderRadius={{ base: '0px', large: '20px' }}
+            marginRight={{ base: '0rem', large: '0.5rem' }}
             columnStart="2"
             columnEnd="-1"
             display="flex"
@@ -293,11 +283,9 @@ export const Main = () => {
             {renderDashboard()}
             {!!renderAuth && authStatus !== 'authenticated' && (
               <Authenticator
-                hideSignUp={renderAuth === "signIn"}
+                hideSignUp={renderAuth === 'signIn'}
                 loginMechanisms={['email']}
-                signUpAttributes={[
-                  "email"
-                ]}
+                signUpAttributes={['email']}
                 variation="modal"
                 initialState={renderAuth}
                 socialProviders={['apple', 'google']}
@@ -306,7 +294,7 @@ export const Main = () => {
                     if (Object.keys(formData).length >= 3 && !formData.acknowledgement) {
                       return {
                         acknowledgement: 'You must agree to the Terms & Conditions',
-                      };
+                      }
                     }
                   },
                 }}
@@ -331,11 +319,11 @@ export const Main = () => {
                           <Authenticator.SignIn.Footer />
                         </>
                       )
-                    }
+                    },
                   },
                   SignUp: {
                     FormFields() {
-                      const { validationErrors } = useAuthenticator();
+                      const { validationErrors } = useAuthenticator()
                       return (
                         <>
                           <Authenticator.SignUp.FormFields />
@@ -353,7 +341,7 @@ export const Main = () => {
                             Cancel
                           </Button>
                         </>
-                      );
+                      )
                     },
                   },
                 }}
@@ -368,11 +356,9 @@ export const Main = () => {
           </Card>
         </Grid>
       </Authenticator.Provider>
-
     </ThemeProvider>
-
-  );
-};
+  )
+}
 
 const Clip = () => {
   const READY = 'Ready'
@@ -386,7 +372,7 @@ const Clip = () => {
 
   useEffect(() => {
     Notification.requestPermission()
-  }, []);
+  }, [])
 
   const onReady = () => {
     setStatus(READY)
@@ -396,7 +382,7 @@ const Clip = () => {
     try {
       if (!key) return
       setStatus(`${PROCESSING} : ${key}…`)
-      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       const url = await retry({ fn: async () => await getData(key, '') })
       setUrl(url)
 
@@ -407,32 +393,36 @@ const Clip = () => {
       setProcessDurationSecond(`⏱️ ${durationSecond}`)
       new Notification(`⏱️ ${durationSecond}`)
     } catch (error) {
-      console.error(`onSuccess ERROR : ${error}`);
+      console.error(`onSuccess ERROR : ${error}`)
     }
   }
 
   const onResetVideoUrl = () => setUrl('')
 
-  const ref = useRef(null);
+  const ref = useRef(null)
 
   return (
     <Flex
       direction="column"
       flex={1}
-
     >
       <StorageManager
         // maxFileSize={''} // TODO
         ref={ref}
         isResumable
-        accessLevel='public'
+        accessLevel="public"
         acceptedFileTypes={['video/*']}
         maxFileCount={1}
         onUploadSuccess={onSuccess}
         onFileRemove={onResetVideoUrl}
         onUploadError={onResetVideoUrl}
         onUploadStart={onResetVideoUrl}
-        components={{ FilePicker({ onClick }) { return <Picker onClick={onClick} /> } }}
+        components={{
+          // eslint-disable-next-line react/prop-types
+          FilePicker({ onClick }) {
+            return <Picker onClick={onClick} />
+          },
+        }}
       />
       {/* <Flex direction="column" gap="small">
         <Input
@@ -442,11 +432,7 @@ const Clip = () => {
           placeholder="Paste YouTube link or drop a file"
         />
       </Flex> */}
-      <Heading
-        level={5}
-      >
-        {status}
-      </Heading>
+      <Heading level={5}>{status}</Heading>
       {!!url && processDurationSecond === '' && (
         <Flex
           backgroundColor={'rgb(13, 25, 38)'}
@@ -468,11 +454,7 @@ const Clip = () => {
           gap="small"
           justifyContent="space-around"
         >
-          <Heading
-            level={5}
-          >
-            {processDurationSecond}
-          </Heading>
+          <Heading level={5}>{processDurationSecond}</Heading>
         </Flex>
       )}
       <Flex
@@ -485,7 +467,7 @@ const Clip = () => {
           playing={false}
           controls={true}
           url={url}
-          width={"100%"}
+          width={'100%'}
         />
         <ReactPlayer
           style={{ backgroundColor: 'grey' }}
@@ -493,9 +475,9 @@ const Clip = () => {
           playing={false}
           controls={true}
           url={urlEdited}
-          width={"100%"}
+          width={'100%'}
         />
       </Flex>
     </Flex>
-  );
+  )
 }
