@@ -1,0 +1,13 @@
+{
+  "resourceName": "clipcrafteraistorage",
+  "policyUUID": "c3f0af39",
+  "bucketName": "clipcrafteraibucket",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ"
+  ],
+  "triggerFunction": "S3Triggera6bc74ca",
+  "groupAccess": {}
+}

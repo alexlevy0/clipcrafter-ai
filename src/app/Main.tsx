@@ -25,7 +25,8 @@ import { ThemeProvider } from '@aws-amplify/ui-react'
 import React, { useEffect, useRef, useState } from 'react'
 // @ts-expect-error:next-line
 import dynamic from 'next/dynamic'
-import { Auth } from 'aws-amplify'
+// import { Auth } from 'aws-amplify'
+import { signOut } from 'aws-amplify/auth'
 // @ts-expect-error:next-line
 import { Features } from './Features.tsx'
 // @ts-expect-error:next-line
@@ -91,8 +92,8 @@ export const Main = () => {
       const error = await stripe?.redirectToCheckout({
         lineItems: [{ price: 'price_1OHZaRHjC5oFez5B3xJk2zRS', quantity: 1 }],
         mode: 'subscription',
-        successUrl: 'https://main.d1dn1n1ry842dz.amplifyapp.com/',
-        cancelUrl: 'https://main.d1dn1n1ry842dz.amplifyapp.com/cancel',
+        successUrl: 'https://main.dvqngwodvr6ir.amplifyapp.com/',
+        cancelUrl: 'https://main.dvqngwodvr6ir.amplifyapp.com/cancel',
       })
       console.log({ error })
     } catch (error) {
@@ -231,7 +232,7 @@ export const Main = () => {
                     <MenuItem onClick={upgrade}>Upgrade</MenuItem>
                     <Divider />
                     <MenuItem onClick={displayAccountSettings}>Account Settings</MenuItem>
-                    <MenuItem onClick={() => Auth.signOut()}>Logout</MenuItem>
+                    <MenuItem onClick={() => signOut()}>Logout</MenuItem>
                   </Menu>
                 </>
               ) : (
@@ -410,7 +411,8 @@ const Clip = () => {
         // maxFileSize={''} // TODO
         ref={ref}
         isResumable
-        accessLevel="public"
+        // accessLevel="public"
+        accessLevel="guest" // TODO
         acceptedFileTypes={['video/*']}
         maxFileCount={1}
         onUploadSuccess={onSuccess}

@@ -10,12 +10,12 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "installAll": "npm i && cd amplify/backend/function/S3Trigger52a3ac74 && npm i && cd -",
+    "installAll": "npm i && cd amplify/backend/function/S3Triggera6bc74ca && npm i && cd -",
     "i": "npm run installAll",
-    "amplify:S3Trigger52a3ac74": "cd amplify/backend/function/S3Trigger52a3ac74 && tsc -p ./tsconfig.json && cd -",
+    "amplify:S3Triggera6bc74ca": "cd amplify/backend/function/S3Triggera6bc74ca && tsc -p ./tsconfig.json && cd -",
     "---": "---",
-    "invoke": "cd amplify/backend/function/S3Trigger52a3ac74 && sam local invoke 'LambdaFunction' -e lib/event.json -t S3Trigger52a3ac74-cloudformation-template.json",
-    "run:invoke": "npm run amplify:S3Trigger52a3ac74 && npm run invoke && cd -",
+    "invoke": "cd amplify/backend/function/S3Triggera6bc74ca && sam local invoke 'LambdaFunction' -e lib/event.json -t S3Triggera6bc74ca-cloudformation-template.json",
+    "run:invoke": "npm run amplify:S3Triggera6bc74ca && npm run invoke && cd -",
     "local:docker:fix": "sudo ln -sf '$HOME/.docker/run/docker.sock' /var/run/docker.sock"
   },
   "jest": {

@@ -1,4 +1,4 @@
-import { Storage } from 'aws-amplify'
+import { getUrl } from 'aws-amplify/storage'
 
 export const noop = async () => {
   undefined
@@ -24,14 +24,17 @@ export const retry = async ({ fn = noop, retries = 60 * 5 * 3, delay = 333 }) =>
 
 export const getData = async (key: string, prefix = '_edited') => {
   try {
-    const config = {
-      validateObjectExistence: true,
-      download: false,
-      expires: 3600,
-    }
     const [name, format] = key.split('.')
     const newKey = `${name}${prefix}.${format}`
-    return await Storage.get(newKey, config)
+    const config = {
+      key: newKey,
+      options: {
+        validateObjectExistence: true,
+        download: false,
+        expires: 3600,
+      },
+    }
+    return await getUrl(config)
   } catch (error) {
     throw new Error('No data yet')
   }
