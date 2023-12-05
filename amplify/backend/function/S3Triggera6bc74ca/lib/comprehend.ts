@@ -80,7 +80,7 @@ function isKeyMoment(segmentInfo): boolean {
 
 async function analyzeWithChatGPT(text) {
   try {
-    const completion = await await openai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       messages: [{ role: 'user', content: `${chatGPTPrompt}\n\n${text}` }],
       model: conf.openAIConf.model,
       max_tokens: conf.openAIConf.maxTokens,

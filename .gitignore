@@ -36,10 +36,8 @@ yarn-error.log*
 next-env.d.ts
 
 
-amplify/backend/function/S3Trigger52a3ac74/src/**/*.js
-amplify/backend/function/S3Trigger52a3ac74/src/**/*.json
-# amplify/backend/function/**/src/**/*.js
-# amplify/backend/function/**/src/**/*.json
+amplify/backend/function/S3Triggera6bc74ca/src/**/*.js
+
 
 #amplify-do-not-edit-begin
 amplify/\#current-cloud-backend

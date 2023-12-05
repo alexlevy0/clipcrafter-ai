@@ -1,5 +1,6 @@
 {
   "files.exclude": {
+    "amplify/backend/function/S3Triggera6bc74ca/**/*.js": true,
     "amplify/.config": true,
     "amplify/**/*-parameters.json": true,
     "amplify/**/amplify.state": true,
