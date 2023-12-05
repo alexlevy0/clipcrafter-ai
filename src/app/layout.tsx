@@ -6,8 +6,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Qlip App',
-  description: 'Coded by alexlevy0',
+  title: 'ClipCrafter AI',
+  description: 'Elevate Your Content with ClipCrafter AI',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
