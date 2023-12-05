@@ -1,0 +1,20 @@
+{
+  "main": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-clipcrafterai-main-33215-authRole",
+      "UnauthRoleArn": "arn:aws:iam::327852390890:role/amplify-clipcrafterai-main-33215-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::327852390890:role/amplify-clipcrafterai-main-33215-authRole",
+      "Region": "eu-west-2",
+      "DeploymentBucketName": "amplify-clipcrafterai-main-33215-deployment",
+      "UnauthRoleName": "amplify-clipcrafterai-main-33215-unauthRole",
+      "StackName": "amplify-clipcrafterai-main-33215",
+      "StackId": "arn:aws:cloudformation:eu-west-2:327852390890:stack/amplify-clipcrafterai-main-33215/8216cd00-9316-11ee-92e2-0a1df7461aa2",
+      "AmplifyAppId": "dvqngwodvr6ir"
+    },
+    "categories": {
+      "api": {
+        "clipcrafterai": {}
+      }
+    }
+  }
+}

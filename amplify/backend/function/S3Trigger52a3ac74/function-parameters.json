@@ -1,8 +1,0 @@
-{
-  "lambdaLayers": [
-    {
-      "type": "ExternalLayer",
-      "arn": "arn:aws:lambda:eu-west-3:327852390890:layer:ffmpeg:3"
-    }
-  ]
-}
