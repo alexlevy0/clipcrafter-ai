@@ -1,5 +1,8 @@
 /* eslint-disable react/jsx-no-undef */
 'use client'
+import '@aws-amplify/ui-react/styles.css'
+import { loadStripe } from '@stripe/stripe-js'
+
 import {
   AccountSettings,
   Authenticator,
@@ -19,8 +22,6 @@ import {
   useTheme,
 } from '@aws-amplify/ui-react'
 import { StorageManager } from '@aws-amplify/ui-react-storage'
-import '@aws-amplify/ui-react/styles.css'
-// import { loadStripe } from '@stripe/stripe-js'
 import React, { useEffect, useRef, useState } from 'react'
 // @ts-expect-error:next-line
 import dynamic from 'next/dynamic'
@@ -30,22 +31,19 @@ import { signOut } from 'aws-amplify/auth'
 import { Features } from './Features.tsx'
 // @ts-expect-error:next-line
 import { getData, measurePromise, noop, retry } from './utils.ts'
+// import ReactPlayer from 'react-player'
 
-function Picker(
-  props: Readonly<{
-    onClick: React.MouseEventHandler<HTMLButtonElement> | undefined
-  }>,
-) {
+function Picker(props: { onClick: React.MouseEventHandler<HTMLButtonElement> | undefined }) {
   return (
     <Flex
       direction="column"
       justifyContent="space-around"
     >
       <Button
-        isFullWidth
-        onClick={props.onClick}
         size="large"
         variation="primary"
+        isFullWidth={true}
+        onClick={props.onClick}
       >
         Browse Files
       </Button>
@@ -55,16 +53,17 @@ function Picker(
 
 const ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false })
 
-export function Main(): React.JSX.Element {
-  const { tokens } = useTheme(),
-    // Const { user } = useAuthenticator(context => [context.user])
-    { authStatus } = useAuthenticator(context => [context.authStatus]),
-    { route, toSignIn, toSignUp } = useAuthenticator(context => [context.route]),
-    [showAccountSettings, setShowAccountSettings] = useState(false),
-    [showFeatures, setShowFeatures] = useState(false),
-    [renderAuth, setRenderAuth] = useState<'signIn' | 'signUp' | undefined>(undefined)
+export function Main() {
+  const { tokens } = useTheme()
 
-  useEffect((): void => {
+  // const { user } = useAuthenticator(context => [context.user])
+  const { authStatus } = useAuthenticator(context => [context.authStatus])
+  const { route, toSignIn, toSignUp } = useAuthenticator(context => [context.route])
+  const [showAccountSettings, setShowAccountSettings] = useState(false)
+  const [showFeatures, setShowFeatures] = useState(false)
+  const [renderAuth, setRenderAuth] = useState<'signIn' | 'signUp' | undefined>(undefined)
+
+  useEffect(() => {
     if (![authStatus, route].includes('authenticated')) {
       return
     }
@@ -72,133 +71,135 @@ export function Main(): React.JSX.Element {
   }, [route, authStatus])
 
   const goSignIn = (): void => {
-      toSignIn()
-      setRenderAuth('signIn')
-    },
-    goSignUp = () => {
-      toSignUp()
-      setRenderAuth('signUp')
-    },
-    displayAccountSettings = () => {
-      setShowAccountSettings(!showAccountSettings)
-    },
-    upgrade = async () => {
-      try {
-        // const stripe = await loadStripe(
-        //   'pk_test_51OHZRzHjC5oFez5BiDFM3Up4nzlz0XkRwfHDXbxLjNqzJSLuBq0ZKwyrhVH26W1pVG18vHKPINzFoBhTPmy7EhGE00vtJ4cAF4',
-        // )
-        // console.log({ stripe })
-        // const error = await stripe?.redirectToCheckout({
-        //   lineItems: [{ price: 'price_1OHZaRHjC5oFez5B3xJk2zRS', quantity: 1 }],
-        //   mode: 'subscription',
-        //   successUrl: 'https://main.dvqngwodvr6ir.amplifyapp.com/',
-        //   cancelUrl: 'https://main.dvqngwodvr6ir.amplifyapp.com/cancel',
-        // })
-        // console.log({ error })
-      } catch (error) {
-        console.error(error)
-      }
-    },
-    renderDashboard = () => {
-      if (showFeatures) {
-        return <Features />
-      }
-      return showAccountSettings ? (
+    toSignIn()
+    setRenderAuth('signIn')
+  }
+
+  const goSignUp = () => {
+    toSignUp()
+    setRenderAuth('signUp')
+  }
+
+  const displayAccountSettings = () => {
+    setShowAccountSettings(!showAccountSettings)
+  }
+
+  const upgrade = async () => {
+    try {
+      const stripe = await loadStripe(
+        'pk_test_51OHZRzHjC5oFez5BiDFM3Up4nzlz0XkRwfHDXbxLjNqzJSLuBq0ZKwyrhVH26W1pVG18vHKPINzFoBhTPmy7EhGE00vtJ4cAF4',
+      )
+      console.log({ stripe })
+      const error = await stripe?.redirectToCheckout({
+        lineItems: [{ price: 'price_1OHZaRHjC5oFez5B3xJk2zRS', quantity: 1 }],
+        mode: 'subscription',
+        successUrl: 'https://main.dvqngwodvr6ir.amplifyapp.com/',
+        cancelUrl: 'https://main.dvqngwodvr6ir.amplifyapp.com/cancel',
+      })
+      console.log({ error })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const renderDashboard = () => {
+    if (showFeatures) {
+      return <Features />
+    }
+    return showAccountSettings ? (
+      <Flex
+        flex={1}
+        direction="column"
+        justifyContent="space-between"
+      >
         <Flex
           direction="column"
-          flex={1}
           justifyContent="space-between"
         >
-          <Flex
-            direction="column"
-            justifyContent="space-between"
-          >
-            <AccountSettings.ChangePassword
-              onError={noop}
-              onSuccess={noop}
-            />
-          </Flex>
-          <Grid
-            columnGap="0.5rem"
-            templateColumns=".4fr 1fr"
-          >
-            <AccountSettings.DeleteUser
-              onError={noop}
-              onSuccess={noop}
-            />
-            <Button
-              loadingText=""
-              onClick={displayAccountSettings}
-              variation="primary"
-            >
-              Cancel
-            </Button>
-          </Grid>
+          <AccountSettings.ChangePassword
+            onSuccess={noop}
+            onError={noop}
+          />
         </Flex>
-      ) : (
-        <Clip />
-      )
-      /*
-       * : (
-       *   <Flex flex={1} width={"100%"}>
-       *     <iframe
-       *       title="alexlevy0/ClipCrafterStudio/main"
-       *       allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
-       *       sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
-       *       frameBorder="0"
-       *       style={{ width: "100%", height: "100%" }}
-       *       // src="https://codesandbox.io/p/github/alexlevy0/ClipCrafterStudio/main?file=%2F.codesandbox%2Ftasks.json&embed=1"
-       *       src="https://clip-crafter-studio-web-service.onrender.com"
-       *     >
-       *     </iframe>
-       *   </Flex >
-       * )
-       */
-    }
+        <Grid
+          templateColumns=".4fr 1fr"
+          columnGap="0.5rem"
+        >
+          <AccountSettings.DeleteUser
+            onError={noop}
+            onSuccess={noop}
+          />
+          <Button
+            variation="primary"
+            loadingText=""
+            onClick={displayAccountSettings}
+          >
+            Cancel
+          </Button>
+        </Grid>
+      </Flex>
+    ) : (
+      <Clip />
+    )
+    // : (
+    //   <Flex flex={1} width={"100%"}>
+    //     <iframe
+    //       title="alexlevy0/ClipCrafterStudio/main"
+    //       allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+    //       sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+    //       frameBorder="0"
+    //       style={{ width: "100%", height: "100%" }}
+    //       // src="https://codesandbox.io/p/github/alexlevy0/ClipCrafterStudio/main?file=%2F.codesandbox%2Ftasks.json&embed=1"
+    //       src="https://clip-crafter-studio-web-service.onrender.com"
+    //     >
+    //     </iframe>
+    //   </Flex >
+    // )
+  }
 
   return (
     <ThemeProvider
-      colorMode="dark"
       theme={{ name: 'my-theme', overrides: [defaultDarkModeOverride] }}
+      colorMode={'dark'}
     >
       <Authenticator.Provider>
         <Grid
+          style={{ height: '100vh' }}
           columnGap={{ base: '0rem', large: '0.5rem' }}
           rowGap="0.5rem"
-          style={{ height: '100vh' }}
           templateColumns={{ base: '0fr 1fr', large: '.2fr 1fr' }}
           templateRows=".3fr 3.6fr .1fr"
         >
           <Card
-            columnEnd="-1"
             columnStart="1"
+            columnEnd="-1"
             display="flex"
           >
             <Flex
+              flex={1}
               alignContent="center"
               alignItems="center"
-              flex={1}
               justifyContent="flex-start"
             >
               <Heading
-                color="#e8e6e3"
-                fontWeight="bold"
+                color={'#e8e6e3'}
                 level={3}
+                fontWeight="bold"
               >
                 ClipCrafter AI
               </Heading>
               <Heading
-                fontWeight="bold"
-                level={6}
                 display={{ base: 'none', large: 'block' }}
-                // Width={'100%'}
+                // width={'100%'}
                 color={'#e8e6e3'}
+                level={6}
+                fontWeight="bold"
               >
                 Real-Time Collaborative AI Video Editing in the Cloud
               </Heading>
             </Flex>
             <Flex
-              // Flex={1}
+              // flex={1}
               alignContent="center"
               alignItems="center"
               justifyContent="flex-end"
@@ -218,8 +219,8 @@ export function Main(): React.JSX.Element {
                     Upgrade
                   </Button>
                   <Menu
-                    menuAlign="end"
                     size="large"
+                    menuAlign="end"
                   >
                     <MenuItem onClick={() => alert('Download')}>My Projects</MenuItem>
                     <MenuItem
@@ -238,9 +239,9 @@ export function Main(): React.JSX.Element {
               ) : (
                 <>
                   <Button
-                    display={{ base: 'none', large: 'flex' }}
                     loadingText=""
                     onClick={goSignIn}
+                    display={{ base: 'none', large: 'flex' }}
                   >
                     Login
                   </Button>
@@ -267,37 +268,52 @@ export function Main(): React.JSX.Element {
             </Flex>
           </Card>
           <Card
-            columnEnd="2"
             columnStart="1"
-            display={{ base: 'none', large: 'block' }}
+            columnEnd="2"
             variation="elevated"
+            display={{ base: 'none', large: 'block' }}
           >
             {/* <Clip /> */}
           </Card>
           <Card
             borderRadius={{ base: '0px', large: '20px' }}
-            columnEnd="-1"
-            columnStart="2"
-            display="flex"
             marginRight={{ base: '0rem', large: '0.5rem' }}
+            columnStart="2"
+            columnEnd="-1"
+            display="flex"
           >
             {renderDashboard()}
-            {Boolean(renderAuth) && authStatus !== 'authenticated' && (
+            {!!renderAuth && authStatus !== 'authenticated' && (
               <Authenticator
+                hideSignUp={renderAuth === 'signIn'}
+                loginMechanisms={['email']}
+                signUpAttributes={['email']}
+                variation="modal"
+                initialState={renderAuth}
+                socialProviders={['google']}
+                services={{
+                  async validateCustomSignUp(formData) {
+                    if (Object.keys(formData).length >= 3 && !formData.acknowledgement) {
+                      return {
+                        acknowledgement: 'You must agree to the Terms & Conditions',
+                      }
+                    }
+                  },
+                }}
                 components={{
                   SignIn: {
                     Footer() {
                       return (
                         <>
                           <Flex
-                            paddingBottom={tokens.components.button.paddingBlockEnd}
-                            paddingLeft={tokens.components.authenticator.form.padding}
                             paddingRight={tokens.components.authenticator.form.padding}
+                            paddingLeft={tokens.components.authenticator.form.padding}
+                            paddingBottom={tokens.components.button.paddingBlockEnd}
                           >
                             <Button
                               isFullWidth
-                              onClick={() => setRenderAuth(undefined)}
                               variation="link"
+                              onClick={() => setRenderAuth(undefined)}
                             >
                               Cancel
                             </Button>
@@ -314,16 +330,16 @@ export function Main(): React.JSX.Element {
                         <>
                           <Authenticator.SignUp.FormFields />
                           <CheckboxField
-                            color="white"
+                            color={'white'}
                             errorMessage={validationErrors.acknowledgement as string}
-                            hasError={Boolean(validationErrors.acknowledgement)}
-                            label="I agree with the Terms & Conditions"
+                            hasError={!!validationErrors.acknowledgement}
                             name="acknowledgement"
                             value="yes"
+                            label="I agree with the Terms & Conditions"
                           />
                           <Button
-                            onClick={() => setRenderAuth(undefined)}
                             variation="link"
+                            onClick={() => setRenderAuth(undefined)}
                           >
                             Cancel
                           </Button>
@@ -332,27 +348,12 @@ export function Main(): React.JSX.Element {
                     },
                   },
                 }}
-                hideSignUp={renderAuth === 'signIn'}
-                initialState={renderAuth}
-                loginMechanisms={['email']}
-                services={{
-                  async validateCustomSignUp(formData) {
-                    if (Object.keys(formData).length >= 3 && !formData.acknowledgement) {
-                      return {
-                        acknowledgement: 'You must agree to the Terms & Conditions',
-                      }
-                    }
-                  },
-                }}
-                signUpAttributes={['email']}
-                socialProviders={['google']}
-                variation="modal"
               />
             )}
           </Card>
           <Card
-            columnEnd="-1"
             columnStart="1"
+            columnEnd="-1"
           >
             Footer
           </Card>
@@ -363,43 +364,45 @@ export function Main(): React.JSX.Element {
 }
 
 function Clip() {
-  const PROCESSING = 'Processing',
-    READY = 'Ready',
-    STANDBY = '',
-    [url, setUrl] = useState(''),
-    [urlEdited, setUrlEdited] = useState(''),
-    [processDurationSecond, setProcessDurationSecond] = useState(''),
-    [status, setStatus] = useState(STANDBY)
+  const READY = 'Ready'
+  const STANDBY = ''
+  const PROCESSING = 'Processing'
+
+  const [url, setUrl] = useState('')
+  const [urlEdited, setUrlEdited] = useState('')
+  const [processDurationSecond, setProcessDurationSecond] = useState('')
+  const [status, setStatus] = useState(STANDBY)
 
   useEffect(() => {
     Notification.requestPermission()
   }, [])
 
   const onReady = () => {
-      setStatus(READY)
-    },
-    onSuccess = async ({ key = '' }) => {
-      try {
-        if (!key) {
-          return
-        }
-        setStatus(`${PROCESSING} : ${key}…`)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        const url = await retry({ fn: async () => await getData(key, '') })
-        setUrl(url)
+    setStatus(READY)
+  }
 
-        const durationSecond = await measurePromise(async () => {
-          const urlEdited = await retry({ fn: async () => await getData(key) })
-          setUrlEdited(urlEdited)
-        })
-        setProcessDurationSecond(`⏱️ ${durationSecond}`)
-        new Notification(`⏱️ ${durationSecond}`)
-      } catch (error) {
-        console.error(`onSuccess ERROR : ${error}`)
-      }
-    },
-    onResetVideoUrl = () => setUrl(''),
-    ref = useRef(null)
+  const onSuccess = async ({ key = '' }) => {
+    try {
+      if (!key) return
+      setStatus(`${PROCESSING} : ${key}…`)
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      const url = await retry({ fn: async () => await getData(key, '') })
+      setUrl(url)
+
+      const durationSecond = await measurePromise(async () => {
+        const urlEdited = await retry({ fn: async () => await getData(key) })
+        setUrlEdited(urlEdited)
+      })
+      setProcessDurationSecond(`⏱️ ${durationSecond}`)
+      new Notification(`⏱️ ${durationSecond}`)
+    } catch (error) {
+      console.error(`onSuccess ERROR : ${error}`)
+    }
+  }
+
+  const onResetVideoUrl = () => setUrl('')
+
+  const ref = useRef(null)
 
   return (
     <Flex
@@ -407,23 +410,23 @@ function Clip() {
       flex={1}
     >
       <StorageManager
-        // MaxFileSize={''} // TODO
+        // maxFileSize={''} // TODO
+        ref={ref}
+        isResumable
+        // accessLevel="public"
+        accessLevel="guest" // TODO
         acceptedFileTypes={['video/*']}
+        maxFileCount={1}
+        onUploadSuccess={onSuccess}
+        onFileRemove={onResetVideoUrl}
+        onUploadError={onResetVideoUrl}
+        onUploadStart={onResetVideoUrl}
         components={{
           // eslint-disable-next-line react/prop-types
           FilePicker({ onClick }) {
             return <Picker onClick={onClick} />
           },
-        }} // TODO
-        maxFileCount={1}
-        onFileRemove={onResetVideoUrl}
-        onUploadError={onResetVideoUrl}
-        onUploadStart={onResetVideoUrl}
-        onUploadSuccess={onSuccess}
-        ref={ref}
-        isResumable
-        // AccessLevel="public"
-        accessLevel="guest"
+        }}
       />
       {/* <Flex direction="column" gap="small">
         <Input
@@ -434,23 +437,23 @@ function Clip() {
         />
       </Flex> */}
       <Heading level={5}>{status}</Heading>
-      {Boolean(url) && processDurationSecond === '' && (
+      {!!url && processDurationSecond === '' && (
         <Flex
-          backgroundColor="rgb(13, 25, 38)"
+          backgroundColor={'rgb(13, 25, 38)'}
           direction="column"
           gap="small"
           justifyContent="space-around"
         >
           <Loader
-            emptyColor="rgb(13, 25, 38)"
-            filledColor="rgb(125, 214, 232)"
+            emptyColor={'rgb(13, 25, 38)'}
+            filledColor={'rgb(125, 214, 232)'}
             variation="linear"
           />
         </Flex>
       )}
       {processDurationSecond !== '' && (
         <Flex
-          backgroundColor="rgb(13, 25, 38)"
+          backgroundColor={'rgb(13, 25, 38)'}
           direction="column"
           gap="small"
           justifyContent="space-around"
@@ -460,23 +463,23 @@ function Clip() {
       )}
       <Flex
         alignContent="center"
+        justifyContent={'center'}
         gap="small"
-        justifyContent="center"
       >
         <ReactPlayer
-          controls
-          playing={false}
           style={{ backgroundColor: 'black' }}
+          playing={false}
+          controls={true}
           url={url}
-          width="100%"
+          width={'100%'}
         />
         <ReactPlayer
-          controls
+          style={{ backgroundColor: 'grey' }}
           onReady={onReady}
           playing={false}
-          style={{ backgroundColor: 'grey' }}
+          controls={true}
           url={urlEdited}
-          width="100%"
+          width={'100%'}
         />
       </Flex>
     </Flex>
