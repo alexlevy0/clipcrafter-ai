@@ -18,7 +18,7 @@ module.exports = {
     'plugin:functional/stylistic',
     'plugin:promise/recommended',
   ],
-  ignorePatterns: ['node_modules', 'dist' /* , 'amplify' */],
+  ignorePatterns: ['node_modules', 'dist', 'amplify'],
   overrides: [
     {
       env: {
