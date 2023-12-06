@@ -27,7 +27,7 @@
       "function": {
         "S3Triggera6bc74ca": {
           "deploymentBucketName": "amplify-clipcrafterai-main-33215-deployment",
-          "s3Key": "amplify-builds/S3Triggera6bc74ca-5130716a465031655070-build.zip"
+          "s3Key": "amplify-builds/S3Triggera6bc74ca-6e505a55353230423379-build.zip"
         }
       },
       "storage": {
