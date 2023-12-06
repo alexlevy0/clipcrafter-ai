@@ -11,7 +11,9 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "strict": true,
+    "strictNullChecks": true,
     "noEmit": true,
+    "noImplicitAny": true,
     "esModuleInterop": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
@@ -37,7 +39,7 @@
     "**/*.ts",
     "**/*.tsx",
     "@aws-amplify/ui-react/**/types/¨**/*.ts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
   ],
   "exclude": [
     "src/graphql",

@@ -1,48 +1,51 @@
 /* eslint-disable react/jsx-no-undef */
 'use client'
-import '@aws-amplify/ui-react/styles.css'
-import { loadStripe } from '@stripe/stripe-js'
-
-import { StorageManager } from '@aws-amplify/ui-react-storage'
 import {
-  Flex,
-  Button,
-  defaultDarkModeOverride,
-  Loader,
-  useTheme,
-  Grid,
-  Card,
-  Heading,
-  Authenticator,
-  useAuthenticator,
   AccountSettings,
-  Divider,
+  Authenticator,
+  Button,
+  Card,
   CheckboxField,
+  Divider,
+  Flex,
+  Grid,
+  Heading,
+  Loader,
   Menu,
   MenuItem,
+  ThemeProvider,
+  defaultDarkModeOverride,
+  useAuthenticator,
+  useTheme,
 } from '@aws-amplify/ui-react'
-import { ThemeProvider } from '@aws-amplify/ui-react'
+import { StorageManager } from '@aws-amplify/ui-react-storage'
+import '@aws-amplify/ui-react/styles.css'
+import { loadStripe } from '@stripe/stripe-js'
 import React, { useEffect, useRef, useState } from 'react'
 // @ts-expect-error:next-line
 import dynamic from 'next/dynamic'
-// import { Auth } from 'aws-amplify'
+// Import { Auth } from 'aws-amplify'
 import { signOut } from 'aws-amplify/auth'
 // @ts-expect-error:next-line
 import { Features } from './Features.tsx'
 // @ts-expect-error:next-line
-import { retry, noop, getData, measurePromise } from './utils.ts'
+import { getData, measurePromise, noop, retry } from './utils.ts'
 
-const Picker = (props: { onClick: React.MouseEventHandler<HTMLButtonElement> | undefined }) => {
+function Picker(
+  props: Readonly<{
+    onClick: React.MouseEventHandler<HTMLButtonElement> | undefined
+  }>,
+) {
   return (
     <Flex
       direction="column"
       justifyContent="space-around"
     >
       <Button
+        isFullWidth
+        onClick={props.onClick}
         size="large"
         variation="primary"
-        isFullWidth={true}
-        onClick={props.onClick}
       >
         Browse Files
       </Button>
@@ -50,155 +53,152 @@ const Picker = (props: { onClick: React.MouseEventHandler<HTMLButtonElement> | u
   )
 }
 
-// @ts-expect-error:next-line
-const ReactPlayer: ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false })
+const ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false })
 
-export const Main = () => {
-  const { tokens } = useTheme()
+export function Main(): React.JSX.Element {
+  const { tokens } = useTheme(),
+    // Const { user } = useAuthenticator(context => [context.user])
+    { authStatus } = useAuthenticator(context => [context.authStatus]),
+    { route, toSignIn, toSignUp } = useAuthenticator(context => [context.route]),
+    [showAccountSettings, setShowAccountSettings] = useState(false),
+    [showFeatures, setShowFeatures] = useState(false),
+    [renderAuth, setRenderAuth] = useState<'signIn' | 'signUp' | undefined>(undefined)
 
-  // const { user } = useAuthenticator(context => [context.user])
-  const { authStatus } = useAuthenticator(context => [context.authStatus])
-  const { route, toSignIn, toSignUp } = useAuthenticator(context => [context.route])
-  const [showAccountSettings, setShowAccountSettings] = useState(false)
-  const [showFeatures, setShowFeatures] = useState(false)
-  const [renderAuth, setRenderAuth] = useState<'signIn' | 'signUp' | undefined>(undefined)
-
-  useEffect(() => {
-    if ([authStatus, route].includes('authenticated')) {
-      setRenderAuth(undefined)
+  useEffect((): void => {
+    if (![authStatus, route].includes('authenticated')) {
+      return
     }
+    setRenderAuth(undefined)
   }, [route, authStatus])
 
-  const goSignIn = () => {
-    toSignIn()
-    setRenderAuth('signIn')
-  }
-
-  const goSignUp = () => {
-    toSignUp()
-    setRenderAuth('signUp')
-  }
-
-  const displayAccountSettings = () => {
-    setShowAccountSettings(!showAccountSettings)
-  }
-
-  const upgrade = async () => {
-    try {
-      const stripe = await loadStripe(
-        'pk_test_51OHZRzHjC5oFez5BiDFM3Up4nzlz0XkRwfHDXbxLjNqzJSLuBq0ZKwyrhVH26W1pVG18vHKPINzFoBhTPmy7EhGE00vtJ4cAF4',
-      )
-      console.log({ stripe })
-      const error = await stripe?.redirectToCheckout({
-        lineItems: [{ price: 'price_1OHZaRHjC5oFez5B3xJk2zRS', quantity: 1 }],
-        mode: 'subscription',
-        successUrl: 'https://main.dvqngwodvr6ir.amplifyapp.com/',
-        cancelUrl: 'https://main.dvqngwodvr6ir.amplifyapp.com/cancel',
-      })
-      console.log({ error })
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-  const renderDashboard = () => {
-    if (showFeatures) {
-      return <Features />
-    }
-    return showAccountSettings ? (
-      <Flex
-        flex={1}
-        direction="column"
-        justifyContent="space-between"
-      >
+  const goSignIn = (): void => {
+      toSignIn()
+      setRenderAuth('signIn')
+    },
+    goSignUp = () => {
+      toSignUp()
+      setRenderAuth('signUp')
+    },
+    displayAccountSettings = () => {
+      setShowAccountSettings(!showAccountSettings)
+    },
+    upgrade = async () => {
+      try {
+        const stripe = await loadStripe(
+          'pk_test_51OHZRzHjC5oFez5BiDFM3Up4nzlz0XkRwfHDXbxLjNqzJSLuBq0ZKwyrhVH26W1pVG18vHKPINzFoBhTPmy7EhGE00vtJ4cAF4',
+        )
+        console.log({ stripe })
+        const error = await stripe?.redirectToCheckout({
+          lineItems: [{ price: 'price_1OHZaRHjC5oFez5B3xJk2zRS', quantity: 1 }],
+          mode: 'subscription',
+          successUrl: 'https://main.dvqngwodvr6ir.amplifyapp.com/',
+          cancelUrl: 'https://main.dvqngwodvr6ir.amplifyapp.com/cancel',
+        })
+        console.log({ error })
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    renderDashboard = () => {
+      if (showFeatures) {
+        return <Features />
+      }
+      return showAccountSettings ? (
         <Flex
           direction="column"
+          flex={1}
           justifyContent="space-between"
         >
-          <AccountSettings.ChangePassword
-            onSuccess={noop}
-            onError={noop}
-          />
-        </Flex>
-        <Grid
-          templateColumns=".4fr 1fr"
-          columnGap="0.5rem"
-        >
-          <AccountSettings.DeleteUser
-            onError={noop}
-            onSuccess={noop}
-          />
-          <Button
-            variation="primary"
-            loadingText=""
-            onClick={displayAccountSettings}
+          <Flex
+            direction="column"
+            justifyContent="space-between"
           >
-            Cancel
-          </Button>
-        </Grid>
-      </Flex>
-    ) : (
-      <Clip />
-    )
-    // : (
-    //   <Flex flex={1} width={"100%"}>
-    //     <iframe
-    //       title="alexlevy0/ClipCrafterStudio/main"
-    //       allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
-    //       sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
-    //       frameBorder="0"
-    //       style={{ width: "100%", height: "100%" }}
-    //       // src="https://codesandbox.io/p/github/alexlevy0/ClipCrafterStudio/main?file=%2F.codesandbox%2Ftasks.json&embed=1"
-    //       src="https://clip-crafter-studio-web-service.onrender.com"
-    //     >
-    //     </iframe>
-    //   </Flex >
-    // )
-  }
+            <AccountSettings.ChangePassword
+              onError={noop}
+              onSuccess={noop}
+            />
+          </Flex>
+          <Grid
+            columnGap="0.5rem"
+            templateColumns=".4fr 1fr"
+          >
+            <AccountSettings.DeleteUser
+              onError={noop}
+              onSuccess={noop}
+            />
+            <Button
+              loadingText=""
+              onClick={displayAccountSettings}
+              variation="primary"
+            >
+              Cancel
+            </Button>
+          </Grid>
+        </Flex>
+      ) : (
+        <Clip />
+      )
+      /*
+       * : (
+       *   <Flex flex={1} width={"100%"}>
+       *     <iframe
+       *       title="alexlevy0/ClipCrafterStudio/main"
+       *       allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+       *       sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+       *       frameBorder="0"
+       *       style={{ width: "100%", height: "100%" }}
+       *       // src="https://codesandbox.io/p/github/alexlevy0/ClipCrafterStudio/main?file=%2F.codesandbox%2Ftasks.json&embed=1"
+       *       src="https://clip-crafter-studio-web-service.onrender.com"
+       *     >
+       *     </iframe>
+       *   </Flex >
+       * )
+       */
+    }
 
   return (
     <ThemeProvider
+      colorMode="dark"
       theme={{ name: 'my-theme', overrides: [defaultDarkModeOverride] }}
-      colorMode={'dark'}
     >
       <Authenticator.Provider>
         <Grid
-          style={{ height: '100vh' }}
           columnGap={{ base: '0rem', large: '0.5rem' }}
           rowGap="0.5rem"
+          style={{ height: '100vh' }}
           templateColumns={{ base: '0fr 1fr', large: '.2fr 1fr' }}
           templateRows=".3fr 3.6fr .1fr"
         >
           <Card
-            columnStart="1"
             columnEnd="-1"
+            columnStart="1"
             display="flex"
           >
             <Flex
-              flex={1}
               alignContent="center"
               alignItems="center"
+              flex={1}
               justifyContent="flex-start"
             >
               <Heading
-                color={'#e8e6e3'}
-                level={3}
+                color="#e8e6e3"
                 fontWeight="bold"
+                level={3}
               >
                 ClipCrafter AI
               </Heading>
               <Heading
-                display={{ base: 'none', large: 'block' }}
-                // width={'100%'}
-                color={'#e8e6e3'}
-                level={6}
                 fontWeight="bold"
+                level={6}
+                display={{ base: 'none', large: 'block' }}
+                // Width={'100%'}
+                color={'#e8e6e3'}
               >
                 Real-Time Collaborative AI Video Editing in the Cloud
               </Heading>
             </Flex>
             <Flex
-              // flex={1}
+              // Flex={1}
               alignContent="center"
               alignItems="center"
               justifyContent="flex-end"
@@ -218,8 +218,8 @@ export const Main = () => {
                     Upgrade
                   </Button>
                   <Menu
-                    size="large"
                     menuAlign="end"
+                    size="large"
                   >
                     <MenuItem onClick={() => alert('Download')}>My Projects</MenuItem>
                     <MenuItem
@@ -238,9 +238,9 @@ export const Main = () => {
               ) : (
                 <>
                   <Button
+                    display={{ base: 'none', large: 'flex' }}
                     loadingText=""
                     onClick={goSignIn}
-                    display={{ base: 'none', large: 'flex' }}
                   >
                     Login
                   </Button>
@@ -259,7 +259,7 @@ export const Main = () => {
                     <MenuItem onClick={displayAccountSettings}>API</MenuItem>
                     <MenuItem onClick={upgrade}>Upgrade</MenuItem>
                     <Divider />
-                    <MenuItem onClick={goSignUp}>Login</MenuItem>
+                    <MenuItem onClick={goSignIn}>Login</MenuItem>
                     <MenuItem onClick={goSignUp}>Sign Up</MenuItem>
                   </Menu>
                 </>
@@ -267,52 +267,37 @@ export const Main = () => {
             </Flex>
           </Card>
           <Card
-            columnStart="1"
             columnEnd="2"
-            variation="elevated"
+            columnStart="1"
             display={{ base: 'none', large: 'block' }}
+            variation="elevated"
           >
             {/* <Clip /> */}
           </Card>
           <Card
             borderRadius={{ base: '0px', large: '20px' }}
-            marginRight={{ base: '0rem', large: '0.5rem' }}
-            columnStart="2"
             columnEnd="-1"
+            columnStart="2"
             display="flex"
+            marginRight={{ base: '0rem', large: '0.5rem' }}
           >
             {renderDashboard()}
-            {!!renderAuth && authStatus !== 'authenticated' && (
+            {Boolean(renderAuth) && authStatus !== 'authenticated' && (
               <Authenticator
-                hideSignUp={renderAuth === 'signIn'}
-                loginMechanisms={['email']}
-                signUpAttributes={['email']}
-                variation="modal"
-                initialState={renderAuth}
-                socialProviders={['apple', 'google']}
-                services={{
-                  async validateCustomSignUp(formData) {
-                    if (Object.keys(formData).length >= 3 && !formData.acknowledgement) {
-                      return {
-                        acknowledgement: 'You must agree to the Terms & Conditions',
-                      }
-                    }
-                  },
-                }}
                 components={{
                   SignIn: {
                     Footer() {
                       return (
                         <>
                           <Flex
-                            paddingRight={tokens.components.authenticator.form.padding}
-                            paddingLeft={tokens.components.authenticator.form.padding}
                             paddingBottom={tokens.components.button.paddingBlockEnd}
+                            paddingLeft={tokens.components.authenticator.form.padding}
+                            paddingRight={tokens.components.authenticator.form.padding}
                           >
                             <Button
                               isFullWidth
-                              variation="link"
                               onClick={() => setRenderAuth(undefined)}
+                              variation="link"
                             >
                               Cancel
                             </Button>
@@ -329,15 +314,16 @@ export const Main = () => {
                         <>
                           <Authenticator.SignUp.FormFields />
                           <CheckboxField
+                            color="white"
                             errorMessage={validationErrors.acknowledgement as string}
-                            hasError={!!validationErrors.acknowledgement}
+                            hasError={Boolean(validationErrors.acknowledgement)}
+                            label="I agree with the Terms & Conditions"
                             name="acknowledgement"
                             value="yes"
-                            label="I agree with the Terms & Conditions"
                           />
                           <Button
-                            variation="link"
                             onClick={() => setRenderAuth(undefined)}
+                            variation="link"
                           >
                             Cancel
                           </Button>
@@ -346,12 +332,27 @@ export const Main = () => {
                     },
                   },
                 }}
+                hideSignUp={renderAuth === 'signIn'}
+                initialState={renderAuth}
+                loginMechanisms={['email']}
+                services={{
+                  async validateCustomSignUp(formData) {
+                    if (Object.keys(formData).length >= 3 && !formData.acknowledgement) {
+                      return {
+                        acknowledgement: 'You must agree to the Terms & Conditions',
+                      }
+                    }
+                  },
+                }}
+                signUpAttributes={['email']}
+                socialProviders={['google']}
+                variation="modal"
               />
             )}
           </Card>
           <Card
-            columnStart="1"
             columnEnd="-1"
+            columnStart="1"
           >
             Footer
           </Card>
@@ -361,46 +362,44 @@ export const Main = () => {
   )
 }
 
-const Clip = () => {
-  const READY = 'Ready'
-  const STANDBY = ''
-  const PROCESSING = 'Processing'
-
-  const [url, setUrl] = useState('')
-  const [urlEdited, setUrlEdited] = useState('')
-  const [processDurationSecond, setProcessDurationSecond] = useState('')
-  const [status, setStatus] = useState(STANDBY)
+function Clip() {
+  const PROCESSING = 'Processing',
+    READY = 'Ready',
+    STANDBY = '',
+    [url, setUrl] = useState(''),
+    [urlEdited, setUrlEdited] = useState(''),
+    [processDurationSecond, setProcessDurationSecond] = useState(''),
+    [status, setStatus] = useState(STANDBY)
 
   useEffect(() => {
     Notification.requestPermission()
   }, [])
 
   const onReady = () => {
-    setStatus(READY)
-  }
+      setStatus(READY)
+    },
+    onSuccess = async ({ key = '' }) => {
+      try {
+        if (!key) {
+          return
+        }
+        setStatus(`${PROCESSING} : ${key}…`)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        const url = await retry({ fn: async () => await getData(key, '') })
+        setUrl(url)
 
-  const onSuccess = async ({ key = '' }) => {
-    try {
-      if (!key) return
-      setStatus(`${PROCESSING} : ${key}…`)
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      const url = await retry({ fn: async () => await getData(key, '') })
-      setUrl(url)
-
-      const durationSecond = await measurePromise(async () => {
-        const urlEdited = await retry({ fn: async () => await getData(key) })
-        setUrlEdited(urlEdited)
-      })
-      setProcessDurationSecond(`⏱️ ${durationSecond}`)
-      new Notification(`⏱️ ${durationSecond}`)
-    } catch (error) {
-      console.error(`onSuccess ERROR : ${error}`)
-    }
-  }
-
-  const onResetVideoUrl = () => setUrl('')
-
-  const ref = useRef(null)
+        const durationSecond = await measurePromise(async () => {
+          const urlEdited = await retry({ fn: async () => await getData(key) })
+          setUrlEdited(urlEdited)
+        })
+        setProcessDurationSecond(`⏱️ ${durationSecond}`)
+        new Notification(`⏱️ ${durationSecond}`)
+      } catch (error) {
+        console.error(`onSuccess ERROR : ${error}`)
+      }
+    },
+    onResetVideoUrl = () => setUrl(''),
+    ref = useRef(null)
 
   return (
     <Flex
@@ -408,23 +407,23 @@ const Clip = () => {
       flex={1}
     >
       <StorageManager
-        // maxFileSize={''} // TODO
-        ref={ref}
-        isResumable
-        // accessLevel="public"
-        accessLevel="guest" // TODO
+        // MaxFileSize={''} // TODO
         acceptedFileTypes={['video/*']}
-        maxFileCount={1}
-        onUploadSuccess={onSuccess}
-        onFileRemove={onResetVideoUrl}
-        onUploadError={onResetVideoUrl}
-        onUploadStart={onResetVideoUrl}
         components={{
           // eslint-disable-next-line react/prop-types
           FilePicker({ onClick }) {
             return <Picker onClick={onClick} />
           },
-        }}
+        }} // TODO
+        maxFileCount={1}
+        onFileRemove={onResetVideoUrl}
+        onUploadError={onResetVideoUrl}
+        onUploadStart={onResetVideoUrl}
+        onUploadSuccess={onSuccess}
+        ref={ref}
+        isResumable
+        // AccessLevel="public"
+        accessLevel="guest"
       />
       {/* <Flex direction="column" gap="small">
         <Input
@@ -435,23 +434,23 @@ const Clip = () => {
         />
       </Flex> */}
       <Heading level={5}>{status}</Heading>
-      {!!url && processDurationSecond === '' && (
+      {Boolean(url) && processDurationSecond === '' && (
         <Flex
-          backgroundColor={'rgb(13, 25, 38)'}
+          backgroundColor="rgb(13, 25, 38)"
           direction="column"
           gap="small"
           justifyContent="space-around"
         >
           <Loader
-            emptyColor={'rgb(13, 25, 38)'}
-            filledColor={'rgb(125, 214, 232)'}
+            emptyColor="rgb(13, 25, 38)"
+            filledColor="rgb(125, 214, 232)"
             variation="linear"
           />
         </Flex>
       )}
       {processDurationSecond !== '' && (
         <Flex
-          backgroundColor={'rgb(13, 25, 38)'}
+          backgroundColor="rgb(13, 25, 38)"
           direction="column"
           gap="small"
           justifyContent="space-around"
@@ -461,23 +460,23 @@ const Clip = () => {
       )}
       <Flex
         alignContent="center"
-        justifyContent={'center'}
         gap="small"
+        justifyContent="center"
       >
         <ReactPlayer
-          style={{ backgroundColor: 'black' }}
+          controls
           playing={false}
-          controls={true}
+          style={{ backgroundColor: 'black' }}
           url={url}
-          width={'100%'}
+          width="100%"
         />
         <ReactPlayer
-          style={{ backgroundColor: 'grey' }}
+          controls
           onReady={onReady}
           playing={false}
-          controls={true}
+          style={{ backgroundColor: 'grey' }}
           url={urlEdited}
-          width={'100%'}
+          width="100%"
         />
       </Flex>
     </Flex>
