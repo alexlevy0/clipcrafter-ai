@@ -40,7 +40,7 @@
     "@aws-sdk/client-s3": "^3.465.0",
     "@aws-sdk/client-transcribe": "^3.465.0",
     "@stripe/stripe-js": "^2.2.0",
-    "aws-amplify": "^6.0.5",
+    "aws-amplify": "^6.0.6",
     "aws-lambda": "^1.0.7",
     "aws-sdk": "^2.1511.0",
     "jsdom": "^22.1.0",

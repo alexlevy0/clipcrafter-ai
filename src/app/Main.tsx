@@ -20,7 +20,7 @@ import {
 } from '@aws-amplify/ui-react'
 import { StorageManager } from '@aws-amplify/ui-react-storage'
 import '@aws-amplify/ui-react/styles.css'
-import { loadStripe } from '@stripe/stripe-js'
+// import { loadStripe } from '@stripe/stripe-js'
 import React, { useEffect, useRef, useState } from 'react'
 // @ts-expect-error:next-line
 import dynamic from 'next/dynamic'
@@ -84,17 +84,17 @@ export function Main(): React.JSX.Element {
     },
     upgrade = async () => {
       try {
-        const stripe = await loadStripe(
-          'pk_test_51OHZRzHjC5oFez5BiDFM3Up4nzlz0XkRwfHDXbxLjNqzJSLuBq0ZKwyrhVH26W1pVG18vHKPINzFoBhTPmy7EhGE00vtJ4cAF4',
-        )
-        console.log({ stripe })
-        const error = await stripe?.redirectToCheckout({
-          lineItems: [{ price: 'price_1OHZaRHjC5oFez5B3xJk2zRS', quantity: 1 }],
-          mode: 'subscription',
-          successUrl: 'https://main.dvqngwodvr6ir.amplifyapp.com/',
-          cancelUrl: 'https://main.dvqngwodvr6ir.amplifyapp.com/cancel',
-        })
-        console.log({ error })
+        // const stripe = await loadStripe(
+        //   'pk_test_51OHZRzHjC5oFez5BiDFM3Up4nzlz0XkRwfHDXbxLjNqzJSLuBq0ZKwyrhVH26W1pVG18vHKPINzFoBhTPmy7EhGE00vtJ4cAF4',
+        // )
+        // console.log({ stripe })
+        // const error = await stripe?.redirectToCheckout({
+        //   lineItems: [{ price: 'price_1OHZaRHjC5oFez5B3xJk2zRS', quantity: 1 }],
+        //   mode: 'subscription',
+        //   successUrl: 'https://main.dvqngwodvr6ir.amplifyapp.com/',
+        //   cancelUrl: 'https://main.dvqngwodvr6ir.amplifyapp.com/cancel',
+        // })
+        // console.log({ error })
       } catch (error) {
         console.error(error)
       }
