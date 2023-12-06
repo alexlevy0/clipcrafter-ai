@@ -3,7 +3,7 @@ import("next").NextConfig;
 
 const nextConfig = {
   compiler: {
-    removeConsole: false,
+    // removeConsole: false,
   },
   // transpilePackages: ["styled-jsx"],
   transpilePackages: ["styled-jsx", "@splinetool/r3f-spline", "@splinetool/loader"],
