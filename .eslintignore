@@ -1,2 +1,5 @@
 src/models/models
 amplify-codegen-temp/models/models
+src/aws-exports.js
+src/models
+src/graphql
