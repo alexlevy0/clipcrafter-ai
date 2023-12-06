@@ -9,6 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix:dry": "npx eslint --fix-dry-run . --ext .ts --ext .tsx",
+    "lint:all": "npx eslint --fix-dry-run . --ext .ts --ext .tsx",
     "test": "jest",
     "installAll": "npm i && cd amplify/backend/function/S3Triggera6bc74ca && npm i && cd -",
     "i": "npm run installAll",

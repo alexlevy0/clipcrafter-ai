@@ -18,7 +18,7 @@ module.exports = {
     'plugin:functional/stylistic',
     'plugin:promise/recommended',
   ],
-  ignorePatterns: ['node_modules', 'dist', 'amplify'],
+  ignorePatterns: ['node_modules', 'dist' /* , 'amplify' */],
   overrides: [
     {
       env: {
@@ -46,5 +46,6 @@ module.exports = {
     'functional/no-expression-statements': 'off',
     'functional/no-return-void': 'off',
     'functional/immutable-data': ['error', { ignoreNonConstDeclarations: true }],
+    'functional/prefer-immutable-types': 'off',
   },
 }
