@@ -12,7 +12,7 @@
     "test": "jest",
     "installAll": "npm i && cd amplify/backend/function/S3Triggera6bc74ca && npm i && cd -",
     "i": "npm run installAll",
-    "amplify:S3Triggera6bc74ca": "cd amplify/backend/function/S3Triggera6bc74ca && tsc -p ./tsconfig.json && cd -",
+    "amplify:S3Triggera6bc74ca": "cd amplify/backend/function/S3Triggera6bc74ca && npm i && tsc -p ./tsconfig.json && cd -",
     "---": "---",
     "invoke": "cd amplify/backend/function/S3Triggera6bc74ca && sam local invoke 'LambdaFunction' -e lib/event.json -t S3Triggera6bc74ca-cloudformation-template.json",
     "run:invoke": "npm run amplify:S3Triggera6bc74ca && npm run invoke && cd -",
@@ -31,7 +31,7 @@
   "dependencies": {
     "@aws-amplify/adapter-nextjs": "^1.0.5",
     "@aws-amplify/ui-react": "^6.0.3",
-    "@aws-amplify/ui-react-storage": "^3.0.4",
+    "@aws-amplify/ui-react-storage": "^3.0.5",
     "@aws-sdk/client-comprehend": "^3.465.0",
     "@aws-sdk/client-mediaconvert": "^3.465.0",
     "@aws-sdk/client-rekognition": "^3.465.0",
