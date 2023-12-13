@@ -31,7 +31,7 @@
   },
   "dependencies-comments": {},
   "dependencies": {
-    "@aws-amplify/adapter-nextjs": "^1.0.5",
+    "@aws-amplify/adapter-nextjs": "^1.0.7",
     "@aws-amplify/ui-react": "^6.0.3",
     "@aws-amplify/ui-react-storage": "^3.0.5",
     "@aws-sdk/client-comprehend": "^3.465.0",
