@@ -1,14 +1,12 @@
 /* eslint-disable react/jsx-no-undef */
 'use client'
-import '@aws-amplify/ui-react/styles.css'
-import { loadStripe } from '@stripe/stripe-js'
-
 import {
   AccountSettings,
   Authenticator,
   Button,
   Card,
   CheckboxField,
+  defaultDarkModeOverride,
   Divider,
   Flex,
   Grid,
@@ -17,16 +15,17 @@ import {
   Menu,
   MenuItem,
   ThemeProvider,
-  defaultDarkModeOverride,
   useAuthenticator,
   useTheme,
 } from '@aws-amplify/ui-react'
 import { StorageManager } from '@aws-amplify/ui-react-storage'
+import '@aws-amplify/ui-react/styles.css'
+import { loadStripe } from '@stripe/stripe-js'
 import React, { useEffect, useRef, useState } from 'react'
 // @ts-expect-error:next-line
 import dynamic from 'next/dynamic'
 // Import { Auth } from 'aws-amplify'
-import { signOut } from 'aws-amplify/auth'
+import { signOut, getCurrentUser } from 'aws-amplify/auth'
 // @ts-expect-error:next-line
 import { Features } from './Features.tsx'
 // @ts-expect-error:next-line
@@ -53,21 +52,36 @@ function Picker(props: { onClick: React.MouseEventHandler<HTMLButtonElement> | u
 
 const ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false })
 
+async function currentAuthenticatedUser() {
+  try {
+    const { username, userId, signInDetails } = await getCurrentUser()
+    console.log(`The username: ${username}`)
+    console.log(`The userId: ${userId}`)
+    console.log(`The signInDetails: ${signInDetails}`)
+  } catch (err) {
+    console.log(err)
+  }
+}
+
 export function Main() {
   const { tokens } = useTheme()
 
-  // const { user } = useAuthenticator(context => [context.user])
+  const { user } = useAuthenticator(context => [context.user])
   const { authStatus } = useAuthenticator(context => [context.authStatus])
   const { route, toSignIn, toSignUp } = useAuthenticator(context => [context.route])
   const [showAccountSettings, setShowAccountSettings] = useState(false)
   const [showFeatures, setShowFeatures] = useState(false)
   const [renderAuth, setRenderAuth] = useState<'signIn' | 'signUp' | undefined>(undefined)
 
+  console.log({ user })
+
   useEffect(() => {
     if (![authStatus, route].includes('authenticated')) {
       return
     }
     setRenderAuth(undefined)
+
+    currentAuthenticatedUser()
   }, [route, authStatus])
 
   const goSignIn = (): void => {
@@ -410,11 +424,11 @@ function Clip() {
       flex={1}
     >
       <StorageManager
-        // maxFileSize={''} // TODO
+        maxFileSize={1000} // 1Go
         ref={ref}
         isResumable
-        // accessLevel="public"
-        accessLevel="guest" // TODO
+        accessLevel="private"
+        // accessLevel="guest"
         acceptedFileTypes={['video/*']}
         maxFileCount={1}
         onUploadSuccess={onSuccess}

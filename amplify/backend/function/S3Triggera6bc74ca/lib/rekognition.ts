@@ -1,16 +1,16 @@
-import * as fs from 'fs/promises'
 import {
-  RekognitionClient,
-  StartFaceDetectionCommand,
-  GetFaceDetectionCommand,
-  FaceDetection,
-  GetFaceDetectionCommandOutput,
   BoundingBox,
   Emotion,
+  FaceDetection,
+  GetFaceDetectionCommand,
+  GetFaceDetectionCommandOutput,
+  RekognitionClient,
+  StartFaceDetectionCommand,
 } from '@aws-sdk/client-rekognition'
+import * as fs from 'fs/promises'
 import { conf } from './config'
-import { sleep } from './utils'
 import { CropCoordinates, VideoShot } from './types'
+import { sleep } from './utils'
 
 const {
   jobCheckDelay,
